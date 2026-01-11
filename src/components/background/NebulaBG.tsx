@@ -50,15 +50,15 @@ export const NebulaBG: React.FC<{ className?: string }> = ({ className = '' }) =
       Math.random() * (max - min) + min;
 
     class Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      life: number;
-      decay: number;
-      sizeBase: number;
-      size: number;
-      hueOffset: number;
+      x!: number;
+      y!: number;
+      vx!: number;
+      vy!: number;
+      life!: number;
+      decay!: number;
+      sizeBase!: number;
+      size!: number;
+      hueOffset!: number;
 
       constructor() {
         this.reset(true);
