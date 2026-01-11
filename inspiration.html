@@ -1,0 +1,154 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Oracle</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 
+           Molten Gold Animation 
+           Slower, more viscous movement to simulate heavy liquid metal
+        */
+        @keyframes molten-flow {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(15px, -15px) scale(1.05); }
+            66% { transform: translate(-10px, 10px) scale(0.95); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes molten-flow-reverse {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        @keyframes gold-pulse {
+            0%, 100% { opacity: 0.5; filter: blur(40px); }
+            50% { opacity: 0.8; filter: blur(50px); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+
+        .animate-molten { animation: molten-flow 8s ease-in-out infinite; }
+        .animate-molten-slow { animation: molten-flow 12s ease-in-out infinite reverse; }
+        .animate-spin-viscous { animation: molten-flow-reverse 20s linear infinite; }
+        .animate-gold-pulse { animation: gold-pulse 4s ease-in-out infinite; }
+        
+        /* Noise texture for realism */
+        .noise-texture {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            mix-blend-mode: overlay;
+        }
+    </style>
+</head>
+<body class="bg-[#050505] min-h-screen flex flex-col items-center justify-center overflow-hidden font-sans antialiased selection:bg-yellow-500/30">
+
+    <!-- Ambient Golden Atmosphere -->
+    <div class="fixed inset-0 pointer-events-none">
+        <!-- Deep warm backlight -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-yellow-900/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-amber-600/10 rounded-full blur-[80px]"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 flex flex-col items-center gap-16">
+
+        <!-- The Golden Orb -->
+        <div class="relative group cursor-pointer perspective-1000">
+            
+            <!-- External Halo/Glow -->
+            <div class="absolute inset-[-40px] rounded-full blur-3xl bg-gradient-to-tr from-yellow-600/20 via-amber-500/20 to-yellow-200/20 animate-gold-pulse pointer-events-none"></div>
+
+            <!-- The Sphere Container -->
+            <div class="
+                relative 
+                w-[300px] h-[300px] 
+                rounded-full 
+                overflow-hidden 
+                bg-black
+                shadow-[0_0_60px_-10px_rgba(217,119,6,0.3),inset_0_0_40px_rgba(0,0,0,0.8)]
+                border border-yellow-900/30
+                transform transition-transform duration-700 hover:scale-[1.02]
+            ">
+                
+                <!-- Base Metal Material -->
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,_#78350f_0%,_#000000_80%)]"></div>
+
+                <!-- Molten Core (The liquid gold movement) -->
+                <!-- We use mix-blend modes to create the 'liquid metal' effect -->
+                <div class="absolute inset-[-50%] top-[-50%] w-[200%] h-[200%] animate-spin-viscous opacity-100 mix-blend-hard-light">
+                    
+                    <!-- Deep Gold (Shadows) -->
+                    <div class="absolute top-[30%] left-[30%] w-[40%] h-[40%] bg-amber-900 rounded-full blur-3xl opacity-90 animate-molten"></div>
+                    
+                    <!-- Rich Amber (Midtones) -->
+                    <div class="absolute bottom-[30%] right-[30%] w-[45%] h-[45%] bg-yellow-700 rounded-full blur-2xl opacity-80 animate-molten-slow"></div>
+                    
+                    <!-- Bright Gold (Highlights) -->
+                    <div class="absolute top-[40%] left-[40%] w-[20%] h-[20%] bg-yellow-400 rounded-full blur-xl opacity-90 mix-blend-screen animate-molten"></div>
+                    
+                    <!-- White Hot (Specular) -->
+                    <div class="absolute bottom-[45%] left-[45%] w-[15%] h-[15%] bg-white rounded-full blur-lg opacity-80 mix-blend-overlay animate-molten-slow"></div>
+
+                </div>
+
+                <!-- Texture / Grain Layer (Adds Realism) -->
+                <div class="absolute inset-0 noise-texture opacity-[0.15]"></div>
+
+                <!-- 3D Specular Highlights & Reflections (The "Shiny Metal" look) -->
+                
+                <!-- Top Main Reflection -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[40%] bg-gradient-to-b from-white/10 via-yellow-100/5 to-transparent rounded-t-full blur-[1px] opacity-70"></div>
+                
+                <!-- Hard Specular Highlight (Hotspot) -->
+                <div class="absolute top-[15%] left-[25%] w-24 h-12 bg-gradient-to-br from-white/40 to-transparent rounded-full rotate-[-45deg] blur-md opacity-60 mix-blend-overlay"></div>
+
+                <!-- Rim Light (Bottom glow) -->
+                <div class="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-amber-500/30 via-yellow-600/10 to-transparent rounded-b-full blur-md mix-blend-color-dodge"></div>
+                
+                <!-- Inner Shadow for mass/weight -->
+                <div class="absolute inset-0 rounded-full shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] pointer-events-none"></div>
+
+            </div>
+
+            <!-- Subtle Orbital Rings (Optional elegance) -->
+            <div class="absolute inset-[-10px] border border-yellow-700/20 rounded-full opacity-40 scale-95 pointer-events-none"></div>
+            <div class="absolute inset-[-20px] border border-yellow-800/10 rounded-full opacity-30 scale-90 pointer-events-none"></div>
+
+        </div>
+
+        <!-- UI / Controls -->
+        <div class="flex flex-col items-center gap-5">
+            <!-- Status Pill -->
+            <div class="
+                flex items-center gap-3 
+                px-5 py-2.5 
+                rounded-full 
+                bg-gradient-to-b from-white/5 to-transparent 
+                backdrop-blur-xl 
+                border border-yellow-500/20 
+                shadow-[0_4px_20px_-5px_rgba(0,0,0,0.5)]
+            ">
+                <div class="relative flex items-center justify-center w-4 h-4">
+                    <div class="absolute inset-0 bg-yellow-500 rounded-full animate-ping opacity-20"></div>
+                    <i data-lucide="sparkles" class="relative z-10 w-3.5 h-3.5 text-yellow-200 fill-yellow-500/20"></i>
+                </div>
+                <span class="text-xs font-medium tracking-wide text-yellow-100/80 uppercase">Oracle Active</span>
+            </div>
+            
+            <!-- Subtext -->
+            <p class="text-white/30 text-xs font-light tracking-widest uppercase scale-90 opacity-60">
+                Awaiting Input
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body></html>

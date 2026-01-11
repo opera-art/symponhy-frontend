@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm audit fix:*)",
+      "Bash(npm run build:*)",
+      "Bash(pkill:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(timeout 60 npm run build)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout:*)",
+      "Bash(python3:*)",
+      "Bash(node scripts/setup-db.js:*)",
+      "Bash(node:*)",
+      "Bash(ls:*)",
+      "Bash(npx ts-node src/scripts/setupDatabase.ts)",
+      "Bash(npm run dev:*)",
+      "Bash(lsof:*)"
+    ]
+  }
+}

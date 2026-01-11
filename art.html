@@ -1,0 +1,359 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar UI Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar hiding for clean UI */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+    </style>
+</head>
+<body class="bg-[#F2F4F7] min-h-screen p-4 md:p-8 flex items-center justify-center text-zinc-800 antialiased">
+
+    <!-- Main Container -->
+    <div class="bg-white w-full max-w-[1400px] h-[900px] rounded-[32px] shadow-sm p-8 flex flex-col relative overflow-hidden">
+
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <h1 class="text-3xl font-semibold tracking-tight text-zinc-900">December, 2023</h1>
+            
+            <div class="bg-zinc-100 p-1 rounded-xl flex items-center text-sm font-medium">
+                <button class="px-5 py-2 rounded-lg text-zinc-500 hover:text-zinc-900 transition-colors">Month</button>
+                <button class="px-5 py-2 bg-white rounded-lg shadow-sm text-zinc-900">Week</button>
+                <button class="px-5 py-2 rounded-lg text-zinc-500 hover:text-zinc-900 transition-colors">Day</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button class="w-10 h-10 flex items-center justify-center bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors text-zinc-600">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+                <button class="px-6 py-2.5 bg-zinc-100 rounded-xl font-medium text-zinc-600 hover:bg-zinc-200 transition-colors text-sm">Today</button>
+                <button class="w-10 h-10 flex items-center justify-center bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors text-zinc-600">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Days Header -->
+        <div class="grid grid-cols-[60px_1fr] gap-6 mb-6">
+            <div class="flex items-center justify-center pt-2">
+                <button class="text-zinc-400 hover:text-zinc-600">
+                    <i data-lucide="calendar" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-7 gap-4">
+                <!-- Sunday -->
+                <div class="flex flex-col items-center justify-center py-4 rounded-2xl bg-zinc-50 text-zinc-800">
+                    <span class="text-xs font-medium text-zinc-500 mb-1">Sunday</span>
+                    <span class="text-2xl font-semibold tracking-tight">16</span>
+                </div>
+                <!-- Monday (Active) -->
+                <div class="flex flex-col items-center justify-center py-4 rounded-2xl bg-[#1F2024] text-white shadow-lg shadow-zinc-200">
+                    <span class="text-xs font-medium text-zinc-400 mb-1">Monday</span>
+                    <span class="text-2xl font-semibold tracking-tight">17</span>
+                </div>
+                <!-- Tuesday -->
+                <div class="flex flex-col items-center justify-center py-4 rounded-2xl bg-zinc-50 text-zinc-800">
+                    <span class="text-xs font-medium text-zinc-500 mb-1">Tuesday</span>
+                    <span class="text-2xl font-semibold tracking-tight">18</span>
+                </div>
+                <!-- Wednesday -->
+                <div class="flex flex-col items-center justify-center py-4 rounded-2xl bg-zinc-50 text-zinc-800">
+                    <span class="text-xs font-medium text-zinc-500 mb-1">Wednesday</span>
+                    <span class="text-2xl font-semibold tracking-tight">19</span>
+                </div>
+                <!-- Thursday -->
+                <div class="flex flex-col items-center justify-center py-4 rounded-2xl bg-zinc-50 text-zinc-800">
+                    <span class="text-xs font-medium text-zinc-500 mb-1">Thursday</span>
+                    <span class="text-2xl font-semibold tracking-tight">20</span>
+                </div>
+                <!-- Friday -->
+                <div class="flex flex-col items-center justify-center py-4 rounded-2xl bg-zinc-50 text-zinc-800">
+                    <span class="text-xs font-medium text-zinc-500 mb-1">Friday</span>
+                    <span class="text-2xl font-semibold tracking-tight">21</span>
+                </div>
+                <!-- Saturday -->
+                <div class="flex flex-col items-center justify-center py-4 rounded-2xl bg-zinc-50 text-zinc-800">
+                    <span class="text-xs font-medium text-zinc-500 mb-1">Saturday</span>
+                    <span class="text-2xl font-semibold tracking-tight">22</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Grid Area -->
+        <div class="flex-1 overflow-y-auto relative">
+            <div class="grid grid-cols-[60px_1fr] gap-6 min-h-[800px]">
+                
+                <!-- Time Column -->
+                <div class="flex flex-col text-xs text-zinc-400 font-medium pt-0">
+                    <div class="h-[100px] -mt-2.5">6 am</div>
+                    <div class="h-[100px] -mt-2.5">7 am</div>
+                    <div class="h-[100px] -mt-2.5">8 am</div>
+                    <div class="h-[100px] -mt-2.5">9 am</div>
+                    <div class="h-[100px] -mt-2.5">10 am</div>
+                    <div class="h-[100px] -mt-2.5">11 am</div>
+                    <div class="h-[100px] -mt-2.5">12 am</div>
+                    <div class="h-[100px] -mt-2.5">1 pm</div>
+                </div>
+
+                <!-- Events Grid -->
+                <div class="relative grid grid-cols-7 gap-4">
+                    <!-- Horizontal Lines -->
+                    <div class="absolute inset-0 flex flex-col w-full pointer-events-none">
+                        <div class="h-[100px] border-b border-zinc-100 w-full"></div>
+                        <div class="h-[100px] border-b border-zinc-100 w-full"></div>
+                        <div class="h-[100px] border-b border-zinc-100 w-full"></div>
+                        <div class="h-[100px] border-b border-zinc-100 w-full"></div>
+                        <div class="h-[100px] border-b border-zinc-100 w-full"></div>
+                        <div class="h-[100px] border-b border-zinc-100 w-full"></div>
+                        <div class="h-[100px] border-b border-zinc-100 w-full"></div>
+                    </div>
+
+                    <!-- Column 1: Sunday -->
+                    <div class="relative h-full">
+                        <!-- Booking taxi app -->
+                        <div class="absolute top-0 left-0 right-0 h-[150px] bg-[#BFDBFE]/40 rounded-2xl p-4 flex flex-col justify-between group hover:shadow-md transition-shadow cursor-pointer">
+                            <div>
+                                <div class="text-sm font-semibold text-zinc-800">Booking taxi app</div>
+                                <div class="text-xs text-zinc-500 mt-1">06:00 - 07:30</div>
+                            </div>
+                            <div class="flex -space-x-2">
+                                <img src="https://i.pravatar.cc/150?u=1" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                                <img src="https://i.pravatar.cc/150?u=2" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                                <img src="https://i.pravatar.cc/150?u=3" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                            </div>
+                        </div>
+
+                        <!-- Development meet -->
+                        <div class="absolute top-[200px] left-0 right-0 h-[80px] bg-[#E9D5FF] rounded-2xl p-4 flex flex-col justify-center cursor-pointer">
+                            <div class="text-sm font-semibold text-zinc-800">Development meet</div>
+                            <div class="text-xs text-zinc-600 mt-1">08:00 - 08:00</div>
+                        </div>
+
+                        <!-- Dev meet 2 -->
+                        <div class="absolute top-[290px] left-0 right-0 h-[120px] bg-white border border-zinc-100 shadow-sm rounded-2xl p-4 flex flex-col justify-between cursor-pointer">
+                            <div>
+                                <div class="text-sm font-semibold text-zinc-800">Development meet</div>
+                                <div class="text-xs text-zinc-500 mt-1">08:40 - 10:00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Monday -->
+                    <div class="relative h-full">
+                        <!-- Design onboarding -->
+                        <div class="absolute top-0 left-0 right-0 h-[116px] bg-[#86EFAC]/50 rounded-2xl p-4 cursor-pointer">
+                            <div class="text-sm font-semibold text-zinc-800">Design onboarding</div>
+                            <div class="text-xs text-zinc-600 mt-1">06:00 - 07:10</div>
+                        </div>
+
+                        <!-- Book offsite -->
+                        <div class="absolute top-[130px] left-0 right-0 h-[120px] bg-white border border-zinc-100 rounded-2xl p-4 flex flex-col justify-between shadow-sm cursor-pointer">
+                            <div>
+                                <div class="text-sm font-semibold text-zinc-800">Book offsite</div>
+                                <div class="text-xs text-zinc-500 mt-1">07:30 - 10:00</div>
+                            </div>
+                            <div class="flex -space-x-2">
+                                <img src="https://i.pravatar.cc/150?u=4" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                                <img src="https://i.pravatar.cc/150?u=5" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                                <img src="https://i.pravatar.cc/150?u=6" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                            </div>
+                        </div>
+
+                        <!-- Purple Gradient Card -->
+                        <div class="absolute top-[260px] left-0 right-0 h-[140px] rounded-2xl overflow-hidden cursor-pointer group">
+                             <div class="absolute inset-0 bg-gradient-to-br from-[#A78BFA] to-[#818CF8] opacity-90 group-hover:opacity-100 transition-opacity"></div>
+                             <!-- Abstract swirls via css/svg would go here, mimicking with an image placeholder for gradient effect -->
+                             <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&amp;w=2564&amp;auto=format&amp;fit=crop" class="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50" alt="">
+                             <div class="absolute bottom-3 left-0 right-0 flex justify-center text-white/80">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                             </div>
+                        </div>
+
+                        <!-- New project -->
+                        <div class="absolute top-[475px] left-0 right-0 h-[180px] bg-[#BFDBFE]/60 rounded-2xl p-4 cursor-pointer flex flex-col gap-2">
+                            <div>
+                                <div class="text-sm font-semibold text-zinc-800">New project</div>
+                                <div class="text-xs text-zinc-600 mt-1">10:45 - 12:30</div>
+                            </div>
+                            <div class="bg-white/60 rounded-lg px-2 py-1.5 flex items-center gap-2 w-max mt-auto">
+                                <i data-lucide="file-text" class="w-3 h-3 text-zinc-500"></i>
+                                <span class="text-[10px] font-medium text-zinc-600">Clients Brief</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Tuesday -->
+                    <div class="relative h-full">
+                        <!-- Empty Slot -->
+                        <div class="absolute top-0 left-0 right-0 h-[100px] border-2 border-dashed border-zinc-200 rounded-2xl flex items-center justify-center hover:bg-zinc-50 cursor-pointer transition-colors group">
+                             <div class="w-8 h-8 rounded-full border border-zinc-300 flex items-center justify-center text-zinc-400 group-hover:border-zinc-400 group-hover:text-zinc-600">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                             </div>
+                        </div>
+
+                        <!-- Design session -->
+                        <div class="absolute top-[170px] left-0 right-0 h-[180px] bg-[#FED7AA] rounded-2xl p-4 cursor-pointer">
+                            <div class="text-sm font-semibold text-zinc-800">Design session</div>
+                            <div class="text-xs text-zinc-700 mt-1">07:50 - 09:30</div>
+                        </div>
+
+                        <!-- Design Review -->
+                        <div class="absolute top-[360px] left-0 right-0 h-[80px] bg-[#BFDBFE] rounded-2xl p-4 cursor-pointer">
+                            <div class="text-sm font-semibold text-zinc-800">Design Review</div>
+                            <div class="text-xs text-zinc-600 mt-1">09:40 - 10:30</div>
+                        </div>
+
+                        <!-- Onboarding meet -->
+                        <div class="absolute top-[460px] left-0 right-0 h-[110px] bg-[#FBCFE8] rounded-2xl p-4 flex flex-col justify-between cursor-pointer">
+                            <div>
+                                <div class="text-sm font-semibold text-zinc-800">Onboarding meet</div>
+                                <div class="text-xs text-zinc-600 mt-1">10:50 - 12:00</div>
+                            </div>
+                            <div class="flex -space-x-2">
+                                <img src="https://i.pravatar.cc/150?u=8" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                                <img src="https://i.pravatar.cc/150?u=9" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 4: Wednesday (Obscured mostly but ghosted) -->
+                    <div class="relative h-full">
+                         <!-- Some content might be here but hidden by modal -->
+                    </div>
+
+                    <!-- Column 5-7: Placeholders -->
+                    <div class="relative h-full">
+                         <!-- Green card -->
+                         <div class="absolute top-[100px] left-0 right-0 h-[150px] bg-[#86EFAC]/50 rounded-2xl p-4">
+                            <div class="text-sm font-semibold text-zinc-800">Client meet</div>
+                            <div class="text-xs text-zinc-600 mt-1">07:00 - 09:10</div>
+                        </div>
+                        <!-- Purple -->
+                        <div class="absolute top-[260px] left-0 right-0 h-[130px] bg-[#C4B5FD] rounded-2xl p-4">
+                            <div class="text-sm font-semibold text-zinc-800">Sync with team</div>
+                            <div class="text-xs text-zinc-700 mt-1">08:30 - 07:30</div>
+                        </div>
+                         <!-- Blue -->
+                         <div class="absolute top-[520px] left-0 right-0 h-[130px] bg-[#BFDBFE] rounded-2xl p-4 flex items-end justify-center">
+                            <div class="flex -space-x-2 mb-2">
+                                <img src="https://i.pravatar.cc/150?u=20" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                                <img src="https://i.pravatar.cc/150?u=21" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative h-full">
+                         <!-- Orange big card -->
+                         <div class="absolute top-[400px] left-0 right-0 h-[200px] bg-[#FCD34D] rounded-2xl p-4">
+                            <div class="text-sm font-semibold text-zinc-800">Project Review</div>
+                            <div class="text-xs text-zinc-700 mt-1">09:50 - 12:30</div>
+                            <div class="flex -space-x-2 mt-4">
+                                <img src="https://i.pravatar.cc/150?u=15" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                                <img src="https://i.pravatar.cc/150?u=16" class="w-7 h-7 rounded-full border-2 border-white" alt="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative h-full">
+                        <!-- White card top -->
+                        <div class="absolute top-[20px] left-0 right-0 h-[90px] bg-white border border-zinc-100 shadow-sm rounded-2xl p-4">
+                            <div class="text-sm font-semibold text-zinc-800">Planning tasks</div>
+                            <div class="text-xs text-zinc-500 mt-1">07:50 - 08:30</div>
+                        </div>
+                        <!-- Pink 3D Card -->
+                        <div class="absolute top-[120px] left-0 right-0 h-[200px] bg-[#FBCFE8] rounded-2xl p-4 overflow-hidden relative">
+                             <div class="relative z-10">
+                                <div class="text-sm font-semibold text-zinc-800">Design our website</div>
+                                <div class="text-xs text-zinc-600 mt-1">08:30 - 10:50</div>
+                             </div>
+                             <!-- 3D Abstract shape simulation -->
+                             <div class="absolute bottom-4 right-4 w-24 h-24 bg-gradient-to-tr from-orange-400 via-pink-500 to-purple-500 rounded-full blur-sm opacity-80 mix-blend-multiply"></div>
+                             <div class="absolute bottom-2 left-0 right-0 flex justify-center text-zinc-700/50">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Modal Popover -->
+            <div class="absolute top-[50px] left-[35%] w-[380px] bg-white rounded-3xl shadow-2xl shadow-zinc-300/50 border border-zinc-100 p-6 z-50">
+                <!-- Title Input -->
+                <div class="flex items-center gap-2 mb-6">
+                    <input type="text" value="Meet with Jonson Rider" class="text-xl font-semibold text-zinc-900 w-full outline-none placeholder-zinc-300">
+                    <div class="w-0.5 h-6 bg-zinc-900 animate-pulse"></div>
+                </div>
+
+                <!-- Form Fields -->
+                <div class="space-y-3 mb-6">
+                    <!-- Date -->
+                    <div class="flex items-center gap-3 bg-zinc-50 p-3 rounded-xl hover:bg-zinc-100 transition-colors cursor-pointer group">
+                        <i data-lucide="calendar" class="w-5 h-5 text-zinc-400 group-hover:text-zinc-600"></i>
+                        <span class="text-sm font-medium text-zinc-700">Tuesday, 18 December</span>
+                    </div>
+
+                    <!-- Time -->
+                    <div class="flex items-center gap-3 bg-zinc-50 p-3 rounded-xl">
+                        <i data-lucide="clock" class="w-5 h-5 text-zinc-400"></i>
+                        <div class="flex items-center gap-2 flex-1">
+                            <div class="flex items-center justify-between bg-white px-3 py-1.5 rounded-lg shadow-sm border border-zinc-100 flex-1 cursor-pointer">
+                                <span class="text-sm font-medium text-zinc-700">06:00</span>
+                                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-zinc-400"></i>
+                            </div>
+                            <span class="text-zinc-400">-</span>
+                            <div class="flex items-center justify-between bg-white px-3 py-1.5 rounded-lg shadow-sm border border-zinc-100 flex-1 cursor-pointer">
+                                <span class="text-sm font-medium text-zinc-700">07:00</span>
+                                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-zinc-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="flex items-center gap-3 bg-zinc-50 p-3 rounded-xl hover:bg-zinc-100 transition-colors cursor-pointer group">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-zinc-400 group-hover:text-zinc-600"></i>
+                        <span class="text-sm font-medium text-zinc-700">Park Lane Office</span>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <button class="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-200 transition-colors">Design</button>
+                    <button class="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-xs font-semibold hover:bg-amber-200 transition-colors">Personal project</button>
+                    <button class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold hover:bg-blue-100 transition-colors">Developer task</button>
+                </div>
+
+                <!-- Participants & Action -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-2">
+                        <div class="flex -space-x-2">
+                            <img src="https://i.pravatar.cc/150?u=10" class="w-8 h-8 rounded-full border-2 border-white" alt="">
+                            <img src="https://i.pravatar.cc/150?u=11" class="w-8 h-8 rounded-full border-2 border-white" alt="">
+                            <img src="https://i.pravatar.cc/150?u=12" class="w-8 h-8 rounded-full border-2 border-white" alt="">
+                        </div>
+                        <button class="w-8 h-8 rounded-full border border-dashed border-zinc-300 flex items-center justify-center text-zinc-400 hover:border-zinc-500 hover:text-zinc-600 transition-all">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="flex gap-2">
+                    <button class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3 rounded-xl transition-colors text-sm">Add Event</button>
+                    <button class="px-4 py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl transition-colors">
+                        <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body></html>
