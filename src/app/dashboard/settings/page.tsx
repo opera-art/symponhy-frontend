@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import React, { useState, useMemo } from 'react';
 import { Topbar } from '@/components/layout';
 import { Card } from '@/components/ui';
@@ -124,5 +125,7 @@ const SettingsPage: React.FC = () => {
     </>
   );
 };
+
+export const dynamic = 'force-dynamic';
 
 export default SettingsPage;
