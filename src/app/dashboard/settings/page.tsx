@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Topbar } from '@/components/layout';
 import { Card } from '@/components/ui';
 import { GeneralSettings } from '@/components/settings/GeneralSettings';
@@ -8,30 +8,35 @@ import { PreferencesSettings } from '@/components/settings/PreferencesSettings';
 import { PlatformIntegrations } from '@/components/settings/PlatformIntegrations';
 import { Settings, Sliders, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const settingsSections = [
-  {
-    id: 'general',
-    icon: Settings,
-    label: 'Configurações',
-    description: 'Informações gerais e conta',
-  },
-  {
-    id: 'preferences',
-    icon: Sliders,
-    label: 'Preferências',
-    description: 'Personalize sua experiência',
-  },
-  {
-    id: 'integrations',
-    icon: Zap,
-    label: 'Integrações',
-    description: 'Conecte plataformas',
-  },
-];
+import { useLanguage } from '@/context/LanguageContext';
 
 const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
+  const { t } = useLanguage();
+
+  const settingsSections = useMemo(
+    () => [
+      {
+        id: 'general',
+        icon: Settings,
+        label: t('general'),
+        description: t('generalDesc'),
+      },
+      {
+        id: 'preferences',
+        icon: Sliders,
+        label: t('preferences'),
+        description: t('preferencesDesc'),
+      },
+      {
+        id: 'integrations',
+        icon: Zap,
+        label: t('integrations'),
+        description: t('integrationsDesc'),
+      },
+    ],
+    [t]
+  );
 
   return (
     <>
@@ -39,9 +44,9 @@ const SettingsPage: React.FC = () => {
 
       {/* Header */}
       <div className="mb-4 animate-fade-in">
-        <h2 className="text-2xl font-semibold text-slate-900 mb-1">Configurações</h2>
+        <h2 className="text-2xl font-semibold text-slate-900 mb-1">{t('settingsTitle')}</h2>
         <p className="text-sm text-slate-500">
-          Gerencie suas preferências, integrações e informações de conta
+          {t('settingsDescription')}
         </p>
       </div>
 
@@ -50,7 +55,7 @@ const SettingsPage: React.FC = () => {
         <div className="lg:col-span-1">
           <Card padding="md" className="sticky top-24 space-y-2">
             <h3 className="text-sm font-semibold text-slate-900 mb-3 px-2">
-              Seções
+              {t('sections')}
             </h3>
 
             {settingsSections.map((section) => {

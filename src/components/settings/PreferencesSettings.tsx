@@ -3,9 +3,12 @@
 import React, { useState } from 'react';
 import { Card, Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import { Save, Moon, Sun, Palette } from 'lucide-react';
+import { Save, Moon, Sun, Palette, Globe } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+import { Language } from '@/lib/translations';
 
 export const PreferencesSettings: React.FC = () => {
+  const { language, setLanguage, t } = useLanguage();
   const [preferences, setPreferences] = useState({
     theme: 'light' as 'light' | 'dark' | 'auto',
     emailNotifications: true,
@@ -15,6 +18,12 @@ export const PreferencesSettings: React.FC = () => {
     language: 'pt-BR',
     timezone: 'America/Sao_Paulo',
   });
+
+  const languages: { code: Language; name: string; flag: string }[] = [
+    { code: 'pt', name: 'Português', flag: '🇧🇷' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+  ];
 
   const handleToggle = (key: keyof typeof preferences) => {
     setPreferences((prev) => ({
@@ -84,25 +93,38 @@ export const PreferencesSettings: React.FC = () => {
       {/* Language & Location */}
       <Card padding="md">
         <div className="mb-4">
-          <h4 className="font-semibold text-slate-900 mb-4">
-            Localização & Idioma
-          </h4>
+          <div className="flex items-center gap-2 mb-4">
+            <Globe className="w-5 h-5 text-gold" />
+            <h4 className="font-semibold text-slate-900">
+              {t('language')}
+            </h4>
+          </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Idioma
-              </label>
-              <select
-                value={preferences.language}
-                onChange={(e) => handleChange('language', e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/50"
-              >
-                <option value="pt-BR">Português (Brasil)</option>
-                <option value="pt-PT">Português (Portugal)</option>
-                <option value="en">English</option>
-                <option value="es">Español</option>
-              </select>
+              <p className="text-sm text-slate-600 mb-3">
+                Escolha seu idioma preferido
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => setLanguage(lang.code)}
+                    className={`
+                      p-4 rounded-lg border-2 transition-all text-center
+                      ${
+                        language === lang.code
+                          ? 'border-gold bg-gold/5'
+                          : 'border-slate-200 hover:border-gold/50 bg-slate-50'
+                      }
+                    `}
+                  >
+                    <div className="text-3xl mb-2">{lang.flag}</div>
+                    <p className="font-medium text-slate-900">{lang.name}</p>
+                    <p className="text-xs text-slate-500 mt-1">{lang.code.toUpperCase()}</p>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>

@@ -18,7 +18,14 @@
       "Bash(ls:*)",
       "Bash(npx ts-node src/scripts/setupDatabase.ts)",
       "Bash(npm run dev:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(claude mcp list:*)",
+      "mcp__github__create_repository",
+      "Bash(set RAILWAY_TOKEN=ea43da6a-5a40-44e7-99c7-92974ae9cd45)",
+      "Bash(npx:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
