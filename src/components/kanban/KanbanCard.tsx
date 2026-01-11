@@ -96,7 +96,7 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ task, index }) => {
               <div className="flex justify-between items-end mb-1">
                 <span className="text-[10px] text-slate-400">Progress</span>
                 <span className="text-[#D4AF37] text-[10px] font-semibold">
-                  {Math.floor(task.progress / 14.28)} / 7
+                  {Math.floor((task.progress ?? 0) / 14.28)} / 7
                 </span>
               </div>
               <div className="flex gap-0.5">
@@ -105,7 +105,7 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ task, index }) => {
                     key={i}
                     className={cn(
                       'h-1 w-full rounded-full',
-                      i < Math.floor(task.progress / 14.28) ? 'bg-[#D4AF37]' : 'bg-slate-100'
+                      i < Math.floor((task.progress ?? 0) / 14.28) ? 'bg-[#D4AF37]' : 'bg-slate-100'
                     )}
                   />
                 ))}
