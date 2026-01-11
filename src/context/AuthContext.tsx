@@ -75,6 +75,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Salvar no localStorage
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('auth_user', JSON.stringify(data.user));
+
+        // Salvar também em cookies (para middleware)
+        document.cookie = `auth_token=${data.token}; path=/; secure; samesite=strict`;
       } catch (err: any) {
         const errorMessage = err.message || 'Erro ao fazer login';
         setError(errorMessage);
@@ -110,6 +113,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Salvar no localStorage
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('auth_user', JSON.stringify(data.user));
+
+        // Salvar também em cookies (para middleware)
+        document.cookie = `auth_token=${data.token}; path=/; secure; samesite=strict`;
       } catch (err: any) {
         const errorMessage = err.message || 'Erro ao registrar';
         setError(errorMessage);
@@ -127,6 +133,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
+    // Limpar cookie
+    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
   }, []);
 
   const value: AuthContextType = {
