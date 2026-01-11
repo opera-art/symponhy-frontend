@@ -14,10 +14,12 @@ import {
   auditData,
 } from '@/data/mockData';
 import { FileDown, Edit3, CheckCircle } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const BriefingPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('summary');
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
 
   const handleExportPDF = () => {
     // PDF export logic here
@@ -37,16 +39,16 @@ const BriefingPage: React.FC = () => {
       <div className="mb-4 animate-fade-in">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900 mb-1">Briefing</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 mb-1">{t('briefing')}</h2>
             <p className="text-sm text-slate-500">
-              Informações completas sobre perfil, objetivos e identidade de marca
+              {t('briefingDescription')}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="success" size="lg" dot>
               <CheckCircle className="w-4 h-4" />
-              Briefing Completo
+              {t('briefingComplete')}
             </Badge>
             <Button
               variant="outline"
@@ -54,7 +56,7 @@ const BriefingPage: React.FC = () => {
               leftIcon={<Edit3 className="w-4 h-4" />}
               onClick={handleEditBriefing}
             >
-              Editar Briefing
+              {t('editBriefing')}
             </Button>
             <Button
               variant="primary"
@@ -62,7 +64,7 @@ const BriefingPage: React.FC = () => {
               leftIcon={<FileDown className="w-4 h-4" />}
               onClick={handleExportPDF}
             >
-              Exportar PDF
+              {t('exportPDF')}
             </Button>
           </div>
         </div>
@@ -77,10 +79,10 @@ const BriefingPage: React.FC = () => {
             </div>
             <div>
               <h4 className="font-semibold text-slate-800 text-sm mb-0.5">
-                Briefing Completo e Atualizado
+                {t('briefingCompleteUpdated')}
               </h4>
               <p className="text-xs text-slate-600">
-                Última atualização: {new Date(briefingData.lastUpdate).toLocaleDateString('pt-BR')}
+                {t('lastUpdate')}: {new Date(briefingData.lastUpdate).toLocaleDateString('pt-BR')}
               </p>
             </div>
           </div>
@@ -91,10 +93,10 @@ const BriefingPage: React.FC = () => {
       <div className="animate-fade-in">
         <Tabs defaultValue="summary" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4">
-            <TabsTrigger value="summary">Resumo</TabsTrigger>
-            <TabsTrigger value="references">Referências</TabsTrigger>
-            <TabsTrigger value="competitors">Concorrentes</TabsTrigger>
-            <TabsTrigger value="audit">Auditoria</TabsTrigger>
+            <TabsTrigger value="summary">{t('summary')}</TabsTrigger>
+            <TabsTrigger value="references">{t('references')}</TabsTrigger>
+            <TabsTrigger value="competitors">{t('competitors')}</TabsTrigger>
+            <TabsTrigger value="audit">{t('audit')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="summary">

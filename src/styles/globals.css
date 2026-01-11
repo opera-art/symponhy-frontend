@@ -458,6 +458,98 @@
   .animate-nebula-drift-5 {
     animation: nebula-drift-5 16s ease-in-out infinite;
   }
+
+  /* Fluid Ring Animations */
+  @keyframes fluid-ring {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fluid-ring-reverse {
+    0% {
+      transform: rotate(360deg);
+    }
+    100% {
+      transform: rotate(0deg);
+    }
+  }
+
+  @keyframes orbit-particle {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-fluid-ring {
+    animation: fluid-ring 20s linear infinite;
+  }
+
+  .animate-fluid-ring-reverse {
+    animation: fluid-ring-reverse 15s linear infinite;
+  }
+
+  /* 3D Spheres Animations */
+  @keyframes sphere-float-1 {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(10px, -15px);
+    }
+  }
+
+  @keyframes sphere-float-2 {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-12px, 10px);
+    }
+  }
+
+  @keyframes rotate-sphere {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes rotate-sphere-reverse {
+    0% {
+      transform: rotate(360deg);
+    }
+    100% {
+      transform: rotate(0deg);
+    }
+  }
+
+  @keyframes pulse-ray {
+    0%, 100% {
+      opacity: 0.2;
+      stroke-width: 1.5;
+    }
+    50% {
+      opacity: 0.5;
+      stroke-width: 2;
+    }
+  }
+
+  .animate-sphere-float-1 {
+    animation: sphere-float-1 8s ease-in-out infinite;
+  }
+
+  .animate-sphere-float-2 {
+    animation: sphere-float-2 7s ease-in-out infinite;
+  }
 }
 
 @layer utilities {

@@ -10,9 +10,11 @@ import { RecentPostsShowcase } from '@/components/dashboard/RecentPostsShowcase'
 import { UpcomingPostsShowcase } from '@/components/dashboard/UpcomingPostsShowcase';
 import { dashboardStats, audienceData, pendingApprovals } from '@/data/mockData';
 import { TrendingUp, Eye, Calendar, Users } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const DashboardPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <>
@@ -21,17 +23,17 @@ const DashboardPage: React.FC = () => {
       {/* Greeting */}
       <div className="mb-4 animate-fade-in">
         <h2 className="text-2xl font-semibold text-slate-900 mb-1">
-          Olá, Ana! 👋
+          {t('greeting')}, Ana! 👋
         </h2>
         <p className="text-sm text-slate-500">
-          Aqui está um resumo do desempenho das suas redes sociais.
+          {t('dashboardSummary')}
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-5 animate-fade-in">
         <StatsCard
-          title="Alcance Total"
+          title={t('totalReach')}
           value={dashboardStats.totalReach.value}
           change={dashboardStats.totalReach.change}
           trend={dashboardStats.totalReach.trend}
@@ -40,7 +42,7 @@ const DashboardPage: React.FC = () => {
           isLoading={isLoading}
         />
         <StatsCard
-          title="Engajamento"
+          title={t('engagement')}
           value={dashboardStats.engagement.value}
           change={dashboardStats.engagement.change}
           trend={dashboardStats.engagement.trend}
@@ -49,7 +51,7 @@ const DashboardPage: React.FC = () => {
           isLoading={isLoading}
         />
         <StatsCard
-          title="Visualizações"
+          title={t('views')}
           value={dashboardStats.views.value}
           change={dashboardStats.views.change}
           trend={dashboardStats.views.trend}
@@ -58,7 +60,7 @@ const DashboardPage: React.FC = () => {
           isLoading={isLoading}
         />
         <StatsCard
-          title="Posts Agendados"
+          title={t('scheduledPosts')}
           value={dashboardStats.scheduledPosts.value}
           change={dashboardStats.scheduledPosts.change}
           trend={dashboardStats.scheduledPosts.trend}

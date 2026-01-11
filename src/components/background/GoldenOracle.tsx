@@ -6,166 +6,253 @@ export const GoldenOracle: React.FC<{ className?: string }> = ({ className = '' 
   return (
     <div className={`absolute inset-0 bg-white flex flex-col items-center justify-center overflow-hidden ${className}`}>
 
-      {/* SVG Filters for organic nebula texture */}
-      <svg className="absolute w-0 h-0">
-        <defs>
-          <filter id="nebula-noise">
-            <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="8" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="50" />
-          </filter>
-          <filter id="nebula-glow">
-            <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-      </svg>
+      {/* SVG Container */}
+      <div className="relative w-[600px] h-[600px] flex items-center justify-center">
 
-      {/* Nebula Container */}
-      <div className="relative w-[500px] h-[500px] flex items-center justify-center">
+        <svg viewBox="0 0 600 600" className="w-full h-full">
+          <defs>
+            {/* Gradientes para esfera azul/roxo */}
+            <linearGradient id="blueGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#3A86FF" stopOpacity="0.9">
+                <animate attributeName="stop-color" values="#3A86FF;#5B9FFF;#3A86FF" dur="6s" repeatCount="indefinite" />
+              </stop>
+              <stop offset="100%" stopColor="#8338EC" stopOpacity="0.8">
+                <animate attributeName="stop-color" values="#8338EC;#9D5EFF;#8338EC" dur="6s" repeatCount="indefinite" />
+              </stop>
+            </linearGradient>
 
-        {/* Outer Glow Aura */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-40 blur-[120px]"
-          style={{
-            background: 'radial-gradient(circle, rgba(65,105,225,0.3) 0%, rgba(255,20,147,0.2) 40%, transparent 70%)'
-          }}
-        ></div>
+            <linearGradient id="blueGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#1E5FCC" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#5B21B6" stopOpacity="0.6" />
+            </linearGradient>
 
-        {/* Main Nebula Sphere */}
-        <div className="relative w-[400px] h-[400px] rounded-full overflow-visible animate-spin-slow">
+            {/* Gradientes para esfera vermelha/laranja/rosa */}
+            <linearGradient id="redGrad1" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#FF006E" stopOpacity="0.95">
+                <animate attributeName="stop-color" values="#FF006E;#FF1A7F;#FF006E" dur="5s" repeatCount="indefinite" />
+              </stop>
+              <stop offset="50%" stopColor="#FB5607" stopOpacity="0.9">
+                <animate attributeName="stop-color" values="#FB5607;#FF6B1A;#FB5607" dur="5s" repeatCount="indefinite" />
+              </stop>
+              <stop offset="100%" stopColor="#EC4899" stopOpacity="0.85">
+                <animate attributeName="stop-color" values="#EC4899;#F764B3;#EC4899" dur="5s" repeatCount="indefinite" />
+              </stop>
+            </linearGradient>
 
-          {/* Core - Deep Space Purple/Blue */}
-          <div className="absolute inset-0 rounded-full overflow-hidden"
-            style={{
-              background: 'radial-gradient(circle at 50% 50%, #1a0033 0%, #0a001a 60%, #000000 100%)',
-              boxShadow: '0 0 120px rgba(139,0,255,0.6), 0 0 200px rgba(255,20,147,0.4), inset 0 0 80px rgba(0,0,0,0.8)',
-              filter: 'contrast(1.3) brightness(1.2)'
-            }}
-          >
+            <linearGradient id="redGrad2" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#C90052" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#FF4500" stopOpacity="0.7" />
+            </linearGradient>
 
-            {/* Gas Cloud 1 - Magenta/Pink */}
-            <div className="absolute top-[10%] left-[15%] w-[45%] h-[45%] rounded-full opacity-90 animate-nebula-drift-1 mix-blend-screen"
-              style={{
-                background: 'radial-gradient(circle, #FF1493 0%, #FF69B4 30%, #DC143C 60%, transparent 80%)',
-                filter: 'blur(35px) url(#nebula-noise)'
-              }}
-            ></div>
+            {/* Filtros para efeito fluido */}
+            <filter id="fluidFlow">
+              <feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="4" result="turbulence">
+                <animate attributeName="baseFrequency" dur="80s" values="0.008;0.012;0.008" repeatCount="indefinite" />
+              </feTurbulence>
+              <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="8" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
 
-            {/* Gas Cloud 2 - Blue/Cyan */}
-            <div className="absolute top-[20%] right-[10%] w-[50%] h-[50%] rounded-full opacity-80 animate-nebula-drift-2 mix-blend-screen"
-              style={{
-                background: 'radial-gradient(circle, #4169E1 0%, #1E90FF 40%, #00BFFF 70%, transparent 85%)',
-                filter: 'blur(40px) url(#nebula-noise)'
-              }}
-            ></div>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
 
-            {/* Gas Cloud 3 - Purple/Violet */}
-            <div className="absolute bottom-[15%] left-[20%] w-[55%] h-[55%] rounded-full opacity-85 animate-nebula-drift-3 mix-blend-screen"
-              style={{
-                background: 'radial-gradient(circle, #8B00FF 0%, #9370DB 35%, #BA55D3 65%, transparent 80%)',
-                filter: 'blur(45px) url(#nebula-noise)'
-              }}
-            ></div>
+            <filter id="strongGlow">
+              <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
 
-            {/* Gas Cloud 4 - Orange/Red */}
-            <div className="absolute bottom-[25%] right-[18%] w-[48%] h-[48%] rounded-full opacity-75 animate-nebula-drift-4 mix-blend-screen"
-              style={{
-                background: 'radial-gradient(circle, #FF6347 0%, #FF4500 40%, #DC143C 70%, transparent 85%)',
-                filter: 'blur(38px) url(#nebula-noise)'
-              }}
-            ></div>
-
-            {/* Gas Cloud 5 - Cyan/Teal overlay */}
-            <div className="absolute top-[35%] left-[30%] w-[40%] h-[40%] rounded-full opacity-70 animate-nebula-drift-5 mix-blend-color-dodge"
-              style={{
-                background: 'radial-gradient(circle, #00CED1 0%, #20B2AA 50%, transparent 75%)',
-                filter: 'blur(30px)'
-              }}
-            ></div>
-
-            {/* Bright Energy Core Center */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] rounded-full animate-core-pulse mix-blend-screen"
-              style={{
-                background: 'radial-gradient(circle, #FFFFFF 0%, #FFD700 20%, #FF1493 50%, transparent 70%)',
-                filter: 'blur(20px)',
-                boxShadow: '0 0 80px rgba(255,255,255,0.8), 0 0 120px rgba(255,105,180,0.6)'
-              }}
-            ></div>
-
-            {/* Swirling Energy Bands */}
-            <div className="absolute inset-0 animate-wave-flow mix-blend-overlay opacity-60">
-              <div className="absolute top-[25%] left-[-10%] w-[120%] h-[15%] rotate-[-35deg]"
-                style={{
-                  background: 'linear-gradient(90deg, transparent 0%, #FF1493 30%, #8B00FF 50%, #4169E1 70%, transparent 100%)',
-                  filter: 'blur(25px)'
-                }}
-              ></div>
-              <div className="absolute bottom-[30%] left-[-10%] w-[120%] h-[18%] rotate-[25deg]"
-                style={{
-                  background: 'linear-gradient(90deg, transparent 0%, #00CED1 25%, #FF6347 50%, #DC143C 75%, transparent 100%)',
-                  filter: 'blur(28px)'
-                }}
-              ></div>
-            </div>
-
-            {/* Edge Glow Enhancement */}
-            <div className="absolute inset-0 rounded-full"
-              style={{
-                boxShadow: 'inset 0 0 60px rgba(65,105,225,0.4), inset 0 0 100px rgba(255,20,147,0.3)'
-              }}
-            ></div>
-
-          </div>
-
-          {/* Outer Nebula Glow Rings */}
-          <div className="absolute inset-[-20px] rounded-full opacity-50 mix-blend-screen animate-ping-slow"
-            style={{
-              background: 'radial-gradient(circle, transparent 45%, rgba(139,0,255,0.4) 60%, rgba(255,20,147,0.3) 70%, transparent 80%)',
-              filter: 'blur(20px)'
-            }}
-          ></div>
-          <div className="absolute inset-[-40px] rounded-full opacity-40 mix-blend-screen animate-ping-slower"
-            style={{
-              background: 'radial-gradient(circle, transparent 40%, rgba(65,105,225,0.3) 55%, rgba(255,105,180,0.2) 70%, transparent 85%)',
-              filter: 'blur(25px)'
-            }}
-          ></div>
-
-        </div>
-
-        {/* Floating Star Particles */}
-        <div className="absolute inset-0 pointer-events-none">
-          {Array.from({ length: 40 }).map((_, i) => {
-            const angle = (i * 360) / 40;
-            const distance = 150 + (i % 5) * 20;
-            const size = 1 + (i % 3);
-            const colors = ['#FFFFFF', '#FFD700', '#FF69B4', '#4169E1', '#8B00FF', '#00CED1'];
-            const color = colors[i % colors.length];
-            return (
-              <div
-                key={i}
-                className="absolute top-1/2 left-1/2"
-                style={{
-                  transform: `rotate(${angle}deg) translateX(${distance}px)`,
-                }}
-              >
-                <div
-                  className="rounded-full animate-particle-float mix-blend-screen"
+          {/* Esfera Azul/Roxo (esquerda inferior) */}
+          <g className="animate-sphere-float-1">
+            {/* Linhas fluidas que formam a esfera */}
+            {Array.from({ length: 24 }).map((_, i) => {
+              const angle = (i * 180) / 24;
+              const offset = i * 15;
+              return (
+                <ellipse
+                  key={`blue-${i}`}
+                  cx="220"
+                  cy="320"
+                  rx="120"
+                  ry="140"
+                  fill="none"
+                  stroke="url(#blueGrad1)"
+                  strokeWidth={2.5 - (i % 3) * 0.3}
+                  strokeLinecap="round"
+                  opacity={0.4 - (i % 5) * 0.05}
+                  transform={`rotate(${angle + offset} 220 320)`}
+                  filter="url(#fluidFlow)"
                   style={{
-                    width: `${size}px`,
-                    height: `${size}px`,
-                    backgroundColor: color,
-                    boxShadow: `0 0 ${size * 3}px ${color}`,
-                    filter: 'blur(0.5px)',
-                    animationDelay: `${i * 0.15}s`,
+                    animation: `rotate-sphere ${20 + i % 4}s linear infinite`,
+                    transformOrigin: '220px 320px'
                   }}
-                ></div>
-              </div>
+                />
+              );
+            })}
+
+            {/* Linhas horizontais para profundidade */}
+            {Array.from({ length: 12 }).map((_, i) => {
+              const y = 200 + i * 20;
+              const rx = Math.sin((i / 12) * Math.PI) * 120;
+              return (
+                <ellipse
+                  key={`blue-h-${i}`}
+                  cx="220"
+                  cy={y}
+                  rx={rx}
+                  ry="6"
+                  fill="none"
+                  stroke="url(#blueGrad2)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  opacity={0.3}
+                  filter="url(#glow)"
+                />
+              );
+            })}
+
+            {/* Núcleo luminoso */}
+            <circle
+              cx="220"
+              cy="320"
+              r="40"
+              fill="url(#blueGrad1)"
+              opacity="0.15"
+              filter="url(#strongGlow)"
+            >
+              <animate attributeName="r" values="40;50;40" dur="4s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.15;0.25;0.15" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+
+          {/* Esfera Vermelha/Rosa/Laranja (direita superior) */}
+          <g className="animate-sphere-float-2">
+            {/* Linhas fluidas que formam a esfera */}
+            {Array.from({ length: 28 }).map((_, i) => {
+              const angle = (i * 180) / 28;
+              const offset = i * 12;
+              return (
+                <ellipse
+                  key={`red-${i}`}
+                  cx="380"
+                  cy="260"
+                  rx="130"
+                  ry="150"
+                  fill="none"
+                  stroke="url(#redGrad1)"
+                  strokeWidth={2.8 - (i % 4) * 0.3}
+                  strokeLinecap="round"
+                  opacity={0.45 - (i % 6) * 0.05}
+                  transform={`rotate(${-angle + offset} 380 260)`}
+                  filter="url(#fluidFlow)"
+                  style={{
+                    animation: `rotate-sphere-reverse ${18 + i % 5}s linear infinite`,
+                    transformOrigin: '380px 260px'
+                  }}
+                />
+              );
+            })}
+
+            {/* Linhas horizontais para profundidade */}
+            {Array.from({ length: 14 }).map((_, i) => {
+              const y = 140 + i * 20;
+              const rx = Math.sin((i / 14) * Math.PI) * 130;
+              return (
+                <ellipse
+                  key={`red-h-${i}`}
+                  cx="380"
+                  cy={y}
+                  rx={rx}
+                  ry="5"
+                  fill="none"
+                  stroke="url(#redGrad2)"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  opacity={0.35}
+                  filter="url(#glow)"
+                />
+              );
+            })}
+
+            {/* Núcleo luminoso */}
+            <circle
+              cx="380"
+              cy="260"
+              r="45"
+              fill="url(#redGrad1)"
+              opacity="0.2"
+              filter="url(#strongGlow)"
+            >
+              <animate attributeName="r" values="45;55;45" dur="3.5s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.2;0.3;0.2" dur="3.5s" repeatCount="indefinite" />
+            </circle>
+
+            {/* Linhas extras de brilho */}
+            {Array.from({ length: 8 }).map((_, i) => {
+              const angle = (i * 360) / 8;
+              return (
+                <line
+                  key={`red-ray-${i}`}
+                  x1="380"
+                  y1="260"
+                  x2={380 + Math.cos((angle * Math.PI) / 180) * 80}
+                  y2={260 + Math.sin((angle * Math.PI) / 180) * 80}
+                  stroke="url(#redGrad1)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  opacity="0.2"
+                  filter="url(#glow)"
+                  style={{
+                    animation: `pulse-ray ${4 + i * 0.5}s ease-in-out infinite`,
+                    transformOrigin: '380px 260px'
+                  }}
+                />
+              );
+            })}
+          </g>
+
+          {/* Partículas flutuantes */}
+          {Array.from({ length: 40 }).map((_, i) => {
+            const x = 150 + Math.random() * 300;
+            const y = 150 + Math.random() * 300;
+            const size = 1 + Math.random() * 2;
+            const color = i % 2 === 0 ? '#3A86FF' : '#FF006E';
+            return (
+              <circle
+                key={`particle-${i}`}
+                cx={x}
+                cy={y}
+                r={size}
+                fill={color}
+                opacity="0.4"
+                filter="url(#glow)"
+              >
+                <animate
+                  attributeName="cy"
+                  values={`${y};${y - 30};${y}`}
+                  dur={`${6 + i % 4}s`}
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="opacity"
+                  values="0.4;0.8;0.4"
+                  dur={`${6 + i % 4}s`}
+                  repeatCount="indefinite"
+                />
+              </circle>
             );
           })}
-        </div>
+        </svg>
 
       </div>
     </div>

@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
 import {
   LayoutGrid,
@@ -13,18 +14,23 @@ import {
   LogOut,
   SlidersHorizontal,
 } from 'lucide-react';
-
-const navItems = [
-  { icon: LayoutGrid, href: '/dashboard', label: 'Dashboard' },
-  { icon: CalendarDays, href: '/dashboard/calendar', label: 'Calendário' },
-  { icon: ClipboardList, href: '/dashboard/briefing', label: 'Briefing' },
-  { icon: Layers, href: '/dashboard/content', label: 'Conteúdos' },
-  { icon: LineChart, href: '/dashboard/reports', label: 'Relatórios' },
-  { icon: SlidersHorizontal, href: '/dashboard/settings', label: 'Configurações' },
-];
+import type { TranslationKey } from '@/lib/translations';
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const navItems = useMemo(
+    () => [
+      { icon: LayoutGrid, href: '/dashboard', labelKey: 'dashboard' as TranslationKey },
+      { icon: CalendarDays, href: '/dashboard/calendar', labelKey: 'calendar' as TranslationKey },
+      { icon: ClipboardList, href: '/dashboard/briefing', labelKey: 'briefing' as TranslationKey },
+      { icon: Layers, href: '/dashboard/content', labelKey: 'contents' as TranslationKey },
+      { icon: LineChart, href: '/dashboard/reports', labelKey: 'reports' as TranslationKey },
+      { icon: SlidersHorizontal, href: '/dashboard/settings', labelKey: 'settings' as TranslationKey },
+    ],
+    []
+  );
 
   return (
     <aside className="w-[5.5rem] bg-white hidden md:flex flex-col items-center py-8 flex-shrink-0 z-30 border-r border-slate-50/50 shadow-sidebar">
@@ -51,6 +57,7 @@ const Sidebar: React.FC = () => {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+          const label = t(item.labelKey);
 
           return (
             <Link
@@ -62,13 +69,13 @@ const Sidebar: React.FC = () => {
                   ? 'bg-gold/10 text-gold shadow-sm'
                   : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
               )}
-              aria-label={item.label}
+              aria-label={label}
             >
               <Icon className="w-5 h-5" strokeWidth={1.5} />
 
               {/* Tooltip */}
               <span className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
-                {item.label}
+                {label}
               </span>
             </Link>
           );
@@ -79,7 +86,7 @@ const Sidebar: React.FC = () => {
       <div className="mt-auto">
         <button
           className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-status-error hover:bg-rose-50 transition-colors"
-          aria-label="Sair"
+          aria-label={t('logout')}
         >
           <LogOut className="w-5 h-5" strokeWidth={1.5} />
         </button>

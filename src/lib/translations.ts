@@ -52,15 +52,45 @@ export const translations = {
     register: 'Register',
     registerButton: 'Create Account',
 
-    // Dashboard
+    // Dashboard Menu
     dashboard: 'Dashboard',
     briefing: 'Briefing',
     calendar: 'Calendar',
     comments: 'Comments',
     content: 'Content',
+    contents: 'Contents',
     references: 'References',
     reports: 'Reports',
     profile: 'Profile',
+
+    // Topbar
+    last15Days: 'Last 15 Days',
+    last30Days: 'Last 30 Days',
+    last90Days: 'Last 90 Days',
+    thisMonth: 'This Month',
+    notifications: 'Notifications',
+
+    // Dashboard Page
+    greeting: 'Hello',
+    dashboardSummary: "Here's a summary of your social media performance",
+    totalReach: 'Total Reach',
+    engagement: 'Engagement',
+    views: 'Views',
+    scheduledPosts: 'Scheduled Posts',
+
+    // Briefing Page
+    briefingComplete: 'Briefing Complete',
+    briefingCompleteUpdated: 'Briefing Complete and Updated',
+    editBriefing: 'Edit Briefing',
+    exportPDF: 'Export PDF',
+    briefingDescription: 'Complete information about profile, goals and brand identity',
+    lastUpdate: 'Last update',
+    summary: 'Summary',
+    competitors: 'Competitors',
+    audit: 'Audit',
+
+    // Common
+    loading: 'Loading...',
 
     // Success/Error
     saved: 'Saved successfully',
@@ -119,15 +149,45 @@ export const translations = {
     register: 'Registrar',
     registerButton: 'Criar Conta',
 
-    // Dashboard
-    dashboard: 'Painel',
+    // Dashboard Menu
+    dashboard: 'Dashboard',
     briefing: 'Briefing',
     calendar: 'Calendário',
     comments: 'Comentários',
     content: 'Conteúdo',
+    contents: 'Conteúdos',
     references: 'Referências',
     reports: 'Relatórios',
     profile: 'Perfil',
+
+    // Topbar
+    last15Days: 'Últimos 15 Dias',
+    last30Days: 'Últimos 30 Dias',
+    last90Days: 'Últimos 90 Dias',
+    thisMonth: 'Este Mês',
+    notifications: 'Notificações',
+
+    // Dashboard Page
+    greeting: 'Olá',
+    dashboardSummary: 'Aqui está um resumo do desempenho das suas redes sociais',
+    totalReach: 'Alcance Total',
+    engagement: 'Engajamento',
+    views: 'Visualizações',
+    scheduledPosts: 'Posts Agendados',
+
+    // Briefing Page
+    briefingComplete: 'Briefing Completo',
+    briefingCompleteUpdated: 'Briefing Completo e Atualizado',
+    editBriefing: 'Editar Briefing',
+    exportPDF: 'Exportar PDF',
+    briefingDescription: 'Informações completas sobre perfil, objetivos e identidade de marca',
+    lastUpdate: 'Última atualização',
+    summary: 'Resumo',
+    competitors: 'Concorrentes',
+    audit: 'Auditoria',
+
+    // Common
+    loading: 'Carregando...',
 
     // Success/Error
     saved: 'Salvo com sucesso',
@@ -186,15 +246,45 @@ export const translations = {
     register: 'Registrarse',
     registerButton: 'Crear Cuenta',
 
-    // Dashboard
-    dashboard: 'Panel',
+    // Dashboard Menu
+    dashboard: 'Dashboard',
     briefing: 'Briefing',
     calendar: 'Calendario',
     comments: 'Comentarios',
     content: 'Contenido',
+    contents: 'Contenidos',
     references: 'Referencias',
     reports: 'Reportes',
     profile: 'Perfil',
+
+    // Topbar
+    last15Days: 'Últimos 15 Días',
+    last30Days: 'Últimos 30 Días',
+    last90Days: 'Últimos 90 Días',
+    thisMonth: 'Este Mes',
+    notifications: 'Notificaciones',
+
+    // Dashboard Page
+    greeting: 'Hola',
+    dashboardSummary: 'Aquí está un resumen del desempeño de tus redes sociales',
+    totalReach: 'Alcance Total',
+    engagement: 'Compromiso',
+    views: 'Visualizaciones',
+    scheduledPosts: 'Posts Programados',
+
+    // Briefing Page
+    briefingComplete: 'Briefing Completo',
+    briefingCompleteUpdated: 'Briefing Completo y Actualizado',
+    editBriefing: 'Editar Briefing',
+    exportPDF: 'Exportar PDF',
+    briefingDescription: 'Información completa sobre perfil, objetivos e identidad de marca',
+    lastUpdate: 'Última actualización',
+    summary: 'Resumen',
+    competitors: 'Competidores',
+    audit: 'Auditoría',
+
+    // Common
+    loading: 'Cargando...',
 
     // Success/Error
     saved: 'Guardado exitosamente',

@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Menu, Grid2X2, Bell, User } from 'lucide-react';
+import type { TranslationKey } from '@/lib/translations';
 
 interface TopbarProps {
   title?: string;
@@ -15,7 +17,8 @@ const Topbar: React.FC<TopbarProps> = ({
   showPeriodSelector = false,
   className,
 }) => {
-  const [period, setPeriod] = useState('Últimos 15 Dias');
+  const { t } = useLanguage();
+  const [period, setPeriod] = useState<TranslationKey>('last15Days');
 
   return (
     <header className={cn('flex justify-between items-center mb-4', className)}>
@@ -59,7 +62,7 @@ const Topbar: React.FC<TopbarProps> = ({
             }}
           >
             <span className="text-xs font-bold text-slate-600 tracking-wider uppercase">
-              {period}
+              {t(period)}
             </span>
             <ChevronDown className="w-3 h-3 text-slate-400" />
           </button>
@@ -67,10 +70,16 @@ const Topbar: React.FC<TopbarProps> = ({
 
         {/* Notifications & Profile */}
         <div className="hidden lg:flex items-center gap-2">
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
+          <button
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+            aria-label={t('notifications')}
+          >
             <Bell className="w-4 h-4" strokeWidth={1.5} />
           </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
+          <button
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+            aria-label={t('profile')}
+          >
             <User className="w-4 h-4" strokeWidth={1.5} />
           </button>
         </div>
