@@ -1,0 +1,500 @@
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alchemy of Systems | Digital Renaissance</title>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&amp;family=Inter:wght@200;300;400&amp;family=JetBrains+Mono:wght@200;300;400&amp;display=swap" rel="stylesheet">
+<!-- Tailwind & Icons -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+tailwind.config = {
+theme: {
+extend: {
+fontFamily: {
+sans: ['Inter', 'sans-serif'],
+serif: ['Cormorant Garamond', 'serif'],
+mono: ['JetBrains Mono', 'monospace'],
+},
+colors: {
+paper: '#FDFCF8',
+ink: '#1C1917',
+sepia: '#78350F',
+stone: '#E7E5E4',
+rust: '#9A3412'
+},
+animation: {
+'fade-in': 'fadeIn 1.2s ease-out forwards',
+'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+},
+keyframes: {
+fadeIn: {
+'0%': { opacity: '0', transform: 'translateY(10px)' },
+'100%': { opacity: '1', transform: 'translateY(0)' },
+}
+}
+}
+}
+}
+</script>
+<style>
+body {
+margin: 0;
+overflow: hidden;
+background-color: #FDFCF8;
+color: #1C1917;
+}
+/* Custom Range Slider - Minimalist/Paper style */
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+input[type=range]::-webkit-slider-thumb {
+-webkit-appearance: none; height: 12px; width: 12px;
+background: #1C1917; border: 1px solid #FDFCF8;
+cursor: pointer; margin-top: -5px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+transition: transform 0.2s ease;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+input[type=range]::-webkit-slider-runnable-track {
+width: 100%; height: 1px; cursor: pointer; background: #D6D3D1;
+}
+input[type=range]:focus { outline: none; }
+/* Glass Panel with "Vellum" feel */
+.vellum-glass {
+background: rgba(253, 252, 248, 0.85);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+border: 1px solid rgba(28, 25, 23, 0.08);
+box-shadow:
+0 4px 6px -1px rgba(0, 0, 0, 0.02),
+0 20px 40px -4px rgba(28, 25, 23, 0.05);
+}
+/* Utility */
+::selection { background: #E7E5E4; color: #1C1917; }
+.thin-border { border: 1px solid rgba(28, 25, 23, 0.1); }
+/* Da Vinci Grid Overlay */
+.grid-overlay {
+background-size: 40px 40px;
+background-image:
+linear-gradient(to right, rgba(28, 25, 23, 0.03) 1px, transparent 1px),
+linear-gradient(to bottom, rgba(28, 25, 23, 0.03) 1px, transparent 1px);
+mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+}
+/* SVG Line Animation */
+.sketch-line {
+stroke: #78350F; stroke-width: 0.8;
+stroke-dasharray: 4, 4; opacity: 0.4;
+}
+</style></head>
+
+<body class="antialiased font-sans bg-paper h-screen w-screen overflow-hidden">
+
+    <!-- Subtle Grid Background -->
+    <div class="absolute inset-0 pointer-events-none grid-overlay z-0"></div>
+
+    <!-- Canvas -->
+    <div id="canvas-container" class="absolute inset-0 z-1"></div>
+
+    <!-- Main Content -->
+    <main class="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between p-6 md:p-12">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-start animate-fade-in" style="animation-delay: 0.1s;">
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 border border-neutral-800 flex items-center justify-center rounded-sm bg-paper relative overflow-hidden">
+                        <div class="absolute w-full h-[1px] bg-neutral-800 rotate-45"></div>
+                        <div class="absolute w-full h-[1px] bg-neutral-800 -rotate-45"></div>
+                    </div>
+                    <span class="font-serif text-xl tracking-tight text-ink font-medium">Alchemy of Systems</span>
+                </div>
+                <div class="flex items-center gap-2 pl-11">
+                    <span class="font-mono text-[10px] uppercase tracking-widest text-sepia/70">Est. MMXIV</span>
+                    <div class="h-px w-8 bg-sepia/20"></div>
+                </div>
+            </div>
+
+            <nav class="pointer-events-auto hidden md:flex items-center gap-8">
+                <a href="#" class="font-mono text-xs text-neutral-500 hover:text-ink transition-colors uppercase tracking-widest">Manifesto</a>
+                <a href="#" class="font-mono text-xs text-neutral-500 hover:text-ink transition-colors uppercase tracking-widest">Works</a>
+                <button class="font-serif italic text-lg px-6 py-1 border border-neutral-200 hover:border-neutral-800 transition-colors text-ink rounded-full">
+                    Inquire
+                </button>
+            </nav>
+        </header>
+
+        <!-- Hero Text -->
+        <div class="relative z-10 w-full max-w-4xl mt-auto md:mt-0 md:top-[-10%] animate-fade-in opacity-0" style="animation-delay: 0.3s;">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="h-px w-12 bg-rust"></div>
+                <span class="font-mono text-xs text-rust uppercase tracking-[0.2em]">Automated Intelligence</span>
+            </div>
+            
+            <h1 class="font-serif text-6xl md:text-8xl lg:text-9xl text-ink leading-[0.9] tracking-tighter mix-blend-multiply">
+                Revolutionizing<br>
+                <span class="italic font-light text-neutral-600">Efficiency</span>
+            </h1>
+            
+            <p class="mt-8 max-w-md font-sans text-sm md:text-base text-neutral-600 font-light leading-relaxed">
+                We blend Renaissance ingenuity with modern algorithmic precision. 
+                Transforming chaotic workflows into fluid, self-correcting systems.
+            </p>
+
+            <div class="mt-10 flex items-center gap-4 pointer-events-auto">
+                <button class="group flex items-center gap-3 bg-ink text-paper pl-6 pr-5 py-3 rounded-sm hover:bg-sepia transition-all duration-500">
+                    <span class="font-mono text-xs tracking-widest uppercase">Start Sequence</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+                <div class="h-px w-16 bg-neutral-300"></div>
+                <span class="font-serif italic text-neutral-400">v.4.0</span>
+            </div>
+        </div>
+
+        <!-- Controls / "The Tablet" -->
+        <div class="pointer-events-auto absolute bottom-8 right-6 md:right-12 w-[280px] vellum-glass rounded-sm animate-fade-in opacity-0" style="animation-delay: 0.5s;">
+            
+            <div class="border-b border-neutral-200/60 px-4 py-3 flex justify-between items-center">
+                <span class="font-serif italic text-lg text-ink">System Calibration</span>
+                <div class="w-2 h-2 rounded-full bg-green-500/50 shadow-[0_0_8px_rgba(34,197,94,0.4)]"></div>
+            </div>
+
+            <div class="p-5 space-y-6">
+                <!-- Control 1 -->
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
+                        <span>Fluid Dynamics</span>
+                        <span id="val-distortion">0.5</span>
+                    </div>
+                    <input type="range" id="input-distortion" min="0" max="2.0" step="0.1" value="0.6">
+                </div>
+
+                <!-- Control 2 -->
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
+                        <span>Complexity</span>
+                        <span id="val-detail">0.8</span>
+                    </div>
+                    <input type="range" id="input-detail" min="0.1" max="2.0" step="0.1" value="0.9">
+                </div>
+
+                <!-- Dual Grid -->
+                <div class="grid grid-cols-2 gap-4 pt-2 border-t border-neutral-200/50">
+                    <div class="space-y-2">
+                         <div class="flex justify-between text-[9px] font-mono tracking-widest text-neutral-500 uppercase">
+                            <span>Entropy</span>
+                        </div>
+                        <input type="range" id="input-speed" min="0" max="0.5" step="0.01" value="0.1">
+                    </div>
+                    <div class="space-y-2">
+                         <div class="flex justify-between text-[9px] font-mono tracking-widest text-neutral-500 uppercase">
+                            <span>Density</span>
+                        </div>
+                        <input type="range" id="input-opacity" min="0.1" max="1.0" step="0.05" value="0.8">
+                    </div>
+                </div>
+
+                <!-- Palette Selector -->
+                <div class="pt-4 flex items-center justify-between">
+                    <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-400">Ink Tone</span>
+                    <div class="flex gap-2">
+                        <button class="w-4 h-4 rounded-full bg-[#1C1917] border border-transparent ring-1 ring-offset-2 ring-transparent hover:ring-neutral-300 transition-all color-btn" data-color="#1C1917"></button>
+                        <button class="w-4 h-4 rounded-full bg-[#78350F] border border-transparent hover:ring-1 hover:ring-offset-2 hover:ring-neutral-300 transition-all color-btn" data-color="#78350F"></button>
+                        <button class="w-4 h-4 rounded-full bg-[#404040] border border-transparent hover:ring-1 hover:ring-offset-2 hover:ring-neutral-300 transition-all color-btn" data-color="#404040"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Coordinates -->
+        <div class="absolute bottom-6 left-6 md:left-12 flex flex-col gap-1 opacity-60">
+            <span class="font-mono text-[9px] text-neutral-400">LAT: 43.7696° N</span>
+            <span class="font-mono text-[9px] text-neutral-400">LON: 11.2558° E</span>
+        </div>
+
+    </main>
+
+    <!-- Shaders -->
+    <script type="x-shader/x-vertex" id="vertexShader">
+        uniform float uTime;
+        uniform float uDistortion; 
+        uniform float uSize;       
+        uniform vec2 uMouse;
+
+        varying float vAlpha;
+        varying vec3 vPos;
+        varying float vNoise;
+
+        // Simplex Noise (Standard implementation)
+        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+        
+        float snoise(vec3 v) {
+            const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+            const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+            vec3 i  = floor(v + dot(v, C.yyy) );
+            vec3 x0 = v - i + dot(i, C.xxx) ;
+            vec3 g = step(x0.yzx, x0.xyz);
+            vec3 l = 1.0 - g;
+            vec3 i1 = min( g.xyz, l.zxy );
+            vec3 i2 = max( g.xyz, l.zxy );
+            vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+            vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+            vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
+            i = mod289(i);
+            vec4 p = permute( permute( permute(
+                        i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                    + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+                    + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+            float n_ = 1.0/7.0;
+            vec3  ns = n_ * D.wyz - D.xzx;
+            vec4 j = p - 49.0 * floor(p * ns.z *ns.z);
+            vec4 x_ = floor(j * ns.z);
+            vec4 y_ = floor(j - 7.0 * x_ );
+            vec4 x = x_ *ns.x + ns.yyyy;
+            vec4 y = y_ *ns.x + ns.yyyy;
+            vec4 h = 1.0 - abs(x) - abs(y);
+            vec4 b0 = vec4( x.xy, y.xy );
+            vec4 b1 = vec4( x.zw, y.zw );
+            vec4 s0 = floor(b0)*2.0 + 1.0;
+            vec4 s1 = floor(b1)*2.0 + 1.0;
+            vec4 sh = -step(h, vec4(0.0));
+            vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+            vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+            vec3 p0 = vec3(a0.xy,h.x);
+            vec3 p1 = vec3(a0.zw,h.y);
+            vec3 p2 = vec3(a1.xy,h.z);
+            vec3 p3 = vec3(a1.zw,h.w);
+            vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+            p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+            vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+            m = m * m;
+            return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+        }
+
+        void main() {
+            vec3 pos = position;
+            
+            // Smoother, more organic noise (Liquid/Ink feel)
+            float noiseFreq = 0.5;
+            float noiseAmp = uDistortion;
+            float noise = snoise(vec3(pos.x * noiseFreq + uTime * 0.1, pos.y * noiseFreq, pos.z * noiseFreq));
+            
+            vNoise = noise;
+            
+            // Deform the sphere along normal based on noise
+            vec3 newPos = pos + (normalize(pos) * noise * noiseAmp);
+
+            // Interaction
+            float dist = distance(uMouse * 10.0, newPos.xy);
+            float interaction = smoothstep(5.0, 0.0, dist);
+            newPos += normalize(pos) * interaction * 0.5;
+
+            vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+
+            // Size variation based on depth and noise
+            gl_PointSize = uSize * (24.0 / -mvPosition.z) * (1.0 + noise * 0.5);
+            
+            vAlpha = 1.0;
+            vPos = newPos;
+        }
+    </script>
+
+    <script type="x-shader/x-fragment" id="fragmentShader">
+        uniform vec3 uColor;
+        uniform float uOpacity;
+        
+        varying float vNoise;
+        varying vec3 vPos;
+
+        void main() {
+            // Soft circle particle
+            vec2 center = gl_PointCoord - vec2(0.5);
+            float dist = length(center);
+            if (dist > 0.5) discard;
+            
+            // Soft edges for "ink blot" effect
+            float alpha = smoothstep(0.5, 0.2, dist) * uOpacity;
+            
+            // Color variation based on noise (creates depth)
+            vec3 darkColor = uColor * 0.5;
+            vec3 lightColor = uColor * 1.8; // Highlights
+            
+            vec3 finalColor = mix(darkColor, lightColor, vNoise * 0.5 + 0.5);
+            
+            gl_FragColor = vec4(finalColor, alpha);
+        }
+    </script>
+
+    <script>
+        lucide.createIcons();
+
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        // Fog to blend into paper background
+        scene.fog = new THREE.FogExp2(0xFDFCF8, 0.035);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 18);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // Group to hold the "Systems"
+        const systemsGroup = new THREE.Group();
+        systemsGroup.position.x = 4.0; 
+        scene.add(systemsGroup);
+
+        // --- MAIN PARTICLE MESH (The "Brain/Cloud") ---
+        // Dense geometry for ink effect
+        const geometry = new THREE.IcosahedronGeometry(4.5, 30);
+        
+        const uniforms = {
+            uTime: { value: 0 },
+            uDistortion: { value: 0.6 },
+            uSize: { value: 2.5 },
+            uColor: { value: new THREE.Color('#1C1917') }, // Ink Color
+            uOpacity: { value: 0.8 },
+            uMouse: { value: new THREE.Vector2(0, 0) }
+        };
+
+        const material = new THREE.ShaderMaterial({
+            vertexShader: document.getElementById('vertexShader').textContent,
+            fragmentShader: document.getElementById('fragmentShader').textContent,
+            uniforms: uniforms,
+            transparent: true,
+            depthWrite: false,
+            // Additive blending makes it look too digital/glowing. 
+            // Normal blending is better for ink/physical matter.
+            blending: THREE.NormalBlending
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        systemsGroup.add(particles);
+
+        // --- RENAISSANCE LINES (Astrolabe effect) ---
+        const lineGroup = new THREE.Group();
+        systemsGroup.add(lineGroup);
+
+        function createThinOrbit(radius, rotation) {
+            const curve = new THREE.EllipseCurve(
+                0, 0,            // ax, aY
+                radius, radius,  // xRadius, yRadius
+                0, 2 * Math.PI,  // aStartAngle, aEndAngle
+                false,           // aClockwise
+                0                // aRotation
+            );
+            const points = curve.getPoints(128);
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            const mat = new THREE.LineBasicMaterial({ 
+                color: 0x78350F, // Sepia
+                transparent: true, 
+                opacity: 0.15 
+            });
+            const orbit = new THREE.Line(geo, mat);
+            orbit.rotation.x = rotation.x;
+            orbit.rotation.y = rotation.y;
+            lineGroup.add(orbit);
+            return orbit;
+        }
+
+        const orbits = [
+            createThinOrbit(5.5, {x: Math.PI/2, y: 0}),
+            createThinOrbit(5.2, {x: Math.PI/3, y: Math.PI/6}),
+            createThinOrbit(6.0, {x: Math.PI/1.8, y: Math.PI/4})
+        ];
+
+        // --- INTERACTION & ANIMATION ---
+        let time = 0;
+        let speed = 0.1;
+        let mouseX = 0, mouseY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            uniforms.uMouse.value.x += (mouseX - uniforms.uMouse.value.x) * 0.05;
+            uniforms.uMouse.value.y += (mouseY - uniforms.uMouse.value.y) * 0.05;
+        });
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            adjustLayout();
+        });
+
+        function adjustLayout() {
+            if(window.innerWidth < 768) {
+                systemsGroup.position.set(0, 1.5, -5);
+                systemsGroup.scale.set(0.8, 0.8, 0.8);
+            } else {
+                systemsGroup.position.set(4.5, 0, 0);
+                systemsGroup.scale.set(1, 1, 1);
+            }
+        }
+        adjustLayout();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01 + (speed * 0.05);
+
+            // Rotate entire system slowly (planetary motion)
+            systemsGroup.rotation.y = time * 0.05;
+            systemsGroup.rotation.z = Math.sin(time * 0.1) * 0.05;
+
+            // Counter-rotate orbits
+            lineGroup.rotation.x = Math.sin(time * 0.05) * 0.2;
+            orbits.forEach((orbit, i) => {
+                orbit.rotation.z += 0.002 * (i + 1);
+            });
+
+            // Smooth camera sway based on mouse
+            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
+            camera.lookAt(0,0,0);
+
+            uniforms.uTime.value = time;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- UI BINDINGS ---
+        document.getElementById('input-distortion').addEventListener('input', (e) => {
+            uniforms.uDistortion.value = parseFloat(e.target.value);
+            document.getElementById('val-distortion').textContent = e.target.value;
+        });
+        document.getElementById('input-detail').addEventListener('input', (e) => {
+            // Higher input = Smaller particles but more visual complexity illusion
+            const val = parseFloat(e.target.value);
+            uniforms.uSize.value = val * 3.0; 
+            document.getElementById('val-detail').textContent = val;
+        });
+        document.getElementById('input-speed').addEventListener('input', (e) => {
+            speed = parseFloat(e.target.value);
+        });
+        document.getElementById('input-opacity').addEventListener('input', (e) => {
+            uniforms.uOpacity.value = parseFloat(e.target.value);
+        });
+
+        // Color Switching
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const color = btn.getAttribute('data-color');
+                uniforms.uColor.value.set(color);
+                
+                // Change line color subtly too
+                lineGroup.children.forEach(line => {
+                    line.material.color.set(color);
+                });
+            });
+        });
+
+    </script>
+
+</body></html>

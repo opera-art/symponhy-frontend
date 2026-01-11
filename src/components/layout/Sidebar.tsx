@@ -2,8 +2,9 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import {
   LayoutGrid,
@@ -18,7 +19,9 @@ import type { TranslationKey } from '@/lib/translations';
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { t } = useLanguage();
+  const { logout } = useAuth();
 
   const navItems = useMemo(
     () => [
@@ -85,10 +88,19 @@ const Sidebar: React.FC = () => {
       {/* Logout */}
       <div className="mt-auto">
         <button
-          className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-status-error hover:bg-rose-50 transition-colors"
+          onClick={() => {
+            logout();
+            router.push('/login');
+          }}
+          className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-status-error hover:bg-rose-50 transition-all duration-300 group relative"
           aria-label={t('logout')}
         >
           <LogOut className="w-5 h-5" strokeWidth={1.5} />
+
+          {/* Tooltip */}
+          <span className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
+            {t('logout')}
+          </span>
         </button>
       </div>
     </aside>
