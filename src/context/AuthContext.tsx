@@ -6,6 +6,7 @@ export interface User {
   id: string;
   email: string;
   fullName: string;
+  accessType?: string; // 'client', 'agency', or 'admin'
 }
 
 interface AuthContextType {

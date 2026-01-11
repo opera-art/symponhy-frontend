@@ -36,7 +36,17 @@
       "Bash(npm uninstall:*)",
       "Bash(for:*)",
       "Bash(do echo \"Check $i...\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(railway up:*)",
+      "Bash(dir:*)",
+      "Bash(railway status:*)",
+      "Bash(railway service:*)",
+      "Bash(railway link:*)",
+      "Bash(railway logs:*)",
+      "mcp__github__search_repositories",
+      "mcp__github__get_file_contents",
+      "Bash(railway login:*)",
+      "Bash(railway project list:*)"
     ]
   }
 }
