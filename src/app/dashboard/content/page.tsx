@@ -553,7 +553,7 @@ const InstagramContentGrid: React.FC<InstagramContentGridProps> = ({
                       ? 'default'
                       : item.status === 'pending'
                         ? 'warning'
-                        : 'secondary'
+                        : 'error'
                   }
                   size="sm"
                   className="absolute bottom-2 left-2"
