@@ -19,10 +19,12 @@ import {
   FileDown,
   Clock,
 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const ReportsPage: React.FC = () => {
   const [period, setPeriod] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
 
   const handleExport = () => {
     console.log('Exporting report...');
@@ -41,7 +43,7 @@ const ReportsPage: React.FC = () => {
       <div className="mb-4 animate-fade-in">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 mb-3">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900 mb-1">Relatórios</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 mb-1">{t('reportsTitle')}</h2>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
@@ -53,7 +55,7 @@ const ReportsPage: React.FC = () => {
               </div>
               <Badge variant="default" size="sm" className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                Atualizado em {reportsData.lastUpdate}
+                {t('updatedOn')} {reportsData.lastUpdate}
               </Badge>
             </div>
           </div>
@@ -71,7 +73,7 @@ const ReportsPage: React.FC = () => {
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  {days} dias
+                  {days} {t('days')}
                 </button>
               ))}
             </div>
@@ -83,7 +85,7 @@ const ReportsPage: React.FC = () => {
               onClick={handleRefresh}
               isLoading={isLoading}
             >
-              Atualizar
+              {t('update')}
             </Button>
 
             <Button
@@ -92,7 +94,7 @@ const ReportsPage: React.FC = () => {
               leftIcon={<FileDown className="w-4 h-4" />}
               onClick={handleExport}
             >
-              Exportar
+              {t('export')}
             </Button>
           </div>
         </div>
@@ -105,9 +107,9 @@ const ReportsPage: React.FC = () => {
             <TrendingUp className="w-7 h-7 text-gold" strokeWidth={2} />
           </div>
           <div>
-            <h3 className="text-xl font-semibold mb-1 text-slate-900">Resumo Executivo</h3>
+            <h3 className="text-xl font-semibold mb-1 text-slate-900">{t('executiveSummary')}</h3>
             <p className="text-sm text-slate-600">
-              Visão geral do desempenho dos últimos {period} dias
+              {t('performanceOverview')} {period} {t('days')}
             </p>
           </div>
         </div>
@@ -124,12 +126,12 @@ const ReportsPage: React.FC = () => {
             };
             const Icon = icons[key as keyof typeof icons];
             const labels = {
-              followers: 'Seguidores',
-              reach: 'Alcance',
-              engagement: 'Engajamento',
-              comments: 'Comentários',
-              saves: 'Salvamentos',
-              shares: 'Compartilhamentos',
+              followers: t('followers'),
+              reach: t('reach'),
+              engagement: t('engagement'),
+              comments: t('comments'),
+              saves: t('saves'),
+              shares: t('shares'),
             };
 
             return (

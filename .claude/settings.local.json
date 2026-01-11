@@ -27,7 +27,10 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git -C \"c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy\" add -A)",
-      "Bash(git -C \"c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy\" diff --cached --stat)"
+      "Bash(git -C \"c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy\" diff --cached --stat)",
+      "Bash(git -C \"c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy\" commit -m \"$\\(cat <<''EOF''\nImplement system-wide multi-language support \\(EN, PT, ES\\)\n\n- Updated Sidebar and Topbar to use dynamic translations\n- Converted Dashboard, Briefing, and Calendar pages to use translation keys\n- Expanded translations.ts with comprehensive text coverage\n- All menu items, tooltips, and page content now respond to language changes\n- Language selection in Settings now affects entire application\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy\" commit -m \"$\\(cat <<''EOF''\nAdd comprehensive multi-language translations for all pages\n\n- Expanded translations.ts with Reports, Content, Comments, and References pages\n- Added translations for EN, PT, and ES for all new sections\n- Updated Reports page to use dynamic translations\n- Translations now cover 100% of the main application pages\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy\" push origin master)"
     ]
   }
 }
