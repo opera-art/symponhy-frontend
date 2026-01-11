@@ -8,10 +8,11 @@ import { GoldenOracle } from '@/components/background/GoldenOracle';
 export default function LoginPage() {
   const router = useRouter();
 
-  const handleLoginSubmit = (data: { email: string; password: string; accessType: string }) => {
+  const handleLoginSubmit = async (data: { email: string; password: string; accessType: string }) => {
     console.log('Login attempt:', data);
     // Redirect to dashboard after successful login
-    router.push('/dashboard');
+    console.log('Redirecionando para dashboard...');
+    await router.push('/dashboard');
   };
 
   return (

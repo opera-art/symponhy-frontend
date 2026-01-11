@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 
 export interface LoginFormProps {
-  onSubmit?: (data: { email: string; password: string; accessType: string }) => void;
+  onSubmit?: (data: { email: string; password: string; accessType: string }) => Promise<void>;
 }
 
 export function LoginForm({ onSubmit }: LoginFormProps) {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,8 +23,16 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
 
     try {
       await login(email, password);
-      onSubmit?.({ email, password, accessType });
+      console.log('Login bem-sucedido, redirecionando...');
+
+      if (onSubmit) {
+        await onSubmit({ email, password, accessType });
+      } else {
+        // Se não houver callback, redireciona diretamente
+        await router.push('/dashboard');
+      }
     } catch (err) {
+      console.error('Erro no login:', err);
       // Erro já está no estado
     }
   };
