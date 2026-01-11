@@ -208,6 +208,22 @@ export const translations = {
     fri: 'Fri',
     sat: 'Sat',
 
+    // Agency Features
+    team: 'Team',
+    clients: 'Clients',
+    automation: 'Automation',
+    whitelabel: 'White Label',
+    manageTeam: 'Manage Team',
+    inviteMembers: 'Invite Members',
+    viewAllProjects: 'View All Projects',
+    aiFeatures: 'AI Features',
+    bulkActions: 'Bulk Actions',
+    customBranding: 'Custom Branding',
+    apiIntegrations: 'API Integrations',
+    upgradeToAgency: 'Upgrade to Agency',
+    agencyPlan: 'Agency Plan',
+    unlockFeature: 'Unlock this feature',
+
     // Common
     loading: 'Loading...',
     cancel: 'Cancel',
@@ -425,6 +441,22 @@ export const translations = {
     fri: 'Sex',
     sat: 'Sáb',
 
+    // Agency Features
+    team: 'Equipe',
+    clients: 'Clientes',
+    automation: 'Automação',
+    whitelabel: 'Marca Branca',
+    manageTeam: 'Gerenciar Equipe',
+    inviteMembers: 'Convidar Membros',
+    viewAllProjects: 'Ver Todos os Projetos',
+    aiFeatures: 'Recursos de IA',
+    bulkActions: 'Ações em Massa',
+    customBranding: 'Marca Personalizada',
+    apiIntegrations: 'Integrações API',
+    upgradeToAgency: 'Upgrade para Agência',
+    agencyPlan: 'Plano Agência',
+    unlockFeature: 'Desbloquear este recurso',
+
     // Common
     loading: 'Carregando...',
     cancel: 'Cancelar',
@@ -641,6 +673,22 @@ export const translations = {
     thu: 'Jue',
     fri: 'Vie',
     sat: 'Sáb',
+
+    // Agency Features
+    team: 'Equipo',
+    clients: 'Clientes',
+    automation: 'Automatización',
+    whitelabel: 'Marca Blanca',
+    manageTeam: 'Gestionar Equipo',
+    inviteMembers: 'Invitar Miembros',
+    viewAllProjects: 'Ver Todos los Proyectos',
+    aiFeatures: 'Funciones de IA',
+    bulkActions: 'Acciones Masivas',
+    customBranding: 'Marca Personalizada',
+    apiIntegrations: 'Integraciones API',
+    upgradeToAgency: 'Actualizar a Agencia',
+    agencyPlan: 'Plan Agencia',
+    unlockFeature: 'Desbloquear esta función',
 
     // Common
     loading: 'Cargando...',

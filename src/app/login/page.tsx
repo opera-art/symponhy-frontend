@@ -23,13 +23,13 @@ export default function LoginPage() {
       <div className="bg-white w-full max-w-[1200px] rounded-[32px] shadow-2xl flex flex-col lg:flex-row overflow-hidden">
 
         {/* Left Column: Golden Oracle */}
-        <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden bg-white flex-1">
+        <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden bg-white">
           {/* Golden Oracle Background */}
           <GoldenOracle />
         </div>
 
         {/* Right Column: Login Form */}
-        <div className="lg:w-[55%] bg-white p-6 lg:p-12 flex flex-col justify-center w-full flex-1">
+        <div className="lg:w-[55%] bg-white p-6 lg:p-12 flex flex-col justify-center w-full">
 
           <div className="w-full max-w-sm mx-auto lg:max-w-lg">
 

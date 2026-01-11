@@ -188,67 +188,6 @@ export const GoldenOracle: React.FC<{ className?: string }> = ({ className = '' 
     scene.add(particles);
     sceneRef.current.particles = particles;
 
-    // Create energy beam/ray going to login form
-    const beamPoints: THREE.Vector3[] = [];
-    const segments = 100;
-
-    for (let i = 0; i <= segments; i++) {
-      beamPoints.push(new THREE.Vector3(0, 0, 0));
-    }
-
-    const beamGeometry = new THREE.BufferGeometry().setFromPoints(beamPoints);
-    const beamMaterial = new THREE.LineBasicMaterial({
-      color: 0x3A86FF,
-      transparent: true,
-      opacity: 0.4,
-      linewidth: 2
-    });
-
-    const beam = new THREE.Line(beamGeometry, beamMaterial);
-    scene.add(beam);
-
-    // Create flowing particles along the beam
-    const flowingParticles: Array<{
-      mesh: THREE.Points;
-      progress: number;
-      speed: number;
-    }> = [];
-
-    function createFlowingParticle() {
-      const particleGeometry = new THREE.IcosahedronGeometry(0.15, 8);
-      const particleUniforms = {
-        uTime: { value: 0 },
-        uDistortion: { value: 0.2 },
-        uSize: { value: 1.5 },
-        uColor: { value: new THREE.Color('#3A86FF') },
-        uOpacity: { value: 0.8 },
-        uMouse: { value: new THREE.Vector2(0, 0) }
-      };
-
-      const particleMaterial = new THREE.ShaderMaterial({
-        vertexShader,
-        fragmentShader,
-        uniforms: particleUniforms,
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending
-      });
-
-      const particle = new THREE.Points(particleGeometry, particleMaterial);
-      scene.add(particle);
-
-      flowingParticles.push({
-        mesh: particle,
-        progress: Math.random(),
-        speed: 0.003 + Math.random() * 0.002
-      });
-    }
-
-    // Create initial flowing particles
-    for (let i = 0; i < 5; i++) {
-      createFlowingParticle();
-    }
-
     // Animation variables
     let time = 0;
     let mouseX = 0;
@@ -276,56 +215,6 @@ export const GoldenOracle: React.FC<{ className?: string }> = ({ className = '' 
         particles.rotation.y = time * 0.05;
         particles.rotation.z = Math.sin(time * 0.1) * 0.05;
       }
-
-      // Update beam curve - from sphere center to right side (login form direction)
-      const positions = beamGeometry.attributes.position;
-      for (let i = 0; i <= segments; i++) {
-        const t = i / segments;
-
-        // Bezier curve from sphere to login form area
-        const startX = 0;
-        const startY = 0;
-        const endX = 8;
-        const endY = 0;
-
-        // Control points for smooth curve
-        const controlX = 4;
-        const controlY = 1 + Math.sin(time * 0.5 + t * Math.PI * 2) * 0.3;
-
-        // Quadratic bezier
-        const x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * controlX + t * t * endX;
-        const y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * controlY + t * t * endY;
-        const z = Math.sin(t * Math.PI * 3 + time) * 0.2;
-
-        positions.setXYZ(i, x, y, z);
-      }
-      positions.needsUpdate = true;
-
-      // Update flowing particles along the beam
-      flowingParticles.forEach(particle => {
-        particle.progress += particle.speed;
-        if (particle.progress > 1) {
-          particle.progress = 0;
-        }
-
-        const t = particle.progress;
-        const startX = 0;
-        const startY = 0;
-        const endX = 8;
-        const endY = 0;
-        const controlX = 4;
-        const controlY = 1 + Math.sin(time * 0.5 + t * Math.PI * 2) * 0.3;
-
-        const x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * controlX + t * t * endX;
-        const y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * controlY + t * t * endY;
-        const z = Math.sin(t * Math.PI * 3 + time) * 0.2;
-
-        particle.mesh.position.set(x, y, z);
-
-        const mat = particle.mesh.material as THREE.ShaderMaterial;
-        mat.uniforms.uTime.value = time;
-        mat.uniforms.uOpacity.value = 0.8 * Math.sin(t * Math.PI);
-      });
 
       // Smooth camera sway based on mouse
       camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
@@ -357,17 +246,6 @@ export const GoldenOracle: React.FC<{ className?: string }> = ({ className = '' 
         cancelAnimationFrame(sceneRef.current.animationId);
       }
 
-      // Clean up beam
-      beam.geometry.dispose();
-      (beam.material as THREE.Material).dispose();
-
-      // Clean up flowing particles
-      flowingParticles.forEach(particle => {
-        scene.remove(particle.mesh);
-        particle.mesh.geometry.dispose();
-        (particle.mesh.material as THREE.Material).dispose();
-      });
-
       if (sceneRef.current.renderer) {
         sceneRef.current.renderer.dispose();
         container.removeChild(sceneRef.current.renderer.domElement);
@@ -382,7 +260,18 @@ export const GoldenOracle: React.FC<{ className?: string }> = ({ className = '' 
 
   return (
     <div className={`absolute inset-0 bg-white flex items-center justify-center overflow-hidden ${className}`}>
-      <div ref={containerRef} className="w-full h-full" />
+      {/* Spline flowing ribbon - Behind sphere */}
+      <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none">
+        <iframe
+          src="https://my.spline.design/flowingribbon-TlkEaNrvCCNZuJBNJN3LXpRF"
+          width="100%"
+          height="100%"
+          id="aura-spline"
+        />
+      </div>
+
+      {/* Three.js sphere - On top, centered */}
+      <div ref={containerRef} className="w-full h-full absolute inset-0 z-10" />
     </div>
   );
 };
