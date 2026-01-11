@@ -125,6 +125,4 @@ const SettingsPage: React.FC = () => {
   );
 };
 
-export const dynamic = 'force-dynamic';
-
 export default SettingsPage;
