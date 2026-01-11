@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 
-interface LoginFormProps {
+export interface LoginFormProps {
   onSubmit?: (data: { email: string; password: string; accessType: string }) => void;
 }
 
