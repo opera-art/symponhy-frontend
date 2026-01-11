@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Topbar } from '@/components/layout';
 import { Card, Badge, Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -15,33 +15,35 @@ import {
   Filter,
   TrendingUp,
 } from 'lucide-react';
-
-const sentimentConfig = {
-  positive: {
-    icon: ThumbsUp,
-    color: 'text-green-600 bg-green-50',
-    badge: 'success',
-    label: 'Positivo',
-  },
-  negative: {
-    icon: ThumbsDown,
-    color: 'text-red-600 bg-red-50',
-    badge: 'error',
-    label: 'Negativo',
-  },
-  neutral: {
-    icon: MessageCircle,
-    color: 'text-slate-600 bg-slate-50',
-    badge: 'default',
-    label: 'Neutro',
-  },
-};
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CommentsPage() {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSentiment, setFilterSentiment] = useState<'all' | 'positive' | 'negative' | 'neutral'>('all');
   const [filterPlatform, setFilterPlatform] = useState<'all' | 'instagram' | 'youtube'>('all');
   const [expandedComments, setExpandedComments] = useState<string[]>([]);
+
+  const sentimentConfig = useMemo(() => ({
+    positive: {
+      icon: ThumbsUp,
+      color: 'text-green-600 bg-green-50',
+      badge: 'success',
+      label: t('positive'),
+    },
+    negative: {
+      icon: ThumbsDown,
+      color: 'text-red-600 bg-red-50',
+      badge: 'error',
+      label: t('negative'),
+    },
+    neutral: {
+      icon: MessageCircle,
+      color: 'text-slate-600 bg-slate-50',
+      badge: 'default',
+      label: t('neutral'),
+    },
+  }), [t]);
 
   const filteredComments = commentsData.filter((comment) => {
     const matchesSearch =
@@ -77,9 +79,9 @@ export default function CommentsPage() {
 
       {/* Header */}
       <div className="mb-4 animate-fade-in">
-        <h2 className="text-2xl font-semibold text-slate-900 mb-1">Análise de Comentários</h2>
+        <h2 className="text-2xl font-semibold text-slate-900 mb-1">{t('commentsAnalysis')}</h2>
         <p className="text-sm text-slate-500">
-          Monitore e responda aos comentários de seus seguidores com análise de sentimento
+          {t('commentsDescription')}
         </p>
       </div>
 
@@ -87,14 +89,14 @@ export default function CommentsPage() {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-5 animate-fade-in">
         <Card padding="sm" className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
           <div>
-            <p className="text-xs text-slate-600 mb-1">Total de Comentários</p>
+            <p className="text-xs text-slate-600 mb-1">{t('totalComments')}</p>
             <h3 className="text-2xl font-bold text-blue-600">{stats.total}</h3>
           </div>
         </Card>
 
         <Card padding="sm" className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
           <div>
-            <p className="text-xs text-slate-600 mb-1">Positivos</p>
+            <p className="text-xs text-slate-600 mb-1">{t('positives')}</p>
             <h3 className="text-2xl font-bold text-green-600">{stats.positive}</h3>
             <p className="text-xs text-slate-500 mt-1">{positivePercentage}%</p>
           </div>
@@ -102,23 +104,23 @@ export default function CommentsPage() {
 
         <Card padding="sm" className="bg-gradient-to-br from-red-50 to-rose-50 border-red-200">
           <div>
-            <p className="text-xs text-slate-600 mb-1">Negativos</p>
+            <p className="text-xs text-slate-600 mb-1">{t('negatives')}</p>
             <h3 className="text-2xl font-bold text-red-600">{stats.negative}</h3>
           </div>
         </Card>
 
         <Card padding="sm" className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200">
           <div>
-            <p className="text-xs text-slate-600 mb-1">Neutros</p>
+            <p className="text-xs text-slate-600 mb-1">{t('neutrals')}</p>
             <h3 className="text-2xl font-bold text-slate-600">{stats.neutral}</h3>
           </div>
         </Card>
 
         <Card padding="sm" className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200">
           <div>
-            <p className="text-xs text-slate-600 mb-1">Taxa de Resposta</p>
+            <p className="text-xs text-slate-600 mb-1">{t('replyRate')}</p>
             <h3 className="text-2xl font-bold text-purple-600">{replyRate}%</h3>
-            <p className="text-xs text-slate-500 mt-1">{stats.replied} respondidos</p>
+            <p className="text-xs text-slate-500 mt-1">{stats.replied} {t('replied')}</p>
           </div>
         </Card>
       </div>
@@ -126,7 +128,7 @@ export default function CommentsPage() {
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4 animate-fade-in flex-wrap">
         <Input
-          placeholder="Buscar comentários..."
+          placeholder={t('searchComments')}
           leftIcon={<Search className="w-4 h-4" />}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -147,12 +149,12 @@ export default function CommentsPage() {
                 )}
               >
                 {sentiment === 'all'
-                  ? 'Todos'
+                  ? t('all')
                   : sentiment === 'positive'
-                    ? '👍 Positivos'
+                    ? `👍 ${t('positives')}`
                     : sentiment === 'negative'
-                      ? '👎 Negativos'
-                      : '➖ Neutros'}
+                      ? `👎 ${t('negatives')}`
+                      : `➖ ${t('neutrals')}`}
               </button>
             ))}
           </div>
@@ -169,7 +171,7 @@ export default function CommentsPage() {
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 )}
               >
-                {platform === 'all' ? 'Todas Plataformas' : platform === 'instagram' ? '📷 Instagram' : '▶️ YouTube'}
+                {platform === 'all' ? t('allPlatforms') : platform === 'instagram' ? '📷 Instagram' : '▶️ YouTube'}
               </button>
             ))}
           </div>
@@ -210,7 +212,7 @@ export default function CommentsPage() {
 
                     {comment.postTitle && (
                       <p className="text-xs text-slate-500 mb-2">
-                        em: <span className="font-medium">{comment.postTitle}</span>
+                        {t('on')}: <span className="font-medium">{comment.postTitle}</span>
                       </p>
                     )}
 
@@ -219,7 +221,7 @@ export default function CommentsPage() {
                     <div className="flex items-center gap-4 text-xs text-slate-500 mt-2">
                       <span className="flex items-center gap-1">
                         <Heart className="w-3 h-3" />
-                        {comment.likes} curtidas
+                        {comment.likes} {t('likes')}
                       </span>
                       <span>{new Date(comment.date).toLocaleDateString('pt-BR')}</span>
                     </div>
@@ -246,7 +248,7 @@ export default function CommentsPage() {
                       leftIcon={<Reply className="w-3 h-3" />}
                       className="text-blue-600"
                     >
-                      Responder
+                      {t('reply')}
                     </Button>
                     <Button
                       variant="outline"
@@ -254,13 +256,13 @@ export default function CommentsPage() {
                       leftIcon={<Heart className="w-3 h-3" />}
                       className="text-rose-600"
                     >
-                      Curtir
+                      {t('like')}
                     </Button>
                   </>
                 ) : (
                   <div className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-lg">
                     <Badge variant="success" size="sm">
-                      ✓ Respondido
+                      ✓ {t('replied')}
                     </Badge>
                   </div>
                 )}
@@ -306,9 +308,9 @@ export default function CommentsPage() {
               <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
                 <MessageCircle className="w-8 h-8" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">Nenhum comentário encontrado</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">{t('noCommentsFound')}</h3>
               <p className="text-sm text-slate-500">
-                {searchTerm ? 'Tente ajustar seus critérios de busca' : 'Não há comentários para análise'}
+                {searchTerm ? t('adjustSearchCriteria') : t('noCommentsToAnalyze')}
               </p>
             </div>
           </Card>

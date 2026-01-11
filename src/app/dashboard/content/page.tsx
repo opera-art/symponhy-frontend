@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Topbar } from '@/components/layout';
 import {
   Tabs,
@@ -38,42 +38,10 @@ import {
   Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const platformSections = [
-  {
-    id: 'youtube',
-    icon: Play,
-    label: 'YouTube Shorts',
-    color: 'from-red-50 to-rose-50',
-    borderColor: 'border-red-200',
-    logo: 'https://waryhub.com/files/preview/960x960/11767610313jrhof02aap4tz9sc5zd4jruev8rjau7kuv4wouxfagagliudlz5b2bh6gvqmrz29amwaflw2mumipqcbul5xibtd7dxyo7jr4pip.png',
-  },
-  {
-    id: 'tiktok',
-    icon: Music,
-    label: 'TikTok',
-    color: 'from-slate-50 to-slate-100',
-    borderColor: 'border-slate-200',
-    logo: 'https://static.vecteezy.com/system/resources/thumbnails/018/930/574/small/tiktok-logo-tikok-icon-transparent-tikok-app-logo-free-png.png',
-  },
-  {
-    id: 'instagram',
-    icon: Image,
-    label: 'Instagram',
-    color: 'from-pink-50 to-rose-50',
-    borderColor: 'border-pink-200',
-    logo: 'https://png.pngtree.com/png-clipart/20180626/ourmid/pngtree-instagram-icon-instagram-logo-png-image_3584853.png',
-  },
-];
-
-const instagramTabs = [
-  { id: 'posts', label: 'Posts', icon: '📷' },
-  { id: 'carousel', label: 'Carrossel', icon: '🔄' },
-  { id: 'reels', label: 'Reels', icon: '🎬' },
-  { id: 'stories', label: 'Stories', icon: '📱' },
-];
+import { useLanguage } from '@/context/LanguageContext';
 
 const ContentPage: React.FC = () => {
+  const { t } = useLanguage();
   const [activePlatform, setActivePlatform] = useState('youtube');
   const [activeInstagramTab, setActiveInstagramTab] = useState('posts');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -81,6 +49,43 @@ const ContentPage: React.FC = () => {
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [selectedContent, setSelectedContent] = useState<any>(null);
   const [showInteractionModal, setShowInteractionModal] = useState(false);
+
+  const platformSections = useMemo(() => [
+    {
+      id: 'youtube',
+      icon: Play,
+      label: t('youtubeShorts'),
+      description: t('youtubeShortsDescription'),
+      color: 'from-red-50 to-rose-50',
+      borderColor: 'border-red-200',
+      logo: 'https://waryhub.com/files/preview/960x960/11767610313jrhof02aap4tz9sc5zd4jruev8rjau7kuv4wouxfagagliudlz5b2bh6gvqmrz29amwaflw2mumipqcbul5xibtd7dxyo7jr4pip.png',
+    },
+    {
+      id: 'tiktok',
+      icon: Music,
+      label: t('tiktok'),
+      description: t('tiktokDescription'),
+      color: 'from-slate-50 to-slate-100',
+      borderColor: 'border-slate-200',
+      logo: 'https://static.vecteezy.com/system/resources/thumbnails/018/930/574/small/tiktok-logo-tikok-icon-transparent-tikok-app-logo-free-png.png',
+    },
+    {
+      id: 'instagram',
+      icon: Image,
+      label: t('instagram'),
+      description: t('instagramDescription'),
+      color: 'from-pink-50 to-rose-50',
+      borderColor: 'border-pink-200',
+      logo: 'https://png.pngtree.com/png-clipart/20180626/ourmid/pngtree-instagram-icon-instagram-logo-png-image_3584853.png',
+    },
+  ], [t]);
+
+  const instagramTabs = useMemo(() => [
+    { id: 'posts', label: t('posts'), icon: '📷' },
+    { id: 'carousel', label: t('carousel'), icon: '🔄' },
+    { id: 'reels', label: t('reels'), icon: '🎬' },
+    { id: 'stories', label: t('stories'), icon: '📱' },
+  ], [t]);
 
   const instagramContents = contents.filter((c) => {
     if (activeInstagramTab === 'posts') return c.type === 'post';
@@ -92,10 +97,10 @@ const ContentPage: React.FC = () => {
 
   const getTypeLabel = (type: string) => {
     const labels = {
-      post: 'Post',
-      carousel: 'Carrossel',
-      reel: 'Reel',
-      story: 'Story',
+      post: t('posts'),
+      carousel: t('carousel'),
+      reel: t('reels'),
+      story: t('stories'),
     };
     return labels[type as keyof typeof labels];
   };
@@ -117,10 +122,10 @@ const ContentPage: React.FC = () => {
       {/* Header */}
       <div className="mb-4 animate-fade-in">
         <h2 className="text-2xl font-semibold text-slate-900 mb-1">
-          Gerenciador de Conteúdo
+          {t('contentManager')}
         </h2>
         <p className="text-sm text-slate-500">
-          Organize seus conteúdos por plataforma e tipo
+          {t('contentDescription')}
         </p>
       </div>
 
@@ -129,7 +134,7 @@ const ContentPage: React.FC = () => {
         <div className="lg:col-span-1">
           <Card padding="md" className="sticky top-24 space-y-2">
             <h3 className="text-sm font-semibold text-slate-900 mb-3 px-2">
-              Plataformas
+              {t('platforms')}
             </h3>
 
             {platformSections.map((platform) => {
@@ -192,10 +197,10 @@ const ContentPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-slate-900 text-lg">
-                      YouTube Shorts
+                      {t('youtubeShorts')}
                     </h3>
                     <p className="text-sm text-slate-600">
-                      Gerencie seus vídeos curtos para YouTube
+                      {t('youtubeShortsDescription')}
                     </p>
                   </div>
                 </div>
@@ -218,10 +223,10 @@ const ContentPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-slate-900 text-lg">
-                      TikTok
+                      {t('tiktok')}
                     </h3>
                     <p className="text-sm text-slate-600">
-                      Gerencie seus vídeos curtos para TikTok
+                      {t('tiktokDescription')}
                     </p>
                   </div>
                 </div>
@@ -249,10 +254,10 @@ const ContentPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-slate-900 text-lg">
-                      Instagram
+                      {t('instagram')}
                     </h3>
                     <p className="text-sm text-slate-600">
-                      Manage posts, carousels, reels, and stories
+                      {t('instagramDescription')}
                     </p>
                   </div>
                 </div>
@@ -272,7 +277,7 @@ const ContentPage: React.FC = () => {
 
                   <div className="flex items-center gap-2">
                     <Input
-                      placeholder="Buscar..."
+                      placeholder={t('searchPlaceholder')}
                       leftIcon={<Search className="w-4 h-4" />}
                       className="w-40"
                     />
@@ -480,6 +485,8 @@ const InstagramContentGrid: React.FC<InstagramContentGridProps> = ({
   type,
   onContentClick,
 }) => {
+  const { t } = useLanguage();
+
   const typeIcons = {
     post: '📷',
     carousel: '🔄',
@@ -488,10 +495,10 @@ const InstagramContentGrid: React.FC<InstagramContentGridProps> = ({
   };
 
   const typeLabels = {
-    post: 'Post',
-    carousel: 'Carrossel',
-    reel: 'Reel',
-    story: 'Story',
+    post: t('posts'),
+    carousel: t('carousel'),
+    reel: t('reels'),
+    story: t('stories'),
   };
 
   const filteredItems = items.filter((item) => item.type === type);
@@ -503,13 +510,13 @@ const InstagramContentGrid: React.FC<InstagramContentGridProps> = ({
           {typeIcons[type as keyof typeof typeIcons]}
         </div>
         <h3 className="text-lg font-semibold text-slate-800 mb-2">
-          Nenhum {typeLabels[type as keyof typeof typeLabels]}
+          {t('noContent')} {typeLabels[type as keyof typeof typeLabels]}
         </h3>
         <p className="text-sm text-slate-500 mb-4">
-          Comece adicionando seus primeiros conteúdos
+          {t('startAdding')}
         </p>
         <Button variant="primary" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
-          Novo {typeLabels[type as keyof typeof typeLabels]}
+          {t('new')} {typeLabels[type as keyof typeof typeLabels]}
         </Button>
       </Card>
     );
@@ -559,12 +566,12 @@ const InstagramContentGrid: React.FC<InstagramContentGridProps> = ({
                   className="absolute bottom-2 left-2"
                 >
                   {item.status === 'approved'
-                    ? 'Aprovado'
+                    ? t('approved')
                     : item.status === 'pending'
-                      ? 'Pendente'
+                      ? t('pending')
                       : item.status === 'rejected'
-                        ? 'Reprovado'
-                        : 'Rascunho'}
+                        ? t('rejected')
+                        : t('draft')}
                 </Badge>
               </div>
 
@@ -621,10 +628,10 @@ const InstagramContentGrid: React.FC<InstagramContentGridProps> = ({
                   </h4>
                   <Badge variant="default" size="sm" className="text-xs flex-shrink-0">
                     {item.status === 'approved'
-                      ? 'Aprovado'
+                      ? t('approved')
                       : item.status === 'pending'
-                        ? 'Pendente'
-                        : 'Rascunho'}
+                        ? t('pending')
+                        : t('draft')}
                   </Badge>
                 </div>
 
@@ -640,7 +647,7 @@ const InstagramContentGrid: React.FC<InstagramContentGridProps> = ({
                     size="sm"
                     leftIcon={<Edit3 className="w-3 h-3" />}
                   >
-                    Editar
+                    {t('edit')}
                   </Button>
                   <Button
                     variant="outline"
@@ -648,7 +655,7 @@ const InstagramContentGrid: React.FC<InstagramContentGridProps> = ({
                     leftIcon={<Trash2 className="w-3 h-3" />}
                     className="text-status-error"
                   >
-                    Remover
+                    {t('remove')}
                   </Button>
                 </div>
               </div>

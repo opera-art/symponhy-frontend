@@ -20,6 +20,7 @@ import {
   Heart,
   Bookmark,
 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const platformColors = {
   instagram: 'from-pink-500/20 to-rose-600/10',
@@ -34,6 +35,7 @@ const platformBadgeColors = {
 };
 
 export default function ReferencesPage() {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedReference, setSelectedReference] = useState(referencesData[0]);
   const [activeAnalysisTab, setActiveAnalysisTab] = useState('overview');
@@ -75,9 +77,9 @@ export default function ReferencesPage() {
 
       {/* Header */}
       <div className="mb-4 animate-fade-in">
-        <h2 className="text-2xl font-semibold text-slate-900 mb-1">Base de Referências</h2>
+        <h2 className="text-2xl font-semibold text-slate-900 mb-1">{t('referencesBase')}</h2>
         <p className="text-sm text-slate-500">
-          Análise automática de conteúdos que funcionam bem em suas redes
+          {t('referencesDescription')}
         </p>
       </div>
 
@@ -85,7 +87,7 @@ export default function ReferencesPage() {
         {/* Left: References List */}
         <div className="lg:col-span-1 space-y-3">
           <Input
-            placeholder="Buscar referências..."
+            placeholder={t('searchReferences')}
             leftIcon={<Search className="w-4 h-4" />}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -200,7 +202,7 @@ export default function ReferencesPage() {
 
               {/* Copy Section */}
               <div className="bg-white/50 rounded-lg p-3 backdrop-blur-sm">
-                <p className="text-xs font-medium text-slate-600 mb-1">Copy</p>
+                <p className="text-xs font-medium text-slate-600 mb-1">{t('copy')}</p>
                 <p className="text-sm text-slate-900">{selectedReference.copy}</p>
               </div>
 
@@ -213,7 +215,7 @@ export default function ReferencesPage() {
                   <p className="text-xs font-semibold text-slate-900">
                     {(selectedReference.metrics.likes / 1000).toFixed(1)}k
                   </p>
-                  <p className="text-xs text-slate-500">Likes</p>
+                  <p className="text-xs text-slate-500">{t('likes')}</p>
                 </div>
                 <div className="bg-white/50 rounded-lg p-2 text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
@@ -222,7 +224,7 @@ export default function ReferencesPage() {
                   <p className="text-xs font-semibold text-slate-900">
                     {(selectedReference.metrics.comments / 1000).toFixed(1)}k
                   </p>
-                  <p className="text-xs text-slate-500">Comentários</p>
+                  <p className="text-xs text-slate-500">{t('comments')}</p>
                 </div>
                 <div className="bg-white/50 rounded-lg p-2 text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
@@ -231,7 +233,7 @@ export default function ReferencesPage() {
                   <p className="text-xs font-semibold text-slate-900">
                     {(selectedReference.metrics.views / 1000).toFixed(0)}k
                   </p>
-                  <p className="text-xs text-slate-500">Visualizações</p>
+                  <p className="text-xs text-slate-500">{t('views')}</p>
                 </div>
                 <div className="bg-white/50 rounded-lg p-2 text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
@@ -242,7 +244,7 @@ export default function ReferencesPage() {
                       ? `${Math.round((selectedReference.metrics.saves || 0) / 100)}`
                       : '0'}
                   </p>
-                  <p className="text-xs text-slate-500">Salvos</p>
+                  <p className="text-xs text-slate-500">{t('saves')}</p>
                 </div>
               </div>
 
@@ -265,7 +267,7 @@ export default function ReferencesPage() {
                   className="flex-1"
                   leftIcon={<Zap className="w-4 h-4" />}
                 >
-                  Analisar com IA
+                  {t('analyzeWithAI')}
                 </Button>
                 <Button
                   variant="outline"
@@ -273,7 +275,7 @@ export default function ReferencesPage() {
                   className="flex-1"
                   leftIcon={<Copy className="w-4 h-4" />}
                 >
-                  Copiar Estratégia
+                  {t('copyStrategy')}
                 </Button>
               </div>
             </div>
@@ -282,9 +284,9 @@ export default function ReferencesPage() {
           {/* Analysis Tabs */}
           <Tabs value={activeAnalysisTab} onValueChange={setActiveAnalysisTab}>
             <TabsList>
-              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-              <TabsTrigger value="insights">Insights</TabsTrigger>
-              <TabsTrigger value="engagement">Engajamento</TabsTrigger>
+              <TabsTrigger value="overview">{t('overview')}</TabsTrigger>
+              <TabsTrigger value="insights">{t('insights')}</TabsTrigger>
+              <TabsTrigger value="engagement">{t('engagement')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-3">
@@ -292,7 +294,7 @@ export default function ReferencesPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-600 mb-1">Score de Performance</p>
+                      <p className="text-sm text-slate-600 mb-1">{t('performanceScore')}</p>
                       <h4 className="text-2xl font-bold text-slate-900">{performanceScore}%</h4>
                     </div>
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold/20 to-amber-300/20 flex items-center justify-center">
@@ -302,7 +304,7 @@ export default function ReferencesPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-600">Alcance</span>
+                      <span className="text-slate-600">{t('reach')}</span>
                       <span className="font-semibold text-slate-900">
                         {(selectedReference.metrics.views / 1000).toFixed(0)}k
                       </span>
@@ -317,7 +319,7 @@ export default function ReferencesPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-600">Taxa de Engajamento</span>
+                      <span className="text-slate-600">{t('engagementRate')}</span>
                       <span className="font-semibold text-slate-900">{engagementRate.toFixed(2)}%</span>
                     </div>
                     <div className="w-full bg-slate-200 rounded-full h-2">
@@ -337,11 +339,11 @@ export default function ReferencesPage() {
                   <div className="flex gap-3">
                     <Zap className="w-5 h-5 text-amber-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-slate-900 text-sm mb-1">Pontos Fortes</h4>
+                      <h4 className="font-semibold text-slate-900 text-sm mb-1">{t('strengths')}</h4>
                       <ul className="text-sm text-slate-600 space-y-1">
-                        <li>• Alto alcance com {(selectedReference.metrics.views / 1000).toFixed(0)}k visualizações</li>
-                        <li>• Taxa de engajamento acima da média ({engagementRate.toFixed(1)}%)</li>
-                        <li>• Bom número de compartilhamentos ({selectedReference.metrics.comments} comentários)</li>
+                        <li>• {t('highReach')} {(selectedReference.metrics.views / 1000).toFixed(0)}k {t('viewsText')}</li>
+                        <li>• {t('engagementAboveAverage')} ({engagementRate.toFixed(1)}%)</li>
+                        <li>• {t('goodShares')} ({selectedReference.metrics.comments} {t('commentsText')})</li>
                       </ul>
                     </div>
                   </div>
@@ -349,11 +351,11 @@ export default function ReferencesPage() {
                   <div className="flex gap-3 pt-3 border-t border-slate-200">
                     <TrendingUp className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-slate-900 text-sm mb-1">Recomendações</h4>
+                      <h4 className="font-semibold text-slate-900 text-sm mb-1">{t('recommendations')}</h4>
                       <ul className="text-sm text-slate-600 space-y-1">
-                        <li>• Considere reutilizar este formato em outros conteúdos</li>
-                        <li>• Acompanhe as tags "{selectedReference.tags[0]}" e "{selectedReference.tags[1]}"</li>
-                        <li>• Estude a copy para aplicar em próximos posts</li>
+                        <li>• {t('considerReusing')}</li>
+                        <li>• {t('followTags')} "{selectedReference.tags[0]}" e "{selectedReference.tags[1]}"</li>
+                        <li>• {t('studyCopy')}</li>
                       </ul>
                     </div>
                   </div>
@@ -366,41 +368,41 @@ export default function ReferencesPage() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-lg p-3">
-                      <p className="text-xs text-slate-600 mb-1">Curtidas (Likes)</p>
+                      <p className="text-xs text-slate-600 mb-1">{t('likes')}</p>
                       <h4 className="text-2xl font-bold text-rose-600">
                         {(selectedReference.metrics.likes / 1000).toFixed(1)}k
                       </h4>
                       <p className="text-xs text-slate-500 mt-1">
-                        {((selectedReference.metrics.likes / selectedReference.metrics.views) * 100).toFixed(2)}% da views
+                        {((selectedReference.metrics.likes / selectedReference.metrics.views) * 100).toFixed(2)}% {t('ofViews')}
                       </p>
                     </div>
 
                     <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-3">
-                      <p className="text-xs text-slate-600 mb-1">Comentários</p>
+                      <p className="text-xs text-slate-600 mb-1">{t('comments')}</p>
                       <h4 className="text-2xl font-bold text-blue-600">
                         {(selectedReference.metrics.comments / 1000).toFixed(1)}k
                       </h4>
                       <p className="text-xs text-slate-500 mt-1">
-                        {((selectedReference.metrics.comments / selectedReference.metrics.views) * 100).toFixed(2)}% das views
+                        {((selectedReference.metrics.comments / selectedReference.metrics.views) * 100).toFixed(2)}% {t('ofViews')}
                       </p>
                     </div>
 
                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-3">
-                      <p className="text-xs text-slate-600 mb-1">Salvos</p>
+                      <p className="text-xs text-slate-600 mb-1">{t('saves')}</p>
                       <h4 className="text-2xl font-bold text-amber-600">
                         {((selectedReference.metrics.saves || 0) / 100).toFixed(0)}
                       </h4>
                       <p className="text-xs text-slate-500 mt-1">
-                        {(((selectedReference.metrics.saves || 0) / selectedReference.metrics.views) * 100).toFixed(2)}% da views
+                        {(((selectedReference.metrics.saves || 0) / selectedReference.metrics.views) * 100).toFixed(2)}% {t('ofViews')}
                       </p>
                     </div>
 
                     <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-3">
-                      <p className="text-xs text-slate-600 mb-1">Visualizações</p>
+                      <p className="text-xs text-slate-600 mb-1">{t('views')}</p>
                       <h4 className="text-2xl font-bold text-purple-600">
                         {(selectedReference.metrics.views / 1000).toFixed(0)}k
                       </h4>
-                      <p className="text-xs text-slate-500 mt-1">Total do conteúdo</p>
+                      <p className="text-xs text-slate-500 mt-1">{t('totalContent')}</p>
                     </div>
                   </div>
                 </div>
