@@ -1,260 +1,365 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import * as THREE from 'three';
 
 export const GoldenOracle: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<{
+    scene?: THREE.Scene;
+    camera?: THREE.PerspectiveCamera;
+    renderer?: THREE.WebGLRenderer;
+    particles?: THREE.Points;
+    uniforms?: any;
+    animationId?: number;
+  }>({});
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+
+    // Scene setup
+    const scene = new THREE.Scene();
+    sceneRef.current.scene = scene;
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      100
+    );
+    camera.position.set(0, 0, 14); // Closer camera = bigger sphere
+    sceneRef.current.camera = camera;
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+    sceneRef.current.renderer = renderer;
+
+    // Vertex Shader (exact from ESFERA.HTML)
+    const vertexShader = `
+      uniform float uTime;
+      uniform float uDistortion;
+      uniform float uSize;
+      uniform vec2 uMouse;
+
+      varying float vAlpha;
+      varying vec3 vPos;
+      varying float vNoise;
+
+      // Simplex Noise (Standard implementation)
+      vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+      vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+      vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+      vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+      float snoise(vec3 v) {
+          const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+          const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+          vec3 i  = floor(v + dot(v, C.yyy) );
+          vec3 x0 = v - i + dot(i, C.xxx) ;
+          vec3 g = step(x0.yzx, x0.xyz);
+          vec3 l = 1.0 - g;
+          vec3 i1 = min( g.xyz, l.zxy );
+          vec3 i2 = max( g.xyz, l.zxy );
+          vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+          vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+          vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
+          i = mod289(i);
+          vec4 p = permute( permute( permute(
+                      i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                  + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+                  + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+          float n_ = 1.0/7.0;
+          vec3  ns = n_ * D.wyz - D.xzx;
+          vec4 j = p - 49.0 * floor(p * ns.z *ns.z);
+          vec4 x_ = floor(j * ns.z);
+          vec4 y_ = floor(j - 7.0 * x_ );
+          vec4 x = x_ *ns.x + ns.yyyy;
+          vec4 y = y_ *ns.x + ns.yyyy;
+          vec4 h = 1.0 - abs(x) - abs(y);
+          vec4 b0 = vec4( x.xy, y.xy );
+          vec4 b1 = vec4( x.zw, y.zw );
+          vec4 s0 = floor(b0)*2.0 + 1.0;
+          vec4 s1 = floor(b1)*2.0 + 1.0;
+          vec4 sh = -step(h, vec4(0.0));
+          vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+          vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+          vec3 p0 = vec3(a0.xy,h.x);
+          vec3 p1 = vec3(a0.zw,h.y);
+          vec3 p2 = vec3(a1.xy,h.z);
+          vec3 p3 = vec3(a1.zw,h.w);
+          vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+          p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+          vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+          m = m * m;
+          return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+      }
+
+      void main() {
+          vec3 pos = position;
+
+          // Smoother, more organic noise (Liquid/Ink feel)
+          float noiseFreq = 0.5;
+          float noiseAmp = uDistortion;
+          float noise = snoise(vec3(pos.x * noiseFreq + uTime * 0.1, pos.y * noiseFreq, pos.z * noiseFreq));
+
+          vNoise = noise;
+
+          // Deform the sphere along normal based on noise
+          vec3 newPos = pos + (normalize(pos) * noise * noiseAmp);
+
+          // Interaction
+          float dist = distance(uMouse * 10.0, newPos.xy);
+          float interaction = smoothstep(5.0, 0.0, dist);
+          newPos += normalize(pos) * interaction * 0.5;
+
+          vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+
+          // Size variation based on depth and noise
+          gl_PointSize = uSize * (24.0 / -mvPosition.z) * (1.0 + noise * 0.5);
+
+          vAlpha = 1.0;
+          vPos = newPos;
+      }
+    `;
+
+    // Fragment Shader (exact from ESFERA.HTML)
+    const fragmentShader = `
+      uniform vec3 uColor;
+      uniform float uOpacity;
+
+      varying float vNoise;
+      varying vec3 vPos;
+
+      void main() {
+          // Soft circle particle
+          vec2 center = gl_PointCoord - vec2(0.5);
+          float dist = length(center);
+          if (dist > 0.5) discard;
+
+          // Soft edges for "ink blot" effect
+          float alpha = smoothstep(0.5, 0.2, dist) * uOpacity;
+
+          // Color variation based on noise (creates depth)
+          vec3 darkColor = uColor * 0.5;
+          vec3 lightColor = uColor * 1.8; // Highlights
+
+          vec3 finalColor = mix(darkColor, lightColor, vNoise * 0.5 + 0.5);
+
+          gl_FragColor = vec4(finalColor, alpha);
+      }
+    `;
+
+    // Geometry - Dense IcosahedronGeometry for organic particle effect
+    const geometry = new THREE.IcosahedronGeometry(4.5, 30);
+
+    // Uniforms
+    const uniforms = {
+      uTime: { value: 0 },
+      uDistortion: { value: 0.6 },
+      uSize: { value: 2.5 },
+      uColor: { value: new THREE.Color('#3A86FF') }, // Cosmic blue
+      uOpacity: { value: 0.8 },
+      uMouse: { value: new THREE.Vector2(0, 0) }
+    };
+    sceneRef.current.uniforms = uniforms;
+
+    // Material
+    const material = new THREE.ShaderMaterial({
+      vertexShader,
+      fragmentShader,
+      uniforms,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.NormalBlending
+    });
+
+    // Create particle system
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+    sceneRef.current.particles = particles;
+
+    // Create smaller multiplying spheres
+    const smallSpheres: Array<{
+      mesh: THREE.Points;
+      velocity: THREE.Vector3;
+      life: number;
+      maxLife: number;
+    }> = [];
+
+    function createSmallSphere() {
+      const smallGeometry = new THREE.IcosahedronGeometry(1.2, 20);
+      const smallUniforms = {
+        uTime: { value: 0 },
+        uDistortion: { value: 0.4 },
+        uSize: { value: 1.8 },
+        uColor: { value: new THREE.Color('#3A86FF') },
+        uOpacity: { value: 0.6 },
+        uMouse: { value: new THREE.Vector2(0, 0) }
+      };
+
+      const smallMaterial = new THREE.ShaderMaterial({
+        vertexShader,
+        fragmentShader,
+        uniforms: smallUniforms,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.NormalBlending
+      });
+
+      const smallSphere = new THREE.Points(smallGeometry, smallMaterial);
+
+      // Random direction
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
+      const velocity = new THREE.Vector3(
+        Math.sin(phi) * Math.cos(theta) * 0.02,
+        Math.sin(phi) * Math.sin(theta) * 0.02,
+        Math.cos(phi) * 0.02
+      );
+
+      scene.add(smallSphere);
+
+      smallSpheres.push({
+        mesh: smallSphere,
+        velocity,
+        life: 0,
+        maxLife: 300 // frames
+      });
+    }
+
+    // Create initial small spheres
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => createSmallSphere(), i * 2000);
+    }
+
+    // Spawn new spheres periodically
+    const spawnInterval = setInterval(() => {
+      if (smallSpheres.length < 5) {
+        createSmallSphere();
+      }
+    }, 3000);
+
+    // Animation variables
+    let time = 0;
+    let mouseX = 0;
+    let mouseY = 0;
+
+    // Mouse interaction
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      uniforms.uMouse.value.x += (mouseX - uniforms.uMouse.value.x) * 0.05;
+      uniforms.uMouse.value.y += (mouseY - uniforms.uMouse.value.y) * 0.05;
+    };
+
+    container.addEventListener('mousemove', handleMouseMove);
+
+    // Animation loop
+    function animate() {
+      sceneRef.current.animationId = requestAnimationFrame(animate);
+
+      time += 0.01;
+
+      // Rotate particle system slowly
+      if (particles) {
+        particles.rotation.y = time * 0.05;
+        particles.rotation.z = Math.sin(time * 0.1) * 0.05;
+      }
+
+      // Update small spheres
+      for (let i = smallSpheres.length - 1; i >= 0; i--) {
+        const sphere = smallSpheres[i];
+        sphere.life++;
+
+        // Move sphere
+        sphere.mesh.position.add(sphere.velocity);
+
+        // Rotate
+        sphere.mesh.rotation.y = time * 0.08;
+        sphere.mesh.rotation.x = time * 0.05;
+
+        // Update uniforms
+        const mat = sphere.mesh.material as THREE.ShaderMaterial;
+        mat.uniforms.uTime.value = time;
+
+        // Fade out and scale down near end of life
+        const lifeRatio = sphere.life / sphere.maxLife;
+        mat.uniforms.uOpacity.value = 0.6 * (1 - lifeRatio);
+        sphere.mesh.scale.setScalar(1 - lifeRatio * 0.5);
+
+        // Remove dead spheres
+        if (sphere.life >= sphere.maxLife) {
+          scene.remove(sphere.mesh);
+          sphere.mesh.geometry.dispose();
+          mat.dispose();
+          smallSpheres.splice(i, 1);
+        }
+      }
+
+      // Smooth camera sway based on mouse
+      camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+      camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
+      camera.lookAt(0, 0, 0);
+
+      uniforms.uTime.value = time;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Handle resize
+    const handleResize = () => {
+      if (!container || !camera || !renderer) return;
+
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      container.removeEventListener('mousemove', handleMouseMove);
+      clearInterval(spawnInterval);
+
+      if (sceneRef.current.animationId) {
+        cancelAnimationFrame(sceneRef.current.animationId);
+      }
+
+      // Clean up small spheres
+      smallSpheres.forEach(sphere => {
+        scene.remove(sphere.mesh);
+        sphere.mesh.geometry.dispose();
+        (sphere.mesh.material as THREE.Material).dispose();
+      });
+
+      if (sceneRef.current.renderer) {
+        sceneRef.current.renderer.dispose();
+        container.removeChild(sceneRef.current.renderer.domElement);
+      }
+
+      if (sceneRef.current.particles) {
+        sceneRef.current.particles.geometry.dispose();
+        (sceneRef.current.particles.material as THREE.Material).dispose();
+      }
+    };
+  }, []);
+
   return (
-    <div className={`absolute inset-0 bg-white flex flex-col items-center justify-center overflow-hidden ${className}`}>
-
-      {/* SVG Container */}
-      <div className="relative w-[600px] h-[600px] flex items-center justify-center">
-
-        <svg viewBox="0 0 600 600" className="w-full h-full">
-          <defs>
-            {/* Gradientes para esfera azul/roxo */}
-            <linearGradient id="blueGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#3A86FF" stopOpacity="0.9">
-                <animate attributeName="stop-color" values="#3A86FF;#5B9FFF;#3A86FF" dur="6s" repeatCount="indefinite" />
-              </stop>
-              <stop offset="100%" stopColor="#8338EC" stopOpacity="0.8">
-                <animate attributeName="stop-color" values="#8338EC;#9D5EFF;#8338EC" dur="6s" repeatCount="indefinite" />
-              </stop>
-            </linearGradient>
-
-            <linearGradient id="blueGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#1E5FCC" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="#5B21B6" stopOpacity="0.6" />
-            </linearGradient>
-
-            {/* Gradientes para esfera vermelha/laranja/rosa */}
-            <linearGradient id="redGrad1" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#FF006E" stopOpacity="0.95">
-                <animate attributeName="stop-color" values="#FF006E;#FF1A7F;#FF006E" dur="5s" repeatCount="indefinite" />
-              </stop>
-              <stop offset="50%" stopColor="#FB5607" stopOpacity="0.9">
-                <animate attributeName="stop-color" values="#FB5607;#FF6B1A;#FB5607" dur="5s" repeatCount="indefinite" />
-              </stop>
-              <stop offset="100%" stopColor="#EC4899" stopOpacity="0.85">
-                <animate attributeName="stop-color" values="#EC4899;#F764B3;#EC4899" dur="5s" repeatCount="indefinite" />
-              </stop>
-            </linearGradient>
-
-            <linearGradient id="redGrad2" x1="100%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stopColor="#C90052" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#FF4500" stopOpacity="0.7" />
-            </linearGradient>
-
-            {/* Filtros para efeito fluido */}
-            <filter id="fluidFlow">
-              <feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="4" result="turbulence">
-                <animate attributeName="baseFrequency" dur="80s" values="0.008;0.012;0.008" repeatCount="indefinite" />
-              </feTurbulence>
-              <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="8" xChannelSelector="R" yChannelSelector="G" />
-            </filter>
-
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-
-            <filter id="strongGlow">
-              <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-
-          {/* Esfera Azul/Roxo (esquerda inferior) */}
-          <g className="animate-sphere-float-1">
-            {/* Linhas fluidas que formam a esfera */}
-            {Array.from({ length: 24 }).map((_, i) => {
-              const angle = (i * 180) / 24;
-              const offset = i * 15;
-              return (
-                <ellipse
-                  key={`blue-${i}`}
-                  cx="220"
-                  cy="320"
-                  rx="120"
-                  ry="140"
-                  fill="none"
-                  stroke="url(#blueGrad1)"
-                  strokeWidth={2.5 - (i % 3) * 0.3}
-                  strokeLinecap="round"
-                  opacity={0.4 - (i % 5) * 0.05}
-                  transform={`rotate(${angle + offset} 220 320)`}
-                  filter="url(#fluidFlow)"
-                  style={{
-                    animation: `rotate-sphere ${20 + i % 4}s linear infinite`,
-                    transformOrigin: '220px 320px'
-                  }}
-                />
-              );
-            })}
-
-            {/* Linhas horizontais para profundidade */}
-            {Array.from({ length: 12 }).map((_, i) => {
-              const y = 200 + i * 20;
-              const rx = Math.sin((i / 12) * Math.PI) * 120;
-              return (
-                <ellipse
-                  key={`blue-h-${i}`}
-                  cx="220"
-                  cy={y}
-                  rx={rx}
-                  ry="6"
-                  fill="none"
-                  stroke="url(#blueGrad2)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  opacity={0.3}
-                  filter="url(#glow)"
-                />
-              );
-            })}
-
-            {/* Núcleo luminoso */}
-            <circle
-              cx="220"
-              cy="320"
-              r="40"
-              fill="url(#blueGrad1)"
-              opacity="0.15"
-              filter="url(#strongGlow)"
-            >
-              <animate attributeName="r" values="40;50;40" dur="4s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.15;0.25;0.15" dur="4s" repeatCount="indefinite" />
-            </circle>
-          </g>
-
-          {/* Esfera Vermelha/Rosa/Laranja (direita superior) */}
-          <g className="animate-sphere-float-2">
-            {/* Linhas fluidas que formam a esfera */}
-            {Array.from({ length: 28 }).map((_, i) => {
-              const angle = (i * 180) / 28;
-              const offset = i * 12;
-              return (
-                <ellipse
-                  key={`red-${i}`}
-                  cx="380"
-                  cy="260"
-                  rx="130"
-                  ry="150"
-                  fill="none"
-                  stroke="url(#redGrad1)"
-                  strokeWidth={2.8 - (i % 4) * 0.3}
-                  strokeLinecap="round"
-                  opacity={0.45 - (i % 6) * 0.05}
-                  transform={`rotate(${-angle + offset} 380 260)`}
-                  filter="url(#fluidFlow)"
-                  style={{
-                    animation: `rotate-sphere-reverse ${18 + i % 5}s linear infinite`,
-                    transformOrigin: '380px 260px'
-                  }}
-                />
-              );
-            })}
-
-            {/* Linhas horizontais para profundidade */}
-            {Array.from({ length: 14 }).map((_, i) => {
-              const y = 140 + i * 20;
-              const rx = Math.sin((i / 14) * Math.PI) * 130;
-              return (
-                <ellipse
-                  key={`red-h-${i}`}
-                  cx="380"
-                  cy={y}
-                  rx={rx}
-                  ry="5"
-                  fill="none"
-                  stroke="url(#redGrad2)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  opacity={0.35}
-                  filter="url(#glow)"
-                />
-              );
-            })}
-
-            {/* Núcleo luminoso */}
-            <circle
-              cx="380"
-              cy="260"
-              r="45"
-              fill="url(#redGrad1)"
-              opacity="0.2"
-              filter="url(#strongGlow)"
-            >
-              <animate attributeName="r" values="45;55;45" dur="3.5s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.2;0.3;0.2" dur="3.5s" repeatCount="indefinite" />
-            </circle>
-
-            {/* Linhas extras de brilho */}
-            {Array.from({ length: 8 }).map((_, i) => {
-              const angle = (i * 360) / 8;
-              return (
-                <line
-                  key={`red-ray-${i}`}
-                  x1="380"
-                  y1="260"
-                  x2={380 + Math.cos((angle * Math.PI) / 180) * 80}
-                  y2={260 + Math.sin((angle * Math.PI) / 180) * 80}
-                  stroke="url(#redGrad1)"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  opacity="0.2"
-                  filter="url(#glow)"
-                  style={{
-                    animation: `pulse-ray ${4 + i * 0.5}s ease-in-out infinite`,
-                    transformOrigin: '380px 260px'
-                  }}
-                />
-              );
-            })}
-          </g>
-
-          {/* Partículas flutuantes */}
-          {Array.from({ length: 40 }).map((_, i) => {
-            const x = 150 + Math.random() * 300;
-            const y = 150 + Math.random() * 300;
-            const size = 1 + Math.random() * 2;
-            const color = i % 2 === 0 ? '#3A86FF' : '#FF006E';
-            return (
-              <circle
-                key={`particle-${i}`}
-                cx={x}
-                cy={y}
-                r={size}
-                fill={color}
-                opacity="0.4"
-                filter="url(#glow)"
-              >
-                <animate
-                  attributeName="cy"
-                  values={`${y};${y - 30};${y}`}
-                  dur={`${6 + i % 4}s`}
-                  repeatCount="indefinite"
-                />
-                <animate
-                  attributeName="opacity"
-                  values="0.4;0.8;0.4"
-                  dur={`${6 + i % 4}s`}
-                  repeatCount="indefinite"
-                />
-              </circle>
-            );
-          })}
-        </svg>
-
-      </div>
+    <div className={`absolute inset-0 bg-white flex items-center justify-center overflow-hidden ${className}`}>
+      <div ref={containerRef} className="w-full h-full" />
     </div>
   );
 };
