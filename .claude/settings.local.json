@@ -33,7 +33,10 @@
       "Bash(git -C \"c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy\" push origin master)",
       "Bash(where railway:*)",
       "Bash(railway whoami:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"Check $i...\")",
+      "Bash(done)"
     ]
   }
 }
