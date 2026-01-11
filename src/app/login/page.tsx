@@ -6,8 +6,6 @@ import { LoginForm } from '@/components/auth/LoginForm';
 import { GoldenOracle } from '@/components/background/GoldenOracle';
 import { useLanguage } from '@/context/LanguageContext';
 
-export const dynamic = 'force-dynamic';
-
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useLanguage();
