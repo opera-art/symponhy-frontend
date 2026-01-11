@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Eye, EyeOff } from 'lucide-react';
 
 export interface LoginFormProps {
@@ -11,6 +12,7 @@ export interface LoginFormProps {
 
 export function LoginForm({ onSubmit }: LoginFormProps) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -49,7 +51,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
       {/* Email Input */}
       <div className="space-y-2">
         <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-          Email
+          {t('email')}
         </label>
         <input
           id="email"
@@ -66,7 +68,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
       {/* Password Input */}
       <div className="space-y-2">
         <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-          Senha
+          {t('password')}
         </label>
         <div className="relative">
           <input
@@ -96,7 +98,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
         disabled={loading}
         className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-semibold py-3 rounded-lg transition duration-200"
       >
-        {loading ? 'Entrando...' : 'Entrar na plataforma'}
+        {loading ? `${t('signIn')}...` : t('loginButton')}
       </button>
 
     </form>

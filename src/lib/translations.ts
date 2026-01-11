@@ -40,9 +40,33 @@ export const translations = {
     enabled: 'Enabled',
     disabled: 'Disabled',
 
+    // Login Page
+    welcome: 'Welcome to',
+    symphony: 'Symphony',
+    signIn: 'Sign In',
+    enterPlatform: 'Enter the platform',
+    password: 'Password',
+    loginButton: 'Enter the platform',
+    forgotPassword: 'Forgot password?',
+    noAccount: "Don't have an account?",
+    register: 'Register',
+    registerButton: 'Create Account',
+
+    // Dashboard
+    dashboard: 'Dashboard',
+    briefing: 'Briefing',
+    calendar: 'Calendar',
+    comments: 'Comments',
+    content: 'Content',
+    references: 'References',
+    reports: 'Reports',
+    profile: 'Profile',
+
     // Success/Error
     saved: 'Saved successfully',
     error: 'An error occurred',
+    loginError: 'Login error',
+    userNotFound: 'User not found',
   },
   pt: {
     // Navigation
@@ -83,9 +107,33 @@ export const translations = {
     enabled: 'Ativado',
     disabled: 'Desativado',
 
+    // Login Page
+    welcome: 'Bem-vindo à',
+    symphony: 'Symphony',
+    signIn: 'Entrar',
+    enterPlatform: 'Entrar na plataforma',
+    password: 'Senha',
+    loginButton: 'Entrar na plataforma',
+    forgotPassword: 'Esqueceu a senha?',
+    noAccount: 'Não tem uma conta?',
+    register: 'Registrar',
+    registerButton: 'Criar Conta',
+
+    // Dashboard
+    dashboard: 'Painel',
+    briefing: 'Briefing',
+    calendar: 'Calendário',
+    comments: 'Comentários',
+    content: 'Conteúdo',
+    references: 'Referências',
+    reports: 'Relatórios',
+    profile: 'Perfil',
+
     // Success/Error
     saved: 'Salvo com sucesso',
     error: 'Ocorreu um erro',
+    loginError: 'Erro ao fazer login',
+    userNotFound: 'Usuário não encontrado',
   },
   es: {
     // Navigation
@@ -126,9 +174,33 @@ export const translations = {
     enabled: 'Habilitado',
     disabled: 'Deshabilitado',
 
+    // Login Page
+    welcome: 'Bienvenido a',
+    symphony: 'Symphony',
+    signIn: 'Iniciar Sesión',
+    enterPlatform: 'Entrar a la plataforma',
+    password: 'Contraseña',
+    loginButton: 'Entrar a la plataforma',
+    forgotPassword: '¿Olvidó su contraseña?',
+    noAccount: '¿No tiene una cuenta?',
+    register: 'Registrarse',
+    registerButton: 'Crear Cuenta',
+
+    // Dashboard
+    dashboard: 'Panel',
+    briefing: 'Briefing',
+    calendar: 'Calendario',
+    comments: 'Comentarios',
+    content: 'Contenido',
+    references: 'Referencias',
+    reports: 'Reportes',
+    profile: 'Perfil',
+
     // Success/Error
     saved: 'Guardado exitosamente',
     error: 'Ocurrió un error',
+    loginError: 'Error al iniciar sesión',
+    userNotFound: 'Usuario no encontrado',
   },
 };
 

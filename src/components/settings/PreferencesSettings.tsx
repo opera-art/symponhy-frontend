@@ -105,13 +105,13 @@ export const PreferencesSettings: React.FC = () => {
               <p className="text-sm text-slate-600 mb-3">
                 Escolha seu idioma preferido
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => setLanguage(lang.code)}
                     className={`
-                      p-4 rounded-lg border-2 transition-all text-center
+                      p-2 rounded-lg border-2 transition-all text-center
                       ${
                         language === lang.code
                           ? 'border-gold bg-gold/5'
@@ -119,9 +119,9 @@ export const PreferencesSettings: React.FC = () => {
                       }
                     `}
                   >
-                    <div className="text-3xl mb-2">{lang.flag}</div>
-                    <p className="font-medium text-slate-900">{lang.name}</p>
-                    <p className="text-xs text-slate-500 mt-1">{lang.code.toUpperCase()}</p>
+                    <div className="text-2xl">{lang.flag}</div>
+                    <p className="text-xs font-medium text-slate-900">{lang.name}</p>
+                    <p className="text-xs text-slate-500">{lang.code.toUpperCase()}</p>
                   </button>
                 ))}
               </div>

@@ -4,9 +4,11 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { GoldenOracle } from '@/components/background/GoldenOracle';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const handleLoginSubmit = async (data: { email: string; password: string; accessType: string }) => {
     console.log('Login attempt:', data);
@@ -40,10 +42,10 @@ export default function LoginPage() {
               />
               <div>
                 <h1 className="text-2xl lg:text-3xl font-medium tracking-tight text-slate-900">
-                  Bem-vindo à
+                  {t('welcome')}
                 </h1>
                 <h2 className="text-2xl lg:text-3xl font-medium tracking-tight text-slate-900">
-                  Symphony
+                  {t('symphony')}
                 </h2>
               </div>
             </div>
