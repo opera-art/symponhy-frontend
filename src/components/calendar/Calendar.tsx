@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Plus, MoreHorizontal, FileText } from 'lucide-react';
 import { CalendarPost } from '@/data/calendarData';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface CalendarProps {
   posts: CalendarPost[];
@@ -13,16 +14,23 @@ interface CalendarProps {
   onMonthChange: (year: number, month: number) => void;
 }
 
+type CalendarView = 'month' | 'week' | 'day';
+
 const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }) => {
+  const { t } = useLanguage();
   const [selectedPost, setSelectedPost] = useState<CalendarPost | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
+  const [view, setView] = useState<CalendarView>('week');
 
-  const monthNames = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
+  const monthNames = useMemo(() => [
+    t('january'), t('february'), t('march'), t('april'), t('may'), t('june'),
+    t('july'), t('august'), t('september'), t('october'), t('november'), t('december')
+  ], [t]);
 
-  const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const weekDays = useMemo(() => [
+    t('sun'), t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat')
+  ], [t]);
+
   const timeSlots = ['8h', '10h', '12h', '14h', '16h', '18h'];
 
   const previousMonth = () => {
@@ -98,14 +106,38 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
 
         {/* View Toggle */}
         <div className="bg-slate-100 p-0.5 rounded-lg flex items-center text-xs font-medium">
-          <button className="px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-900 transition-colors">
-            Mês
+          <button
+            onClick={() => setView('month')}
+            className={cn(
+              'px-3 py-1.5 rounded-md transition-all duration-200',
+              view === 'month'
+                ? 'bg-white shadow-sm text-slate-900'
+                : 'text-slate-500 hover:text-slate-900'
+            )}
+          >
+            {t('month')}
           </button>
-          <button className="px-3 py-1.5 bg-white rounded-md shadow-sm text-slate-900">
-            Semana
+          <button
+            onClick={() => setView('week')}
+            className={cn(
+              'px-3 py-1.5 rounded-md transition-all duration-200',
+              view === 'week'
+                ? 'bg-white shadow-sm text-slate-900'
+                : 'text-slate-500 hover:text-slate-900'
+            )}
+          >
+            {t('week')}
           </button>
-          <button className="px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-900 transition-colors">
-            Dia
+          <button
+            onClick={() => setView('day')}
+            className={cn(
+              'px-3 py-1.5 rounded-md transition-all duration-200',
+              view === 'day'
+                ? 'bg-white shadow-sm text-slate-900'
+                : 'text-slate-500 hover:text-slate-900'
+            )}
+          >
+            {t('day')}
           </button>
         </div>
 
@@ -113,19 +145,19 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
         <div className="flex items-center gap-1.5">
           <button
             onClick={previousMonth}
-            className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors text-slate-600"
+            className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-lg hover:bg-slate-200 transition-all duration-200 text-slate-600"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={goToToday}
-            className="px-4 py-1.5 bg-slate-100 rounded-lg font-medium text-slate-600 hover:bg-slate-200 transition-colors text-xs"
+            className="px-4 py-1.5 bg-slate-100 rounded-lg font-medium text-slate-600 hover:bg-slate-200 transition-all duration-200 text-xs"
           >
-            Hoje
+            {t('today')}
           </button>
           <button
             onClick={nextMonth}
-            className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors text-slate-600"
+            className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-lg hover:bg-slate-200 transition-all duration-200 text-slate-600"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -304,17 +336,17 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
               </button>
               {selectedPost.status === 'approved' && (
                 <button className="px-2.5 py-1 bg-green-100 text-green-700 rounded-lg text-[10px] font-semibold hover:bg-green-200 transition-colors">
-                  Aprovado
+                  {t('approved')}
                 </button>
               )}
               {selectedPost.status === 'pending' && (
                 <button className="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-semibold hover:bg-amber-200 transition-colors">
-                  Pendente
+                  {t('pending')}
                 </button>
               )}
               {selectedPost.status === 'draft' && (
                 <button className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-semibold hover:bg-slate-200 transition-colors">
-                  Rascunho
+                  {t('draft')}
                 </button>
               )}
             </div>
@@ -323,11 +355,11 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
             <div className="flex gap-2">
               <button
                 onClick={() => setSelectedPost(null)}
-                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-xl transition-colors text-xs"
+                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-xl transition-all duration-200 text-xs"
               >
-                Fechar
+                {t('close')}
               </button>
-              <button className="px-3 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-colors">
+              <button className="px-3 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-all duration-200">
                 <MoreHorizontal className="w-4 h-4" />
               </button>
             </div>

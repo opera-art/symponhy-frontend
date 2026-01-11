@@ -8,11 +8,13 @@ import { calendarPosts } from '@/data/calendarData';
 import { kanbanTasksData } from '@/data/newFeaturesData';
 import { cn } from '@/lib/utils';
 import { LayoutGrid, Calendar as CalendarIcon } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 type ViewType = 'calendar' | 'kanban';
 
 export const CalendarViewContainer: React.FC = () => {
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
   const viewParam = searchParams.get('view') as ViewType | null;
   const [currentView, setCurrentView] = useState<ViewType>(viewParam || 'calendar');
   const [currentYear, setCurrentYear] = useState(2024);
@@ -29,9 +31,9 @@ export const CalendarViewContainer: React.FC = () => {
       <div className="mb-5 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900 mb-1">Calendário Editorial</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 mb-1">{t('calendarEditorial')}</h2>
             <p className="text-sm text-slate-500">
-              Visualize e gerencie todos os seus conteúdos agendados
+              {t('calendarDescription')}
             </p>
           </div>
 
@@ -47,7 +49,7 @@ export const CalendarViewContainer: React.FC = () => {
               )}
             >
               <CalendarIcon className="w-3.5 h-3.5" />
-              Calendário
+              {t('calendar')}
             </button>
             <button
               onClick={() => setCurrentView('kanban')}
@@ -59,7 +61,7 @@ export const CalendarViewContainer: React.FC = () => {
               )}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              Kanban
+              {t('kanban')}
             </button>
           </div>
         </div>

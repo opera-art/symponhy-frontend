@@ -175,6 +175,39 @@ export const translations = {
     ofViews: 'of views',
     totalContent: 'Total content',
 
+    // Calendar Page
+    calendarEditorial: 'Editorial Calendar',
+    calendarDescription: 'View and manage all your scheduled content',
+    kanban: 'Kanban',
+    month: 'Month',
+    week: 'Week',
+    day: 'Day',
+    today: 'Today',
+    close: 'Close',
+
+    // Months
+    january: 'January',
+    february: 'February',
+    march: 'March',
+    april: 'April',
+    may: 'May',
+    june: 'June',
+    july: 'July',
+    august: 'August',
+    september: 'September',
+    october: 'October',
+    november: 'November',
+    december: 'December',
+
+    // Week Days Short
+    sun: 'Sun',
+    mon: 'Mon',
+    tue: 'Tue',
+    wed: 'Wed',
+    thu: 'Thu',
+    fri: 'Fri',
+    sat: 'Sat',
+
     // Common
     loading: 'Loading...',
     cancel: 'Cancel',
@@ -359,6 +392,39 @@ export const translations = {
     ofViews: 'das views',
     totalContent: 'Total do conteúdo',
 
+    // Calendar Page
+    calendarEditorial: 'Calendário Editorial',
+    calendarDescription: 'Visualize e gerencie todos os seus conteúdos agendados',
+    kanban: 'Kanban',
+    month: 'Mês',
+    week: 'Semana',
+    day: 'Dia',
+    today: 'Hoje',
+    close: 'Fechar',
+
+    // Months
+    january: 'Janeiro',
+    february: 'Fevereiro',
+    march: 'Março',
+    april: 'Abril',
+    may: 'Maio',
+    june: 'Junho',
+    july: 'Julho',
+    august: 'Agosto',
+    september: 'Setembro',
+    october: 'Outubro',
+    november: 'Novembro',
+    december: 'Dezembro',
+
+    // Week Days Short
+    sun: 'Dom',
+    mon: 'Seg',
+    tue: 'Ter',
+    wed: 'Qua',
+    thu: 'Qui',
+    fri: 'Sex',
+    sat: 'Sáb',
+
     // Common
     loading: 'Carregando...',
     cancel: 'Cancelar',
@@ -542,6 +608,39 @@ export const translations = {
     studyCopy: 'Estudia el copy para aplicar en futuros posts',
     ofViews: 'de las vistas',
     totalContent: 'Total del contenido',
+
+    // Calendar Page
+    calendarEditorial: 'Calendario Editorial',
+    calendarDescription: 'Visualiza y gestiona todo tu contenido programado',
+    kanban: 'Kanban',
+    month: 'Mes',
+    week: 'Semana',
+    day: 'Día',
+    today: 'Hoy',
+    close: 'Cerrar',
+
+    // Months
+    january: 'Enero',
+    february: 'Febrero',
+    march: 'Marzo',
+    april: 'Abril',
+    may: 'Mayo',
+    june: 'Junio',
+    july: 'Julio',
+    august: 'Agosto',
+    september: 'Septiembre',
+    october: 'Octubre',
+    november: 'Noviembre',
+    december: 'Diciembre',
+
+    // Week Days Short
+    sun: 'Dom',
+    mon: 'Lun',
+    tue: 'Mar',
+    wed: 'Mié',
+    thu: 'Jue',
+    fri: 'Vie',
+    sat: 'Sáb',
 
     // Common
     loading: 'Cargando...',

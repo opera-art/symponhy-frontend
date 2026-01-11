@@ -188,66 +188,66 @@ export const GoldenOracle: React.FC<{ className?: string }> = ({ className = '' 
     scene.add(particles);
     sceneRef.current.particles = particles;
 
-    // Create smaller multiplying spheres
-    const smallSpheres: Array<{
+    // Create energy beam/ray going to login form
+    const beamPoints: THREE.Vector3[] = [];
+    const segments = 100;
+
+    for (let i = 0; i <= segments; i++) {
+      beamPoints.push(new THREE.Vector3(0, 0, 0));
+    }
+
+    const beamGeometry = new THREE.BufferGeometry().setFromPoints(beamPoints);
+    const beamMaterial = new THREE.LineBasicMaterial({
+      color: 0x3A86FF,
+      transparent: true,
+      opacity: 0.4,
+      linewidth: 2
+    });
+
+    const beam = new THREE.Line(beamGeometry, beamMaterial);
+    scene.add(beam);
+
+    // Create flowing particles along the beam
+    const flowingParticles: Array<{
       mesh: THREE.Points;
-      velocity: THREE.Vector3;
-      life: number;
-      maxLife: number;
+      progress: number;
+      speed: number;
     }> = [];
 
-    function createSmallSphere() {
-      const smallGeometry = new THREE.IcosahedronGeometry(1.2, 20);
-      const smallUniforms = {
+    function createFlowingParticle() {
+      const particleGeometry = new THREE.IcosahedronGeometry(0.15, 8);
+      const particleUniforms = {
         uTime: { value: 0 },
-        uDistortion: { value: 0.4 },
-        uSize: { value: 1.8 },
+        uDistortion: { value: 0.2 },
+        uSize: { value: 1.5 },
         uColor: { value: new THREE.Color('#3A86FF') },
-        uOpacity: { value: 0.6 },
+        uOpacity: { value: 0.8 },
         uMouse: { value: new THREE.Vector2(0, 0) }
       };
 
-      const smallMaterial = new THREE.ShaderMaterial({
+      const particleMaterial = new THREE.ShaderMaterial({
         vertexShader,
         fragmentShader,
-        uniforms: smallUniforms,
+        uniforms: particleUniforms,
         transparent: true,
         depthWrite: false,
-        blending: THREE.NormalBlending
+        blending: THREE.AdditiveBlending
       });
 
-      const smallSphere = new THREE.Points(smallGeometry, smallMaterial);
+      const particle = new THREE.Points(particleGeometry, particleMaterial);
+      scene.add(particle);
 
-      // Random direction
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-      const velocity = new THREE.Vector3(
-        Math.sin(phi) * Math.cos(theta) * 0.02,
-        Math.sin(phi) * Math.sin(theta) * 0.02,
-        Math.cos(phi) * 0.02
-      );
-
-      scene.add(smallSphere);
-
-      smallSpheres.push({
-        mesh: smallSphere,
-        velocity,
-        life: 0,
-        maxLife: 300 // frames
+      flowingParticles.push({
+        mesh: particle,
+        progress: Math.random(),
+        speed: 0.003 + Math.random() * 0.002
       });
     }
 
-    // Create initial small spheres
-    for (let i = 0; i < 3; i++) {
-      setTimeout(() => createSmallSphere(), i * 2000);
+    // Create initial flowing particles
+    for (let i = 0; i < 5; i++) {
+      createFlowingParticle();
     }
-
-    // Spawn new spheres periodically
-    const spawnInterval = setInterval(() => {
-      if (smallSpheres.length < 5) {
-        createSmallSphere();
-      }
-    }, 3000);
 
     // Animation variables
     let time = 0;
@@ -277,35 +277,55 @@ export const GoldenOracle: React.FC<{ className?: string }> = ({ className = '' 
         particles.rotation.z = Math.sin(time * 0.1) * 0.05;
       }
 
-      // Update small spheres
-      for (let i = smallSpheres.length - 1; i >= 0; i--) {
-        const sphere = smallSpheres[i];
-        sphere.life++;
+      // Update beam curve - from sphere center to right side (login form direction)
+      const positions = beamGeometry.attributes.position;
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments;
 
-        // Move sphere
-        sphere.mesh.position.add(sphere.velocity);
+        // Bezier curve from sphere to login form area
+        const startX = 0;
+        const startY = 0;
+        const endX = 8;
+        const endY = 0;
 
-        // Rotate
-        sphere.mesh.rotation.y = time * 0.08;
-        sphere.mesh.rotation.x = time * 0.05;
+        // Control points for smooth curve
+        const controlX = 4;
+        const controlY = 1 + Math.sin(time * 0.5 + t * Math.PI * 2) * 0.3;
 
-        // Update uniforms
-        const mat = sphere.mesh.material as THREE.ShaderMaterial;
-        mat.uniforms.uTime.value = time;
+        // Quadratic bezier
+        const x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * controlX + t * t * endX;
+        const y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * controlY + t * t * endY;
+        const z = Math.sin(t * Math.PI * 3 + time) * 0.2;
 
-        // Fade out and scale down near end of life
-        const lifeRatio = sphere.life / sphere.maxLife;
-        mat.uniforms.uOpacity.value = 0.6 * (1 - lifeRatio);
-        sphere.mesh.scale.setScalar(1 - lifeRatio * 0.5);
-
-        // Remove dead spheres
-        if (sphere.life >= sphere.maxLife) {
-          scene.remove(sphere.mesh);
-          sphere.mesh.geometry.dispose();
-          mat.dispose();
-          smallSpheres.splice(i, 1);
-        }
+        positions.setXYZ(i, x, y, z);
       }
+      positions.needsUpdate = true;
+
+      // Update flowing particles along the beam
+      flowingParticles.forEach(particle => {
+        particle.progress += particle.speed;
+        if (particle.progress > 1) {
+          particle.progress = 0;
+        }
+
+        const t = particle.progress;
+        const startX = 0;
+        const startY = 0;
+        const endX = 8;
+        const endY = 0;
+        const controlX = 4;
+        const controlY = 1 + Math.sin(time * 0.5 + t * Math.PI * 2) * 0.3;
+
+        const x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * controlX + t * t * endX;
+        const y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * controlY + t * t * endY;
+        const z = Math.sin(t * Math.PI * 3 + time) * 0.2;
+
+        particle.mesh.position.set(x, y, z);
+
+        const mat = particle.mesh.material as THREE.ShaderMaterial;
+        mat.uniforms.uTime.value = time;
+        mat.uniforms.uOpacity.value = 0.8 * Math.sin(t * Math.PI);
+      });
 
       // Smooth camera sway based on mouse
       camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
@@ -332,17 +352,20 @@ export const GoldenOracle: React.FC<{ className?: string }> = ({ className = '' 
     return () => {
       window.removeEventListener('resize', handleResize);
       container.removeEventListener('mousemove', handleMouseMove);
-      clearInterval(spawnInterval);
 
       if (sceneRef.current.animationId) {
         cancelAnimationFrame(sceneRef.current.animationId);
       }
 
-      // Clean up small spheres
-      smallSpheres.forEach(sphere => {
-        scene.remove(sphere.mesh);
-        sphere.mesh.geometry.dispose();
-        (sphere.mesh.material as THREE.Material).dispose();
+      // Clean up beam
+      beam.geometry.dispose();
+      (beam.material as THREE.Material).dispose();
+
+      // Clean up flowing particles
+      flowingParticles.forEach(particle => {
+        scene.remove(particle.mesh);
+        particle.mesh.geometry.dispose();
+        (particle.mesh.material as THREE.Material).dispose();
       });
 
       if (sceneRef.current.renderer) {
