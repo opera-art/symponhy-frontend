@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import api from '@/lib/api';
 import {
   OnboardingProgress,
   SaveSectionPayload,
@@ -68,14 +69,16 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
     }
   }, [type]);
 
-  // Carregar todos os dados do servidor
+  // Carregar todos os dados do servidor (backend)
   const loadAll = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`/api/onboarding/all?type=${type}`);
-      const result: ApiResponse<OnboardingData> = await response.json();
+      const response = await api.get<ApiResponse<OnboardingData>>(
+        `/api/onboarding/all?type=${type}`
+      );
+      const result = response.data;
 
       if (result.success && result.data) {
         setData(result.data);
@@ -100,9 +103,9 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
         }
       }
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error loading onboarding data:', err);
-      setError('Erro ao carregar dados');
+      setError(err.response?.data?.error || 'Erro ao carregar dados');
 
       // Fallback para localStorage
       const localData = loadFromLocalStorage();
@@ -117,6 +120,30 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
       setLoading(false);
     }
   }, [type, loadFromLocalStorage]);
+
+  // Executar salvamento no servidor
+  const executeSaveSection = async (payload: SaveSectionPayload): Promise<boolean> => {
+    setSaving(true);
+    setError(null);
+
+    try {
+      const response = await api.post<ApiResponse>('/api/onboarding/section', payload);
+      const result = response.data;
+
+      if (!result.success) {
+        setError(result.error || 'Erro ao salvar');
+        return false;
+      }
+
+      return true;
+    } catch (err: any) {
+      console.error('Error saving section:', err);
+      setError(err.response?.data?.error || 'Erro ao salvar');
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Salvar seção no servidor (com debounce)
   const saveSection = useCallback(async (
@@ -161,48 +188,17 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
 
   }, [type, autoSave, saveToLocalStorage]);
 
-  // Executar salvamento no servidor
-  const executeSaveSection = async (payload: SaveSectionPayload) => {
-    setSaving(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/onboarding/section', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const result: ApiResponse = await response.json();
-
-      if (!result.success) {
-        setError(result.error || 'Erro ao salvar');
-        return false;
-      }
-
-      return true;
-    } catch (err) {
-      console.error('Error saving section:', err);
-      setError('Erro ao salvar');
-      return false;
-    } finally {
-      setSaving(false);
-    }
-  };
-
   // Salvar progresso
   const saveProgress = useCallback(async (payload: SaveProgressPayload) => {
     try {
-      const response = await fetch('/api/onboarding/progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const response = await api.post<ApiResponse<OnboardingProgress>>(
+        '/api/onboarding/progress',
+        {
           ...payload,
           onboarding_type: type,
-        }),
-      });
-
-      const result: ApiResponse<OnboardingProgress> = await response.json();
+        }
+      );
+      const result = response.data;
 
       if (result.success && result.data) {
         setData(prev => prev ? { ...prev, progress: result.data! } : null);
@@ -210,7 +206,7 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
       }
 
       return false;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving progress:', err);
       return false;
     }
@@ -228,13 +224,11 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
         pendingSaveRef.current = null;
       }
 
-      const response = await fetch('/api/onboarding/progress', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ onboarding_type: type }),
-      });
-
-      const result: ApiResponse<OnboardingProgress> = await response.json();
+      const response = await api.patch<ApiResponse<OnboardingProgress>>(
+        '/api/onboarding/progress',
+        { onboarding_type: type }
+      );
+      const result = response.data;
 
       if (result.success) {
         clearLocalStorage();
@@ -243,9 +237,9 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
 
       setError(result.error || 'Erro ao finalizar');
       return false;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error completing onboarding:', err);
-      setError('Erro ao finalizar');
+      setError(err.response?.data?.error || 'Erro ao finalizar');
       return false;
     } finally {
       setSaving(false);
