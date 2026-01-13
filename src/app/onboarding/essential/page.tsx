@@ -598,9 +598,9 @@ export default function EssentialBriefingPage() {
   const isLastQuestion = currentSection === sections.length - 1 && currentQuestion === section.questions.length - 1;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col">
+    <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="p-6">
+      <header className="p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
@@ -619,7 +619,7 @@ export default function EssentialBriefingPage() {
       </header>
 
       {/* Progress Bar */}
-      <div className="px-6">
+      <div className="px-4 flex-shrink-0">
         <div className="max-w-2xl mx-auto">
           <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
             <div
@@ -627,7 +627,7 @@ export default function EssentialBriefingPage() {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="flex justify-between mt-2">
+          <div className="flex justify-between mt-1">
             <span className="text-xs text-slate-400">
               {completedQuestions + 1} de {totalQuestions} perguntas
             </span>
@@ -637,40 +637,40 @@ export default function EssentialBriefingPage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-2 min-h-0">
         {/* Oracle Sphere */}
-        <div className="relative mb-10">
+        <div className="relative flex-shrink-0 mb-4">
           <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-3xl scale-150" />
-          <FloatingOracle size={320} />
+          <FloatingOracle size={200} />
         </div>
 
         {/* Section Title */}
-        <div className="text-center mb-2">
+        <div className="text-center mb-1 flex-shrink-0">
           <span className="text-xs text-amber-600 font-medium uppercase tracking-wider">
             {section.title}
           </span>
         </div>
 
         {/* Question */}
-        <div className="w-full max-w-2xl">
-          <h2 className="text-xl font-semibold text-slate-900 text-center mb-6">
+        <div className="w-full max-w-2xl flex-shrink-0">
+          <h2 className="text-lg font-semibold text-slate-900 text-center mb-4">
             {question.question}
           </h2>
 
           {/* Input */}
-          <div className="mb-8">{renderInput()}</div>
+          <div className="mb-4">{renderInput()}</div>
 
           {/* Navigation */}
           <div className="flex justify-between">
             <button
               onClick={handleBack}
-              className="px-6 py-3 rounded-xl text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+              className="px-5 py-2.5 rounded-xl text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors"
             >
               Anterior
             </button>
             <button
               onClick={handleNext}
-              className="px-8 py-3 rounded-xl font-medium flex items-center gap-2 transition-all bg-slate-900 text-white hover:bg-slate-800"
+              className="px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all bg-slate-900 text-white hover:bg-slate-800"
             >
               {isLastQuestion ? (
                 <>
@@ -687,7 +687,7 @@ export default function EssentialBriefingPage() {
           </div>
 
           {/* Skip hint */}
-          <p className="text-center text-xs text-slate-400 mt-4">
+          <p className="text-center text-xs text-slate-400 mt-2">
             Campos opcionais podem ser pulados
           </p>
         </div>
