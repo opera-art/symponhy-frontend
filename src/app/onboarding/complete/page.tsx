@@ -805,7 +805,7 @@ export default function CompleteBriefingPage() {
         {/* Oracle Sphere */}
         <div className="relative mb-2 flex-shrink-0">
           <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-xl scale-150" />
-          <FloatingOracle size={80} />
+          <FloatingOracle size={200} />
         </div>
 
         {/* Question */}
