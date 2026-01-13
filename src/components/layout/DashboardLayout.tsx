@@ -3,6 +3,7 @@
 import React from 'react';
 import { Sidebar } from './Sidebar';
 import { ClientViewBanner } from './ClientViewBanner';
+import { FloatingChat } from '../chat/FloatingChat';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -22,6 +23,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {/* Floating Chat with AI Assistant */}
+      <FloatingChat />
     </div>
   );
 };
