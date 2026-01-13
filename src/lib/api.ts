@@ -87,9 +87,9 @@ const refreshAccessToken = async (): Promise<string> => {
 
     const newToken = response.data.token;
 
-    // Atualizar localStorage e cookie com o novo token
+    // Atualizar localStorage com o novo token
+    // Cookie is now set by backend via Set-Cookie header (HttpOnly)
     localStorage.setItem('auth_token', newToken);
-    document.cookie = `auth_token=${newToken}; path=/; secure; samesite=strict`;
 
     // Atualizar também o usuário se vier na resposta
     if (response.data.user) {
@@ -101,7 +101,7 @@ const refreshAccessToken = async (): Promise<string> => {
     // Se o refresh falhar, limpar autenticação
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
-    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+    // Cookie will be cleared by backend logout endpoint
 
     // Redirecionar para login
     if (typeof window !== 'undefined') {
