@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-const BACKEND_URL = process.env.BACKEND_URL || 'https://symponhy-backend-production.up.railway.app'
+const BACKEND_URL = process.env.BACKEND_URL || 'https://api.viol1n.com'
 
 export async function GET(
   request: NextRequest,
