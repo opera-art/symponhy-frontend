@@ -63,7 +63,12 @@
       "Bash(railway --help:*)",
       "Bash(railway deployment list:*)",
       "Bash(xargs ls:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "mcp__vercel__listProjects",
+      "mcp__vercel__createEnvVar",
+      "mcp__github__search_code",
+      "mcp__github__list_commits",
+      "mcp__railway-mcp-server__generate-domain"
     ]
   }
 }

@@ -1,4 +1,4 @@
-import { useAuth } from '@/context/AuthContext';
+import { useUser } from '@clerk/nextjs';
 
 export type UserRole = 'client' | 'agency' | 'admin';
 
@@ -111,13 +111,13 @@ const rolePermissions: Record<UserRole, Permissions> = {
 };
 
 export const usePermissions = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
 
   const getUserRole = (): UserRole => {
     if (!user) return 'client';
 
-    // Map backend accessType to frontend role
-    const accessType = user.accessType?.toLowerCase() || 'client';
+    // Map Clerk publicMetadata accessType to frontend role
+    const accessType = (user.publicMetadata?.accessType as string)?.toLowerCase() || 'client';
 
     if (accessType === 'admin') return 'admin';
     if (accessType === 'agency') return 'agency';

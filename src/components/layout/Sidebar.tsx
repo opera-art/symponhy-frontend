@@ -3,8 +3,8 @@
 import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useClerk } from '@clerk/nextjs';
 import { useLanguage } from '@/context/LanguageContext';
-import { useAuth } from '@/context/AuthContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { getFilteredNavigation } from '@/config/navigation';
 import { cn } from '@/lib/utils';
@@ -13,8 +13,8 @@ import { LogOut, Crown } from 'lucide-react';
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { signOut } = useClerk();
   const { t } = useLanguage();
-  const { logout } = useAuth();
   const { hasPermission, isAgency } = usePermissions();
 
   const navItems = useMemo(
@@ -86,8 +86,7 @@ const Sidebar: React.FC = () => {
       <div className="mt-auto">
         <button
           onClick={() => {
-            logout();
-            router.push('/login');
+            signOut(() => router.push('/login'));
           }}
           className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-status-error hover:bg-rose-50 transition-all duration-300 group relative"
           aria-label={t('logout')}
