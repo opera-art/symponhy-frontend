@@ -124,9 +124,11 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
       }
     `;
 
-    // Fragment Shader
+    // Fragment Shader - Enhanced with depth and color variation
     const fragmentShader = `
       uniform vec3 uColor;
+      uniform vec3 uColor2;
+      uniform vec3 uColor3;
       uniform float uOpacity;
       varying float vNoise;
       varying vec3 vPos;
@@ -135,10 +137,29 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
         vec2 center = gl_PointCoord - vec2(0.5);
         float dist = length(center);
         if (dist > 0.5) discard;
-        float alpha = smoothstep(0.5, 0.2, dist) * uOpacity;
-        vec3 darkColor = uColor * 0.5;
-        vec3 lightColor = uColor * 1.8;
-        vec3 finalColor = mix(darkColor, lightColor, vNoise * 0.5 + 0.5);
+
+        // Soft edges with glow effect
+        float alpha = smoothstep(0.5, 0.1, dist) * uOpacity;
+        float glow = smoothstep(0.5, 0.0, dist) * 0.5;
+
+        // Multi-color gradient based on noise and position
+        float depthFactor = (vPos.z + 5.0) / 10.0; // Depth-based coloring
+
+        // Three-way color blend for richness
+        vec3 deepColor = uColor * 0.3;  // Dark blue core
+        vec3 midColor = uColor2;         // Purple mid-tones
+        vec3 brightColor = uColor3;      // Cyan highlights
+
+        // Blend based on noise and depth
+        float t1 = smoothstep(-0.5, 0.5, vNoise);
+        float t2 = smoothstep(0.0, 1.0, depthFactor);
+
+        vec3 color1 = mix(deepColor, midColor, t1);
+        vec3 finalColor = mix(color1, brightColor, t2 * t1);
+
+        // Add glow
+        finalColor += uColor3 * glow * 0.3;
+
         gl_FragColor = vec4(finalColor, alpha);
       }
     `;
@@ -146,13 +167,15 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
     // Geometry - Dense for quality
     const geometry = new THREE.IcosahedronGeometry(4.5, 30);
 
-    // Uniforms
+    // Uniforms - Multi-color palette for depth
     const uniforms = {
       uTime: { value: 0 },
-      uDistortion: { value: 0.6 },
-      uSize: { value: 2.5 },
-      uColor: { value: new THREE.Color('#3A86FF') },
-      uOpacity: { value: 0.9 },
+      uDistortion: { value: 0.8 },
+      uSize: { value: 3.0 },
+      uColor: { value: new THREE.Color('#1a1a4e') },   // Deep navy/purple core
+      uColor2: { value: new THREE.Color('#3A86FF') },  // Blue mid-tones
+      uColor3: { value: new THREE.Color('#00D9FF') },  // Cyan highlights
+      uOpacity: { value: 0.95 },
       uMouse: { value: new THREE.Vector2(0, 0) },
     };
     sceneRef.current.uniforms = uniforms;
