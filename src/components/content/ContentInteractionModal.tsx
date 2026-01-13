@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Card, Badge, Button, Input, Modal, ModalFooter } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import { ContentInteractionOrb } from './ContentInteractionOrb';
+import { FloatingOracle } from '../chat/FloatingOracle';
 import {
   X,
   CheckCircle,
@@ -158,7 +158,7 @@ export const ContentInteractionModal: React.FC<ContentInteractionModalProps> = (
         <div className="flex-1 overflow-hidden flex gap-6 mb-4">
           {/* Left: Orb and Actions */}
           <div className="flex flex-col items-center gap-4">
-            <ContentInteractionOrb state={orbState} className="w-40 h-40" />
+            <FloatingOracle size={160} />
 
             {/* Action buttons */}
             {activeAction === 'none' && (
