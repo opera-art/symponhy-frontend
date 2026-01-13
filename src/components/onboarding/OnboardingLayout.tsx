@@ -18,12 +18,17 @@ const getOracleColor = (progressPercent: number): string => {
 // Tamanho da esfera baseado no progresso
 const getOracleSize = (progressPercent: number): number => {
   const baseSize = 280;
-  const growth = Math.min(progressPercent / 100, 1) * 40;
+  const growth = Math.min(progressPercent / 100, 1) * 60;
   return baseSize + growth;
 };
 
+// Intensidade da esfera baseada no progresso (0-1)
+const getOracleIntensity = (progressPercent: number): number => {
+  return Math.min(progressPercent / 100, 1);
+};
+
 // Mensagens motivacionais sofisticadas (sem emojis infantis)
-const getMotivationalMessage = (progressPercent: number, sectionTitle: string): string => {
+const getMotivationalMessage = (progressPercent: number): string => {
   if (progressPercent < 10) return 'Vamos construir algo extraordinário.';
   if (progressPercent < 25) return 'Cada detalhe importa.';
   if (progressPercent < 40) return 'Sua estratégia está tomando forma.';
@@ -63,7 +68,6 @@ const triggerConfetti = (intensity: 'low' | 'medium' | 'high' = 'medium') => {
 const triggerFinalConfetti = () => {
   const colors = ['#D4AF37', '#FFD700', '#E5E4E2', '#C0C0C0'];
 
-  // Explosão central
   confetti({
     particleCount: 80,
     spread: 100,
@@ -74,7 +78,6 @@ const triggerFinalConfetti = () => {
     scalar: 1.1,
   });
 
-  // Laterais
   setTimeout(() => {
     confetti({
       particleCount: 40,
@@ -136,6 +139,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   const [previousSection, setPreviousSection] = useState(currentSection);
   const [showMotivation, setShowMotivation] = useState(false);
   const [motivationText, setMotivationText] = useState('');
+  const [buttonPulse, setButtonPulse] = useState(false);
   const inputContainerRef = useRef<HTMLDivElement>(null);
 
   // Calcular progresso
@@ -147,31 +151,28 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   // Esfera dinâmica
   const oracleColor = getOracleColor(progressPercent);
   const oracleSize = getOracleSize(progressPercent);
+  const oracleIntensity = getOracleIntensity(progressPercent);
 
   // Detectar mudança de seção
   useEffect(() => {
     if (currentSection !== previousSection && currentSection > previousSection) {
-      // Seção completada - confetti
       triggerConfetti('medium');
-
-      // Mostrar mensagem motivacional
-      setMotivationText(getMotivationalMessage(progressPercent, sectionTitle));
+      setMotivationText(getMotivationalMessage(progressPercent));
       setShowMotivation(true);
-
       setTimeout(() => setShowMotivation(false), 2500);
     }
     setPreviousSection(currentSection);
-  }, [currentSection, previousSection, progressPercent, sectionTitle]);
+  }, [currentSection, previousSection, progressPercent]);
 
   // Enter para avançar
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      // Não avançar se estiver em textarea
       const activeElement = document.activeElement;
       if (activeElement?.tagName === 'TEXTAREA') {
         return;
       }
       e.preventDefault();
+      triggerButtonPulse();
       onNext();
     }
   }, [onNext]);
@@ -181,8 +182,15 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  // Animação do botão
+  const triggerButtonPulse = () => {
+    setButtonPulse(true);
+    setTimeout(() => setButtonPulse(false), 300);
+  };
+
   // Confetti final
   const handleNext = () => {
+    triggerButtonPulse();
     if (isLastQuestion) {
       triggerFinalConfetti();
     }
@@ -200,14 +208,16 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   }
 
   return (
-    <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden">
+    <div
+      className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden"
+      style={{ cursor: 'url("data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 32 32\'><text y=\'24\' font-size=\'24\' fill=\'%23D4AF37\'>♪</text></svg>") 16 16, auto' }}
+    >
       {/* Error Toast */}
       {error && (
         <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm z-50 animate-fade-in">
           {error}
         </div>
       )}
-
 
       {/* Motivational Message */}
       {showMotivation && (
@@ -322,12 +332,16 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         {/* Oracle Sphere */}
         <div className="relative flex-shrink-0 mb-4">
           <div
-            className="absolute inset-0 rounded-full blur-3xl scale-150 transition-colors duration-1000"
-            style={{ backgroundColor: `${oracleColor}15` }}
+            className="absolute inset-0 rounded-full blur-3xl scale-150 transition-all duration-1000"
+            style={{
+              backgroundColor: `${oracleColor}15`,
+              transform: `scale(${1.5 + oracleIntensity * 0.3})`
+            }}
           />
           <FloatingOracle
             size={oracleSize}
             color={oracleColor}
+            intensity={oracleIntensity}
           />
         </div>
 
@@ -368,10 +382,14 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             <button
               onClick={handleNext}
               disabled={saving}
-              className="px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all disabled:opacity-50"
+              className={`px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all disabled:opacity-50 ${
+                buttonPulse ? 'scale-110 ring-4 ring-opacity-50' : 'scale-100'
+              }`}
               style={{
                 backgroundColor: oracleColor,
-                color: progressPercent > 60 ? '#1e293b' : '#ffffff'
+                color: progressPercent > 60 ? '#1e293b' : '#ffffff',
+                // @ts-expect-error CSS variable for ring color
+                '--tw-ring-color': oracleColor,
               }}
             >
               {isLastQuestion ? (
