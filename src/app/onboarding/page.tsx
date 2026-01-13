@@ -21,8 +21,8 @@ export default function OnboardingPage() {
       <main className="flex-1 flex flex-col items-center justify-center px-6">
         {/* Oracle Sphere - Interactive */}
         <div className="relative mb-6 cursor-pointer">
-          <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-3xl scale-125" />
-          <FloatingOracle size={280} />
+          <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-3xl scale-150" />
+          <FloatingOracle size={380} />
         </div>
 
         {/* Greeting */}

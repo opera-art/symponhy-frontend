@@ -13,7 +13,7 @@ interface FloatingOracleProps {
 export const FloatingOracle: React.FC<FloatingOracleProps> = ({
   size = 64,
   className = '',
-  color = '#1C1917',
+  color = '#D4AF37',
   showOrbits = true
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,6 +26,9 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     animationId?: number;
     systemsGroup?: THREE.Group;
     lineGroup?: THREE.Group;
+    musicNotes?: THREE.Group;
+    mousePos?: THREE.Vector2;
+    isHovering?: boolean;
   }>({});
 
   useEffect(() => {
@@ -35,7 +38,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0xFDFCF8, 0.02);
     sceneRef.current.scene = scene;
 
     // Camera
@@ -43,7 +45,7 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     camera.position.set(0, 0, 18);
     sceneRef.current.camera = camera;
 
-    // Renderer - transparent background
+    // Renderer
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -59,7 +61,14 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     scene.add(systemsGroup);
     sceneRef.current.systemsGroup = systemsGroup;
 
-    // Vertex Shader - Ink/Organic feel
+    // Music Notes Group
+    const musicNotes = new THREE.Group();
+    scene.add(musicNotes);
+    sceneRef.current.musicNotes = musicNotes;
+    sceneRef.current.mousePos = new THREE.Vector2(0, 0);
+    sceneRef.current.isHovering = false;
+
+    // Vertex Shader - Gold luxury feel
     const vertexShader = `
       uniform float uTime;
       uniform float uDistortion;
@@ -120,34 +129,26 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
 
       void main() {
         vec3 pos = position;
-
-        // Smoother, more organic noise
         float noiseFreq = 0.5;
         float noiseAmp = uDistortion;
         float noise = snoise(vec3(pos.x * noiseFreq + uTime * 0.1, pos.y * noiseFreq, pos.z * noiseFreq));
-
         vNoise = noise;
-
-        // Deform sphere along normal based on noise
         vec3 newPos = pos + (normalize(pos) * noise * noiseAmp);
 
-        // Mouse interaction
+        // Mouse interaction - stronger effect
         float dist = distance(uMouse * 10.0, newPos.xy);
-        float interaction = smoothstep(5.0, 0.0, dist);
-        newPos += normalize(pos) * interaction * 0.5;
+        float interaction = smoothstep(6.0, 0.0, dist);
+        newPos += normalize(pos) * interaction * 0.8;
 
         vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
-
-        // Size variation based on depth and noise
         gl_PointSize = uSize * (24.0 / -mvPosition.z) * (1.0 + noise * 0.5);
-
         vAlpha = 1.0;
         vPos = newPos;
       }
     `;
 
-    // Fragment Shader - Ink blot effect
+    // Fragment Shader - Luxurious gold effect
     const fragmentShader = `
       uniform vec3 uColor;
       uniform float uOpacity;
@@ -156,34 +157,34 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       varying vec3 vPos;
 
       void main() {
-        // Soft circle particle
         vec2 center = gl_PointCoord - vec2(0.5);
         float dist = length(center);
         if (dist > 0.5) discard;
 
-        // Soft edges for ink blot effect
-        float alpha = smoothstep(0.5, 0.2, dist) * uOpacity;
+        float alpha = smoothstep(0.5, 0.15, dist) * uOpacity;
 
-        // Color variation based on noise (creates depth)
-        vec3 darkColor = uColor * 0.5;
-        vec3 lightColor = uColor * 1.8;
+        // Gold gradient with shimmer
+        vec3 darkGold = uColor * 0.4;
+        vec3 brightGold = uColor * 1.6;
+        vec3 shimmer = vec3(1.0, 0.95, 0.8) * 0.3;
 
-        vec3 finalColor = mix(darkColor, lightColor, vNoise * 0.5 + 0.5);
+        vec3 finalColor = mix(darkGold, brightGold, vNoise * 0.5 + 0.5);
+        finalColor += shimmer * pow(vNoise * 0.5 + 0.5, 2.0);
 
         gl_FragColor = vec4(finalColor, alpha);
       }
     `;
 
-    // Dense geometry for ink effect
+    // Geometry
     const geometry = new THREE.IcosahedronGeometry(4.5, 30);
 
     // Uniforms
     const uniforms = {
       uTime: { value: 0 },
       uDistortion: { value: 0.6 },
-      uSize: { value: 2.5 },
+      uSize: { value: 2.8 },
       uColor: { value: new THREE.Color(color) },
-      uOpacity: { value: 0.85 },
+      uOpacity: { value: 0.9 },
       uMouse: { value: new THREE.Vector2(0, 0) },
     };
     sceneRef.current.uniforms = uniforms;
@@ -198,12 +199,11 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       blending: THREE.NormalBlending,
     });
 
-    // Create particle system
     const particles = new THREE.Points(geometry, material);
     systemsGroup.add(particles);
     sceneRef.current.particles = particles;
 
-    // Orbit lines (Renaissance/Astrolabe effect)
+    // Orbit lines - Gold color
     const lineGroup = new THREE.Group();
     sceneRef.current.lineGroup = lineGroup;
 
@@ -217,9 +217,9 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
           points.map(p => new THREE.Vector3(p.x, p.y, 0))
         );
         const mat = new THREE.LineBasicMaterial({
-          color: 0x78350F,
+          color: 0xD4AF37,
           transparent: true,
-          opacity: 0.12,
+          opacity: 0.2,
         });
         const orbit = new THREE.Line(geo, mat);
         orbit.rotation.x = rotationX;
@@ -233,21 +233,104 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       createOrbit(6.0, Math.PI / 1.8, Math.PI / 4);
     }
 
+    // Music Note class
+    class MusicNote {
+      mesh: THREE.Sprite;
+      velocity: THREE.Vector3;
+      life: number;
+      maxLife: number;
+
+      constructor(x: number, y: number) {
+        // Create canvas for music note
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d')!;
+
+        // Draw music note symbol
+        ctx.font = '48px serif';
+        ctx.fillStyle = '#D4AF37';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const notes = ['♪', '♫', '♩', '♬'];
+        ctx.fillText(notes[Math.floor(Math.random() * notes.length)], 32, 32);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteMaterial = new THREE.SpriteMaterial({
+          map: texture,
+          transparent: true,
+          opacity: 1,
+        });
+
+        this.mesh = new THREE.Sprite(spriteMaterial);
+        this.mesh.position.set(x, y, 0);
+        this.mesh.scale.set(1.2, 1.2, 1);
+
+        // Random upward velocity with slight horizontal drift
+        this.velocity = new THREE.Vector3(
+          (Math.random() - 0.5) * 0.15,
+          0.08 + Math.random() * 0.08,
+          0
+        );
+
+        this.life = 0;
+        this.maxLife = 60 + Math.random() * 40;
+      }
+
+      update() {
+        this.life++;
+        this.mesh.position.add(this.velocity);
+
+        // Fade out
+        const progress = this.life / this.maxLife;
+        this.mesh.material.opacity = 1 - progress;
+
+        // Slight wave motion
+        this.mesh.position.x += Math.sin(this.life * 0.1) * 0.02;
+
+        // Scale down slightly
+        const scale = 1.2 * (1 - progress * 0.3);
+        this.mesh.scale.set(scale, scale, 1);
+
+        return this.life < this.maxLife;
+      }
+
+      dispose() {
+        this.mesh.material.map?.dispose();
+        this.mesh.material.dispose();
+      }
+    }
+
+    const activeNotes: MusicNote[] = [];
+    let noteSpawnTimer = 0;
+
     // Animation variables
     let time = 0;
     let mouseX = 0;
     let mouseY = 0;
+    let targetMouseX = 0;
+    let targetMouseY = 0;
 
     // Mouse interaction
     const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect();
-      mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      uniforms.uMouse.value.x += (mouseX - uniforms.uMouse.value.x) * 0.05;
-      uniforms.uMouse.value.y += (mouseY - uniforms.uMouse.value.y) * 0.05;
+      targetMouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      targetMouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      if (sceneRef.current.mousePos) {
+        sceneRef.current.mousePos.set(targetMouseX * 8, targetMouseY * 8);
+      }
     };
 
-    // Global mouse for better interaction
+    const handleMouseEnter = () => {
+      sceneRef.current.isHovering = true;
+    };
+
+    const handleMouseLeave = () => {
+      sceneRef.current.isHovering = false;
+    };
+
+    // Global mouse for camera sway
     const handleGlobalMouse = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -257,6 +340,8 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     };
 
     container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener('mouseenter', handleMouseEnter);
+    container.addEventListener('mouseleave', handleMouseLeave);
     window.addEventListener('mousemove', handleGlobalMouse);
 
     // Animation loop
@@ -264,13 +349,17 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       sceneRef.current.animationId = requestAnimationFrame(animate);
       time += 0.01;
 
-      // Rotate entire system slowly
+      // Smooth mouse following
+      uniforms.uMouse.value.x += (targetMouseX - uniforms.uMouse.value.x) * 0.08;
+      uniforms.uMouse.value.y += (targetMouseY - uniforms.uMouse.value.y) * 0.08;
+
+      // Rotate system
       if (systemsGroup) {
         systemsGroup.rotation.y = time * 0.05;
         systemsGroup.rotation.z = Math.sin(time * 0.1) * 0.05;
       }
 
-      // Counter-rotate orbits
+      // Rotate orbits
       if (lineGroup && showOrbits) {
         lineGroup.rotation.x = Math.sin(time * 0.05) * 0.2;
         lineGroup.children.forEach((orbit, i) => {
@@ -278,7 +367,31 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
         });
       }
 
-      // Smooth camera sway
+      // Spawn music notes when hovering
+      if (sceneRef.current.isHovering && sceneRef.current.mousePos) {
+        noteSpawnTimer++;
+        if (noteSpawnTimer > 8) {
+          noteSpawnTimer = 0;
+          const note = new MusicNote(
+            sceneRef.current.mousePos.x + (Math.random() - 0.5) * 2,
+            sceneRef.current.mousePos.y + (Math.random() - 0.5) * 2
+          );
+          activeNotes.push(note);
+          musicNotes.add(note.mesh);
+        }
+      }
+
+      // Update music notes
+      for (let i = activeNotes.length - 1; i >= 0; i--) {
+        const note = activeNotes[i];
+        if (!note.update()) {
+          musicNotes.remove(note.mesh);
+          note.dispose();
+          activeNotes.splice(i, 1);
+        }
+      }
+
+      // Camera sway
       camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
       camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
       camera.lookAt(0, 0, 0);
@@ -291,11 +404,16 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     // Cleanup
     return () => {
       container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('mouseenter', handleMouseEnter);
+      container.removeEventListener('mouseleave', handleMouseLeave);
       window.removeEventListener('mousemove', handleGlobalMouse);
 
       if (sceneRef.current.animationId) {
         cancelAnimationFrame(sceneRef.current.animationId);
       }
+
+      // Cleanup notes
+      activeNotes.forEach(note => note.dispose());
 
       if (sceneRef.current.renderer) {
         sceneRef.current.renderer.dispose();
