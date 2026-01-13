@@ -475,6 +475,11 @@ export default function EssentialBriefingPage() {
 
   // Carregar dados salvos ao montar
   useEffect(() => {
+    // Limpar localStorage antigo (migração - pode remover depois)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('onboarding_draft_essential');
+      localStorage.removeItem('onboarding_draft_complete');
+    }
     loadAll();
   }, [loadAll]);
 

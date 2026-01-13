@@ -9,8 +9,7 @@ import {
   ApiResponse,
 } from '@/types/onboarding';
 
-const LOCAL_STORAGE_KEY = 'onboarding_draft';
-const DEBOUNCE_MS = 2000; // 2 segundos de debounce para salvar no servidor
+const DEBOUNCE_MS = 500; // 0.5 segundos - salva quase imediatamente
 
 interface OnboardingData {
   sections: Record<string, unknown>;
@@ -32,43 +31,6 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingSaveRef = useRef<SaveSectionPayload | null>(null);
 
-  // Carregar dados do localStorage
-  const loadFromLocalStorage = useCallback((): Record<string, unknown> | null => {
-    if (typeof window === 'undefined') return null;
-
-    try {
-      const stored = localStorage.getItem(`${LOCAL_STORAGE_KEY}_${type}`);
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  }, [type]);
-
-  // Salvar no localStorage (instantâneo)
-  const saveToLocalStorage = useCallback((formData: Record<string, unknown>) => {
-    if (typeof window === 'undefined') return;
-
-    try {
-      localStorage.setItem(
-        `${LOCAL_STORAGE_KEY}_${type}`,
-        JSON.stringify(formData)
-      );
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  }, [type]);
-
-  // Limpar localStorage
-  const clearLocalStorage = useCallback(() => {
-    if (typeof window === 'undefined') return;
-
-    try {
-      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_${type}`);
-    } catch (error) {
-      console.error('Error clearing localStorage:', error);
-    }
-  }, [type]);
-
   // Carregar todos os dados do servidor (backend)
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -82,44 +44,27 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
 
       if (result.success && result.data) {
         setData(result.data);
-
-        // Mesclar com dados do localStorage (prioridade para localStorage se mais recentes)
-        const localData = loadFromLocalStorage();
-        if (localData) {
-          setData(prev => prev ? {
-            ...prev,
-            formData: { ...prev.formData, ...localData },
-          } : null);
-        }
       } else {
-        // Se não há dados no servidor, tentar carregar do localStorage
-        const localData = loadFromLocalStorage();
-        if (localData) {
-          setData({
-            sections: {},
-            formData: localData,
-            progress: null,
-          });
-        }
-      }
-
-    } catch (err: any) {
-      console.error('Error loading onboarding data:', err);
-      setError(err.response?.data?.error || 'Erro ao carregar dados');
-
-      // Fallback para localStorage
-      const localData = loadFromLocalStorage();
-      if (localData) {
+        // Inicializar vazio se não há dados
         setData({
           sections: {},
-          formData: localData,
+          formData: {},
           progress: null,
         });
       }
+    } catch (err: any) {
+      console.error('Error loading onboarding data:', err);
+      setError(err.response?.data?.error || 'Erro ao carregar dados');
+      // Inicializar vazio em caso de erro
+      setData({
+        sections: {},
+        formData: {},
+        progress: null,
+      });
     } finally {
       setLoading(false);
     }
-  }, [type, loadFromLocalStorage]);
+  }, [type]);
 
   // Executar salvamento no servidor
   const executeSaveSection = async (payload: SaveSectionPayload): Promise<boolean> => {
@@ -152,11 +97,10 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
     currentQuestion?: number,
     immediate = false
   ) => {
-    // Salvar no localStorage imediatamente
+    // Atualizar estado local imediatamente (para UI responsiva)
     setData(prev => {
       const newFormData = { ...prev?.formData, ...sectionData };
-      saveToLocalStorage(newFormData);
-      return prev ? { ...prev, formData: newFormData } : null;
+      return prev ? { ...prev, formData: newFormData } : { sections: {}, formData: newFormData, progress: null };
     });
 
     // Preparar payload para o servidor
@@ -186,7 +130,7 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
       }
     }, DEBOUNCE_MS);
 
-  }, [type, autoSave, saveToLocalStorage]);
+  }, [type, autoSave]);
 
   // Salvar progresso
   const saveProgress = useCallback(async (payload: SaveProgressPayload) => {
@@ -231,7 +175,6 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
       const result = response.data;
 
       if (result.success) {
-        clearLocalStorage();
         return true;
       }
 
@@ -244,7 +187,7 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
     } finally {
       setSaving(false);
     }
-  }, [type, clearLocalStorage]);
+  }, [type]);
 
   // Limpar erro
   const clearError = useCallback(() => {
@@ -275,9 +218,5 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
     saveProgress,
     complete,
     clearError,
-
-    // Utils
-    saveToLocalStorage,
-    clearLocalStorage,
   };
 }
