@@ -26,6 +26,9 @@ export function LoginForm({ onSubmit, redirectTo = '/dashboard' }: LoginFormProp
       await login(email, password);
       console.log('Login bem-sucedido, redirecionando para:', redirectTo);
 
+      // Pequeno delay para garantir que o cookie seja definido
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Redireciona para destino após login bem-sucedido
       window.location.href = redirectTo;
     } catch (err) {

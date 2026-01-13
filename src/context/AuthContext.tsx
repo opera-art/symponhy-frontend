@@ -77,8 +77,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('auth_user', JSON.stringify(data.user));
 
-        // Salvar também em cookies (para middleware)
-        document.cookie = `auth_token=${data.token}; path=/; secure; samesite=strict`;
+        // Salvar também em cookies (para middleware do Next.js)
+        const maxAge = 7 * 24 * 60 * 60; // 7 dias
+        document.cookie = `auth_token=${data.token}; path=/; max-age=${maxAge}; samesite=lax`;
       } catch (err: any) {
         const errorMessage = err.message || 'Erro ao fazer login';
         setError(errorMessage);
@@ -115,8 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('auth_user', JSON.stringify(data.user));
 
-        // Salvar também em cookies (para middleware)
-        document.cookie = `auth_token=${data.token}; path=/; secure; samesite=strict`;
+        // Salvar também em cookies (para middleware do Next.js)
+        const maxAge = 7 * 24 * 60 * 60; // 7 dias
+        document.cookie = `auth_token=${data.token}; path=/; max-age=${maxAge}; samesite=lax`;
       } catch (err: any) {
         const errorMessage = err.message || 'Erro ao registrar';
         setError(errorMessage);
