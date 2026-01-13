@@ -1,22 +1,25 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Configuração base do Axios
-// Com HttpOnly cookies, o token é enviado automaticamente via cookie
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Envia cookies HttpOnly automaticamente
+  withCredentials: true, // Mantém para cookies se disponíveis
 });
 
-// Interceptor de REQUEST - Com HttpOnly cookies, não precisamos adicionar token manualmente
-// O cookie é enviado automaticamente pelo browser com withCredentials: true
+// Interceptor de REQUEST - Adiciona token do localStorage no header
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    // Com HttpOnly cookies, o token é enviado automaticamente via cookie
-    // Não precisamos mais manipular o header Authorization manualmente
+    // Pega token do localStorage e adiciona no header Authorization
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error) => {
