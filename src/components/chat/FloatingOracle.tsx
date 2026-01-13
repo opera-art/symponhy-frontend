@@ -6,9 +6,16 @@ import * as THREE from 'three';
 interface FloatingOracleProps {
   size?: number;
   className?: string;
+  color?: string;
+  showOrbits?: boolean;
 }
 
-export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, className = '' }) => {
+export const FloatingOracle: React.FC<FloatingOracleProps> = ({
+  size = 64,
+  className = '',
+  color = '#1C1917',
+  showOrbits = true
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
     scene?: THREE.Scene;
@@ -17,6 +24,8 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
     particles?: THREE.Points;
     uniforms?: any;
     animationId?: number;
+    systemsGroup?: THREE.Group;
+    lineGroup?: THREE.Group;
   }>({});
 
   useEffect(() => {
@@ -26,11 +35,12 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
 
     // Scene setup
     const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0xFDFCF8, 0.02);
     sceneRef.current.scene = scene;
 
     // Camera
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-    camera.position.set(0, 0, 14);
+    camera.position.set(0, 0, 18);
     sceneRef.current.camera = camera;
 
     // Renderer - transparent background
@@ -40,11 +50,16 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
     });
     renderer.setSize(size, size);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0); // Transparent background
+    renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
     sceneRef.current.renderer = renderer;
 
-    // Vertex Shader (same as GoldenOracle)
+    // Systems Group
+    const systemsGroup = new THREE.Group();
+    scene.add(systemsGroup);
+    sceneRef.current.systemsGroup = systemsGroup;
+
+    // Vertex Shader - Ink/Organic feel
     const vertexShader = `
       uniform float uTime;
       uniform float uDistortion;
@@ -105,10 +120,15 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
 
       void main() {
         vec3 pos = position;
+
+        // Smoother, more organic noise
         float noiseFreq = 0.5;
         float noiseAmp = uDistortion;
         float noise = snoise(vec3(pos.x * noiseFreq + uTime * 0.1, pos.y * noiseFreq, pos.z * noiseFreq));
+
         vNoise = noise;
+
+        // Deform sphere along normal based on noise
         vec3 newPos = pos + (normalize(pos) * noise * noiseAmp);
 
         // Mouse interaction
@@ -118,64 +138,52 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
 
         vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
+
+        // Size variation based on depth and noise
         gl_PointSize = uSize * (24.0 / -mvPosition.z) * (1.0 + noise * 0.5);
+
         vAlpha = 1.0;
         vPos = newPos;
       }
     `;
 
-    // Fragment Shader - Enhanced with depth and color variation
+    // Fragment Shader - Ink blot effect
     const fragmentShader = `
       uniform vec3 uColor;
-      uniform vec3 uColor2;
-      uniform vec3 uColor3;
       uniform float uOpacity;
+
       varying float vNoise;
       varying vec3 vPos;
 
       void main() {
+        // Soft circle particle
         vec2 center = gl_PointCoord - vec2(0.5);
         float dist = length(center);
         if (dist > 0.5) discard;
 
-        // Soft edges with glow effect
-        float alpha = smoothstep(0.5, 0.1, dist) * uOpacity;
-        float glow = smoothstep(0.5, 0.0, dist) * 0.5;
+        // Soft edges for ink blot effect
+        float alpha = smoothstep(0.5, 0.2, dist) * uOpacity;
 
-        // Multi-color gradient based on noise and position
-        float depthFactor = (vPos.z + 5.0) / 10.0; // Depth-based coloring
+        // Color variation based on noise (creates depth)
+        vec3 darkColor = uColor * 0.5;
+        vec3 lightColor = uColor * 1.8;
 
-        // Three-way color blend for richness
-        vec3 deepColor = uColor * 0.3;  // Dark blue core
-        vec3 midColor = uColor2;         // Purple mid-tones
-        vec3 brightColor = uColor3;      // Cyan highlights
-
-        // Blend based on noise and depth
-        float t1 = smoothstep(-0.5, 0.5, vNoise);
-        float t2 = smoothstep(0.0, 1.0, depthFactor);
-
-        vec3 color1 = mix(deepColor, midColor, t1);
-        vec3 finalColor = mix(color1, brightColor, t2 * t1);
-
-        // Add glow
-        finalColor += uColor3 * glow * 0.3;
+        vec3 finalColor = mix(darkColor, lightColor, vNoise * 0.5 + 0.5);
 
         gl_FragColor = vec4(finalColor, alpha);
       }
     `;
 
-    // Geometry - Dense for quality
+    // Dense geometry for ink effect
     const geometry = new THREE.IcosahedronGeometry(4.5, 30);
 
-    // Uniforms - Multi-color palette for depth
+    // Uniforms
     const uniforms = {
       uTime: { value: 0 },
-      uDistortion: { value: 0.8 },
-      uSize: { value: 3.0 },
-      uColor: { value: new THREE.Color('#1a1a4e') },   // Deep navy/purple core
-      uColor2: { value: new THREE.Color('#3A86FF') },  // Blue mid-tones
-      uColor3: { value: new THREE.Color('#00D9FF') },  // Cyan highlights
-      uOpacity: { value: 0.95 },
+      uDistortion: { value: 0.6 },
+      uSize: { value: 2.5 },
+      uColor: { value: new THREE.Color(color) },
+      uOpacity: { value: 0.85 },
       uMouse: { value: new THREE.Vector2(0, 0) },
     };
     sceneRef.current.uniforms = uniforms;
@@ -192,8 +200,38 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
 
     // Create particle system
     const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
+    systemsGroup.add(particles);
     sceneRef.current.particles = particles;
+
+    // Orbit lines (Renaissance/Astrolabe effect)
+    const lineGroup = new THREE.Group();
+    sceneRef.current.lineGroup = lineGroup;
+
+    if (showOrbits) {
+      systemsGroup.add(lineGroup);
+
+      const createOrbit = (radius: number, rotationX: number, rotationY: number) => {
+        const curve = new THREE.EllipseCurve(0, 0, radius, radius, 0, 2 * Math.PI, false, 0);
+        const points = curve.getPoints(128);
+        const geo = new THREE.BufferGeometry().setFromPoints(
+          points.map(p => new THREE.Vector3(p.x, p.y, 0))
+        );
+        const mat = new THREE.LineBasicMaterial({
+          color: 0x78350F,
+          transparent: true,
+          opacity: 0.12,
+        });
+        const orbit = new THREE.Line(geo, mat);
+        orbit.rotation.x = rotationX;
+        orbit.rotation.y = rotationY;
+        lineGroup.add(orbit);
+        return orbit;
+      };
+
+      createOrbit(5.5, Math.PI / 2, 0);
+      createOrbit(5.2, Math.PI / 3, Math.PI / 6);
+      createOrbit(6.0, Math.PI / 1.8, Math.PI / 4);
+    }
 
     // Animation variables
     let time = 0;
@@ -205,25 +243,44 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
       const rect = container.getBoundingClientRect();
       mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      uniforms.uMouse.value.x += (mouseX - uniforms.uMouse.value.x) * 0.1;
-      uniforms.uMouse.value.y += (mouseY - uniforms.uMouse.value.y) * 0.1;
+      uniforms.uMouse.value.x += (mouseX - uniforms.uMouse.value.x) * 0.05;
+      uniforms.uMouse.value.y += (mouseY - uniforms.uMouse.value.y) * 0.05;
+    };
+
+    // Global mouse for better interaction
+    const handleGlobalMouse = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      mouseX = (e.clientX - centerX) / (window.innerWidth / 2);
+      mouseY = -(e.clientY - centerY) / (window.innerHeight / 2);
     };
 
     container.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleGlobalMouse);
 
     // Animation loop
     function animate() {
       sceneRef.current.animationId = requestAnimationFrame(animate);
       time += 0.01;
 
-      if (particles) {
-        particles.rotation.y = time * 0.08;
-        particles.rotation.z = Math.sin(time * 0.1) * 0.05;
+      // Rotate entire system slowly
+      if (systemsGroup) {
+        systemsGroup.rotation.y = time * 0.05;
+        systemsGroup.rotation.z = Math.sin(time * 0.1) * 0.05;
       }
 
-      // Subtle camera movement
-      camera.position.x += (mouseX * 0.3 - camera.position.x) * 0.05;
-      camera.position.y += (mouseY * 0.3 - camera.position.y) * 0.05;
+      // Counter-rotate orbits
+      if (lineGroup && showOrbits) {
+        lineGroup.rotation.x = Math.sin(time * 0.05) * 0.2;
+        lineGroup.children.forEach((orbit, i) => {
+          orbit.rotation.z += 0.002 * (i + 1);
+        });
+      }
+
+      // Smooth camera sway
+      camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+      camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
       camera.lookAt(0, 0, 0);
 
       uniforms.uTime.value = time;
@@ -234,6 +291,7 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
     // Cleanup
     return () => {
       container.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mousemove', handleGlobalMouse);
 
       if (sceneRef.current.animationId) {
         cancelAnimationFrame(sceneRef.current.animationId);
@@ -250,14 +308,23 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({ size = 64, class
         sceneRef.current.particles.geometry.dispose();
         (sceneRef.current.particles.material as THREE.Material).dispose();
       }
+
+      if (sceneRef.current.lineGroup) {
+        sceneRef.current.lineGroup.children.forEach((child) => {
+          if (child instanceof THREE.Line) {
+            child.geometry.dispose();
+            (child.material as THREE.Material).dispose();
+          }
+        });
+      }
     };
-  }, [size]);
+  }, [size, color, showOrbits]);
 
   return (
     <div
       ref={containerRef}
       className={className}
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, cursor: 'pointer' }}
     />
   );
 };
