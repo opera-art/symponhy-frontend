@@ -1,18 +1,22 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { FloatingOracle } from '@/components/chat/FloatingOracle';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Pega URL de redirecionamento (se veio de uma rota protegida)
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
 
   const handleLoginSubmit = async (data: { email: string; password: string; accessType: string }) => {
     console.log('Login attempt:', data);
-    // Redirect to dashboard after successful login
-    console.log('Redirecionando para dashboard...');
-    await router.push('/dashboard');
+    // Redirect to original destination or dashboard after successful login
+    console.log('Redirecionando para:', redirectTo);
+    await router.push(redirectTo);
   };
 
   return (

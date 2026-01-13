@@ -42,11 +42,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Rotas protegidas (começam com /dashboard)
-  if (pathname.startsWith('/dashboard')) {
+  // Rotas protegidas (dashboard e onboarding)
+  const protectedPaths = ['/dashboard', '/onboarding'];
+  const isProtectedRoute = protectedPaths.some(path => pathname.startsWith(path));
+
+  if (isProtectedRoute) {
     if (!token || !isValidToken) {
-      // Sem token ou token inválido, limpa cookie e redireciona para login
-      const response = NextResponse.redirect(new URL('/login', request.url));
+      // Sem token ou token inválido, redireciona para login com URL de retorno
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+
+      const response = NextResponse.redirect(loginUrl);
       response.cookies.delete('auth_token');
       return response;
     }
