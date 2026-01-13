@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send } from 'lucide-react';
-import { MiniOracle } from './MiniOracle';
+import { FloatingOracle } from './FloatingOracle';
 
 interface Message {
   id: string;
@@ -95,16 +95,17 @@ export const FloatingChat: React.FC = () => {
 
   return (
     <>
-      {/* Floating Button with Mini Sphere */}
+      {/* Floating Button with Oracle Sphere */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-2xl
-          transition-all duration-500 ease-out overflow-hidden
-          hover:scale-110 hover:shadow-blue-500/25
+        className={`fixed bottom-6 right-6 z-50 w-20 h-20 rounded-full
+          transition-all duration-500 ease-out
+          hover:scale-110 cursor-pointer
           ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
+        style={{ background: 'transparent', border: 'none' }}
         aria-label="Abrir chat"
       >
-        <MiniOracle size={64} />
+        <FloatingOracle size={80} />
       </button>
 
       {/* Chat Window */}
@@ -114,11 +115,11 @@ export const FloatingChat: React.FC = () => {
           flex flex-col transition-all duration-500 ease-out origin-bottom-right
           ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}
       >
-        {/* Header with Mini Sphere */}
+        {/* Header with Oracle Sphere */}
         <div className="relative h-20 bg-gradient-to-r from-slate-900 to-slate-800 flex items-center px-4">
-          {/* Mini Sphere in Header */}
-          <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
-            <MiniOracle size={48} />
+          {/* Oracle Sphere in Header */}
+          <div className="w-12 h-12 mr-3">
+            <FloatingOracle size={48} />
           </div>
 
           <div className="flex-1">
