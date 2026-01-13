@@ -44,17 +44,13 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [language]
   );
 
-  // Evitar hidratação mismatched
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
   const value: LanguageContextType = {
     language,
     setLanguage,
     t,
   };
 
+  // Sempre renderiza com o Provider para evitar erro de contexto
   return (
     <LanguageContext.Provider value={value}>
       {children}
