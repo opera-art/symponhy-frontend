@@ -44,8 +44,8 @@ async function handleRequest(
   method: string
 ) {
   try {
-    // Obter autenticação do Clerk
-    const { userId, getToken } = await auth()
+    // Obter autenticação do Clerk (incluindo Organization)
+    const { userId, orgId, orgRole, getToken } = await auth()
 
     if (!userId) {
       return NextResponse.json(
@@ -76,8 +76,16 @@ async function handleRequest(
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    // Adicionar userId do Clerk para o backend identificar o usuário
+    // Adicionar dados do Clerk para o backend
     headers['X-Clerk-User-Id'] = userId
+
+    // Adicionar Organization se existir
+    if (orgId) {
+      headers['X-Clerk-Org-Id'] = orgId
+    }
+    if (orgRole) {
+      headers['X-Clerk-Org-Role'] = orgRole
+    }
 
     // Preparar body para métodos que suportam
     let body: string | undefined
