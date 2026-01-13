@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { FloatingOracle } from '@/components/chat/FloatingOracle';
-import { ArrowLeft, ArrowRight, Check, Sparkles, Upload } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Sparkles, Upload, Loader2 } from 'lucide-react';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 interface FormData {
   // Dados básicos
@@ -370,109 +371,168 @@ const sections = [
   },
 ];
 
+const initialFormData: FormData = {
+  razaoSocial: '',
+  nomeFantasia: '',
+  cnpj: '',
+  dataFundacao: '',
+  siteInstitucional: '',
+  estadosCidades: '',
+  paisesInternacionais: '',
+  temSedeFixa: '',
+  enderecoSede: '',
+  segmentoEspecifico: '',
+  faturamentoAnual: '',
+  instagram: '',
+  tiktok: '',
+  youtubeShorts: '',
+  threads: '',
+  reclameAqui: '',
+  googleMeuNegocio: '',
+  outrosCanais: '',
+  oQueFaz: '',
+  paraQuem: '',
+  comoComecou: '',
+  missao: '',
+  visao3a5Anos: '',
+  valores: '',
+  produtoPrioritario: '',
+  precoProduto: '',
+  formasPagamento: [],
+  oQueIncluso: '',
+  oQueNaoIncluso: '',
+  transformacaoEntrega: '',
+  temProvasSociais: '',
+  linksProvasSociais: '',
+  linkPaginaProduto: '',
+  tipoCliente: '',
+  clienteIdeal: '',
+  tresDores: '',
+  tresDesejos: '',
+  tresObjecoes: '',
+  frasesCliente: '',
+  ondeClienteVive: [],
+  pesquisasGoogle: '',
+  comoClienteChega: [],
+  proximoPasso: [],
+  capacidadeEntrega: '',
+  maioresGargalos: [],
+  faqPerguntas: '',
+  porQueNaoFecham: '',
+  sabeNumeros: '',
+  ticketMedio: '',
+  cac: '',
+  taxaConversao: '',
+  tomMarca: [],
+  palavrasUsaMuito: '',
+  palavrasEvita: '',
+  temasProibidos: '',
+  verdadeIncomoda: '',
+  comoRespondeCriticas: '',
+  objetivoRedes: [],
+  primeiraImpressao: '',
+  plataformasPrioritarias: [],
+  frequenciaDesejada: '',
+  formatosConsegueProduzir: [],
+  rostoConteudo: [],
+  quemGrava: '',
+  temEditor: '',
+  quadroSerie: '',
+  qualQuadro: '',
+  ctasPermitidos: [],
+  temLeadMagnet: '',
+  linkLeadMagnet: '',
+  temasPublicoAma: '',
+  agenda90Dias: '',
+  concorrentesDiretos: '',
+  ondeConcorrentesMelhores: '',
+  porQueEscolhemVoce: '',
+  referenciasConteudo: '',
+  oQueQuerCopiar: '',
+  referenciaNaoGosta: '',
+  algoMais: '',
+  restricaoLegal: '',
+};
+
 export default function EssentialBriefingPage() {
   const router = useRouter();
   const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [formData, setFormData] = useState<FormData>({
-    razaoSocial: '',
-    nomeFantasia: '',
-    cnpj: '',
-    dataFundacao: '',
-    siteInstitucional: '',
-    estadosCidades: '',
-    paisesInternacionais: '',
-    temSedeFixa: '',
-    enderecoSede: '',
-    segmentoEspecifico: '',
-    faturamentoAnual: '',
-    instagram: '',
-    tiktok: '',
-    youtubeShorts: '',
-    threads: '',
-    reclameAqui: '',
-    googleMeuNegocio: '',
-    outrosCanais: '',
-    oQueFaz: '',
-    paraQuem: '',
-    comoComecou: '',
-    missao: '',
-    visao3a5Anos: '',
-    valores: '',
-    produtoPrioritario: '',
-    precoProduto: '',
-    formasPagamento: [],
-    oQueIncluso: '',
-    oQueNaoIncluso: '',
-    transformacaoEntrega: '',
-    temProvasSociais: '',
-    linksProvasSociais: '',
-    linkPaginaProduto: '',
-    tipoCliente: '',
-    clienteIdeal: '',
-    tresDores: '',
-    tresDesejos: '',
-    tresObjecoes: '',
-    frasesCliente: '',
-    ondeClienteVive: [],
-    pesquisasGoogle: '',
-    comoClienteChega: [],
-    proximoPasso: [],
-    capacidadeEntrega: '',
-    maioresGargalos: [],
-    faqPerguntas: '',
-    porQueNaoFecham: '',
-    sabeNumeros: '',
-    ticketMedio: '',
-    cac: '',
-    taxaConversao: '',
-    tomMarca: [],
-    palavrasUsaMuito: '',
-    palavrasEvita: '',
-    temasProibidos: '',
-    verdadeIncomoda: '',
-    comoRespondeCriticas: '',
-    objetivoRedes: [],
-    primeiraImpressao: '',
-    plataformasPrioritarias: [],
-    frequenciaDesejada: '',
-    formatosConsegueProduzir: [],
-    rostoConteudo: [],
-    quemGrava: '',
-    temEditor: '',
-    quadroSerie: '',
-    qualQuadro: '',
-    ctasPermitidos: [],
-    temLeadMagnet: '',
-    linkLeadMagnet: '',
-    temasPublicoAma: '',
-    agenda90Dias: '',
-    concorrentesDiretos: '',
-    ondeConcorrentesMelhores: '',
-    porQueEscolhemVoce: '',
-    referenciasConteudo: '',
-    oQueQuerCopiar: '',
-    referenciaNaoGosta: '',
-    algoMais: '',
-    restricaoLegal: '',
-  });
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Hook de onboarding
+  const {
+    loading: onboardingLoading,
+    saving,
+    error: onboardingError,
+    formData: savedFormData,
+    progress: savedProgress,
+    loadAll,
+    saveSection,
+    complete,
+  } = useOnboarding({ type: 'essential', autoSave: true });
+
+  // Carregar dados salvos ao montar
+  useEffect(() => {
+    loadAll();
+  }, [loadAll]);
+
+  // Restaurar estado quando dados forem carregados
+  useEffect(() => {
+    if (savedFormData && Object.keys(savedFormData).length > 0 && !isInitialized) {
+      setFormData(prev => ({
+        ...prev,
+        ...savedFormData as Partial<FormData>,
+      }));
+
+      // Restaurar posição se houver progresso salvo
+      if (savedProgress) {
+        setCurrentSection(savedProgress.current_section);
+        setCurrentQuestion(savedProgress.current_question);
+      }
+
+      setIsInitialized(true);
+    }
+  }, [savedFormData, savedProgress, isInitialized]);
 
   const section = sections[currentSection];
   const question = section.questions[currentQuestion];
 
   const totalQuestions = sections.reduce((acc, s) => acc + s.questions.length, 0);
   const completedQuestions = sections.slice(0, currentSection).reduce((acc, s) => acc + s.questions.length, 0) + currentQuestion;
-  const progress = ((completedQuestions + 1) / totalQuestions) * 100;
+  const progressPercent = ((completedQuestions + 1) / totalQuestions) * 100;
 
-  const handleNext = () => {
+  // Obter dados da seção atual para salvar
+  const getSectionData = useCallback(() => {
+    const section = sections[currentSection];
+    const sectionData: Record<string, unknown> = {};
+
+    for (const q of section.questions) {
+      sectionData[q.id] = formData[q.id as keyof FormData];
+    }
+
+    return sectionData;
+  }, [currentSection, formData]);
+
+  const handleNext = async () => {
+    // Salvar seção atual
+    const sectionData = getSectionData();
+    await saveSection(currentSection, sectionData, currentQuestion);
+
     if (currentQuestion < section.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else if (currentSection < sections.length - 1) {
+      // Avançar para próxima seção
       setCurrentSection(currentSection + 1);
       setCurrentQuestion(0);
     } else {
+      // Finalizar onboarding
       console.log('Form submitted:', formData);
-      router.push('/dashboard');
+      const success = await complete();
+      if (success) {
+        router.push('/dashboard');
+      }
     }
   };
 
@@ -597,8 +657,33 @@ export default function EssentialBriefingPage() {
 
   const isLastQuestion = currentSection === sections.length - 1 && currentQuestion === section.questions.length - 1;
 
+  // Loading state
+  if (onboardingLoading && !isInitialized) {
+    return (
+      <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+        <p className="mt-4 text-slate-500">Carregando...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden">
+      {/* Error Toast */}
+      {onboardingError && (
+        <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm z-50">
+          {onboardingError}
+        </div>
+      )}
+
+      {/* Saving Indicator */}
+      {saving && (
+        <div className="fixed top-4 left-4 bg-slate-900 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 z-50">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Salvando...
+        </div>
+      )}
+
       {/* Header */}
       <header className="p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -624,7 +709,7 @@ export default function EssentialBriefingPage() {
           <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-slate-900 transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
+              style={{ width: `${progressPercent}%` }}
             />
           </div>
           <div className="flex justify-between mt-1">

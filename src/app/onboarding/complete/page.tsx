@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FloatingOracle } from '@/components/chat/FloatingOracle';
-import { ArrowLeft, ArrowRight, Check, Sparkles, Crown, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Sparkles, Crown, Plus, Trash2, Loader2 } from 'lucide-react';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 interface Product {
   id: string;
@@ -545,21 +546,125 @@ const initialFormData: FormData = {
   referenciasGosta: '', conteudoIdealMistura: '',
 };
 
+// Map section names to section indices for the API
+function getSectionIndex(sectionName: string): number {
+  if (sectionName.startsWith('1. Dados')) return 0;
+  if (sectionName.startsWith('1.5 Redes')) return 1;
+  if (sectionName.startsWith('2.')) return 2;
+  if (sectionName.startsWith('3.')) return 3;
+  if (sectionName.startsWith('4.')) return 4;
+  if (sectionName.startsWith('5.')) return 5;
+  if (sectionName.startsWith('6.')) return 6;
+  if (sectionName.startsWith('7.')) return 7;
+  if (sectionName.startsWith('8.')) return 8;
+  if (sectionName.startsWith('9.')) return 9;
+  if (sectionName.startsWith('10.')) return 10;
+  return 0;
+}
+
+// Get fields that belong to a specific section
+function getFieldsForSection(sectionIndex: number): string[] {
+  const sectionPrefixes: Record<number, string[]> = {
+    0: ['1. Dados'],
+    1: ['1.5 Redes'],
+    2: ['2.'],
+    3: ['3.'],
+    4: ['4.'],
+    5: ['5.'],
+    6: ['6.'],
+    7: ['7.'],
+    8: ['8.'],
+    9: ['9.'],
+    10: ['10.'],
+  };
+
+  const prefixes = sectionPrefixes[sectionIndex] || [];
+  return questions
+    .filter(q => prefixes.some(prefix => q.section.startsWith(prefix)))
+    .map(q => q.id);
+}
+
 export default function CompleteBriefingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  // Hook for API integration
+  const {
+    loading,
+    saving,
+    error,
+    formData: savedFormData,
+    progress: savedProgress,
+    loadAll,
+    saveSection,
+    complete,
+    clearError,
+  } = useOnboarding({ type: 'complete' });
+
+  // Load saved data on mount
+  useEffect(() => {
+    loadAll().then(() => {
+      setIsInitializing(false);
+    });
+  }, [loadAll]);
+
+  // Restore saved data and position
+  useEffect(() => {
+    if (savedFormData && Object.keys(savedFormData).length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        ...savedFormData,
+        // Preserve products array structure
+        products: savedFormData.products && Array.isArray(savedFormData.products) && savedFormData.products.length > 0
+          ? savedFormData.products as Product[]
+          : prev.products,
+      }));
+    }
+
+    // Restore position if saved
+    if (savedProgress?.current_question !== undefined) {
+      setCurrentStep(savedProgress.current_question);
+    }
+  }, [savedFormData, savedProgress]);
+
+  // Auto-dismiss error after 3 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(clearError, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, clearError]);
 
   const currentQuestion = questions[currentStep];
-  const progress = ((currentStep + 1) / questions.length) * 100;
+  const progressPercent = ((currentStep + 1) / questions.length) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Get current section index
+    const sectionIndex = getSectionIndex(currentQuestion.section);
+
+    // Get all fields for this section and extract their values from formData
+    const sectionFields = getFieldsForSection(sectionIndex);
+    const sectionData: Record<string, unknown> = {};
+    for (const field of sectionFields) {
+      if (field in formData) {
+        sectionData[field] = formData[field as keyof FormData];
+      }
+    }
+
+    // Save section data
+    await saveSection(sectionIndex, sectionData, currentStep);
+
     if (currentStep < questions.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      console.log('Form submitted:', formData);
-      router.push('/dashboard');
+      // Complete onboarding
+      const success = await complete();
+      if (success) {
+        router.push('/dashboard');
+      }
     }
   };
 
@@ -749,8 +854,35 @@ export default function CompleteBriefingPage() {
     }
   };
 
+  // Show loading state while initializing
+  if (isInitializing || loading) {
+    return (
+      <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-4" />
+          <p className="text-slate-600">Carregando seus dados...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden">
+      {/* Error Toast */}
+      {error && (
+        <div className="fixed top-4 right-4 bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-lg text-sm z-50">
+          {error}
+        </div>
+      )}
+
+      {/* Saving Indicator */}
+      {saving && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2 rounded-full text-sm flex items-center gap-2 z-50">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Salvando...
+        </div>
+      )}
+
       {/* Header */}
       <header className="p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -776,7 +908,7 @@ export default function CompleteBriefingPage() {
           <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
+              style={{ width: `${progressPercent}%` }}
             />
           </div>
           <div className="flex justify-between mt-1">
