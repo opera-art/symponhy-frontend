@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { FloatingOracle } from '@/components/chat/FloatingOracle';
-import { ArrowLeft, ArrowRight, Check, Sparkles, Upload, Loader2 } from 'lucide-react';
+import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout';
+import { Check } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 
 interface FormData {
@@ -135,7 +135,7 @@ const sections = [
     ],
   },
   {
-    title: 'Redes Sociais e Canais',
+    title: 'Redes Sociais',
     questions: [
       { id: 'instagram', question: 'Instagram', type: 'url', placeholder: 'instagram.com/suamarca' },
       { id: 'tiktok', question: 'TikTok', type: 'url', placeholder: 'tiktok.com/@suamarca' },
@@ -147,7 +147,7 @@ const sections = [
     ],
   },
   {
-    title: 'Identidade da Empresa',
+    title: 'Identidade',
     questions: [
       { id: 'oQueFaz', question: 'O que sua empresa faz?', type: 'textarea', placeholder: 'Descreva em poucas palavras o que vocês fazem' },
       { id: 'paraQuem', question: 'Para quem você faz isso?', type: 'textarea', placeholder: 'Quem são seus clientes' },
@@ -158,7 +158,7 @@ const sections = [
     ],
   },
   {
-    title: 'Oferta Prioritária',
+    title: 'Oferta Principal',
     questions: [
       { id: 'produtoPrioritario', question: 'Qual é o produto/serviço PRIORITÁRIO para os próximos 90 dias?', type: 'textarea', placeholder: 'O que vamos vender no conteúdo' },
       { id: 'precoProduto', question: 'Quanto custa esse produto/serviço?', type: 'text', placeholder: 'Valor ou faixa de preço' },
@@ -208,7 +208,7 @@ const sections = [
     ],
   },
   {
-    title: 'Funil e Vendas',
+    title: 'Funil de Vendas',
     questions: [
       { id: 'comoClienteChega', question: 'Como o cliente chega hoje?', type: 'multiselect', options: [
         { value: 'organico', label: 'Orgânico redes' },
@@ -251,7 +251,7 @@ const sections = [
     ],
   },
   {
-    title: 'Marca e Comunicação',
+    title: 'Comunicação',
     questions: [
       { id: 'tomMarca', question: 'Como você quer que a marca soe?', type: 'multiselect', options: [
         { value: 'educativo', label: 'Educativo' },
@@ -277,7 +277,7 @@ const sections = [
     ],
   },
   {
-    title: 'Conteúdo e Produção',
+    title: 'Conteúdo',
     questions: [
       { id: 'objetivoRedes', question: 'Qual é seu objetivo principal nas redes nos próximos 90 dias?', type: 'multiselect', options: [
         { value: 'autoridade', label: 'Autoridade' },
@@ -352,7 +352,7 @@ const sections = [
     ],
   },
   {
-    title: 'Concorrência e Referências',
+    title: 'Concorrência',
     questions: [
       { id: 'concorrentesDiretos', question: 'Liste 3 concorrentes diretos (links)', type: 'textarea', placeholder: 'Links dos concorrentes' },
       { id: 'ondeConcorrentesMelhores', question: 'Em 1 linha cada: onde eles são melhores?', type: 'textarea', placeholder: 'Pontos fortes deles' },
@@ -363,7 +363,7 @@ const sections = [
     ],
   },
   {
-    title: 'Pergunta Final',
+    title: 'Final',
     questions: [
       { id: 'algoMais', question: 'Tem algo que você quer que a IA saiba e não foi perguntado?', type: 'textarea', placeholder: 'Informações adicionais importantes' },
       { id: 'restricaoLegal', question: 'No seu nicho há alguma restrição legal de conteúdo? (Ex: OAB, medicina, etc)', type: 'textarea', placeholder: 'Restrições que devemos respeitar' },
@@ -454,6 +454,14 @@ const initialFormData: FormData = {
   restricaoLegal: '',
 };
 
+// Preparar sections para o layout
+const layoutSections = sections.map(s => ({
+  title: s.title,
+  questionCount: s.questions.length,
+}));
+
+const totalQuestions = sections.reduce((acc, s) => acc + s.questions.length, 0);
+
 export default function EssentialBriefingPage() {
   const router = useRouter();
   const [currentSection, setCurrentSection] = useState(0);
@@ -475,7 +483,6 @@ export default function EssentialBriefingPage() {
 
   // Carregar dados salvos ao montar
   useEffect(() => {
-    // Limpar localStorage antigo (migração - pode remover depois)
     if (typeof window !== 'undefined') {
       localStorage.removeItem('onboarding_draft_essential');
       localStorage.removeItem('onboarding_draft_complete');
@@ -491,7 +498,6 @@ export default function EssentialBriefingPage() {
         ...savedFormData as Partial<FormData>,
       }));
 
-      // Restaurar posição se houver progresso salvo
       if (savedProgress) {
         setCurrentSection(savedProgress.current_section);
         setCurrentQuestion(savedProgress.current_question);
@@ -503,10 +509,6 @@ export default function EssentialBriefingPage() {
 
   const section = sections[currentSection];
   const question = section.questions[currentQuestion];
-
-  const totalQuestions = sections.reduce((acc, s) => acc + s.questions.length, 0);
-  const completedQuestions = sections.slice(0, currentSection).reduce((acc, s) => acc + s.questions.length, 0) + currentQuestion;
-  const progressPercent = ((completedQuestions + 1) / totalQuestions) * 100;
 
   // Obter dados da seção atual para salvar
   const getSectionData = useCallback(() => {
@@ -521,19 +523,15 @@ export default function EssentialBriefingPage() {
   }, [currentSection, formData]);
 
   const handleNext = async () => {
-    // Salvar seção atual
     const sectionData = getSectionData();
     await saveSection(currentSection, sectionData, currentQuestion);
 
     if (currentQuestion < section.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else if (currentSection < sections.length - 1) {
-      // Avançar para próxima seção
       setCurrentSection(currentSection + 1);
       setCurrentQuestion(0);
     } else {
-      // Finalizar onboarding
-      console.log('Form submitted:', formData);
       const success = await complete();
       if (success) {
         router.push('/dashboard');
@@ -557,12 +555,6 @@ export default function EssentialBriefingPage() {
       ...formData,
       [question.id]: value,
     });
-  };
-
-  const isCurrentStepValid = () => {
-    const value = formData[question.id as keyof FormData];
-    // Most fields are optional in the essential form
-    return true;
   };
 
   const renderInput = () => {
@@ -662,126 +654,24 @@ export default function EssentialBriefingPage() {
 
   const isLastQuestion = currentSection === sections.length - 1 && currentQuestion === section.questions.length - 1;
 
-  // Loading state
-  if (onboardingLoading && !isInitialized) {
-    return (
-      <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
-        <p className="mt-4 text-slate-500">Carregando...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden">
-      {/* Error Toast */}
-      {onboardingError && (
-        <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm z-50">
-          {onboardingError}
-        </div>
-      )}
-
-      {/* Saving Indicator */}
-      {saving && (
-        <div className="fixed top-4 left-4 bg-slate-900 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 z-50">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Salvando...
-        </div>
-      )}
-
-      {/* Header */}
-      <header className="p-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-semibold text-slate-900">Symponhy</span>
-          </div>
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </button>
-        </div>
-      </header>
-
-      {/* Progress Bar */}
-      <div className="px-4 flex-shrink-0">
-        <div className="max-w-2xl mx-auto">
-          <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-slate-900 transition-all duration-500 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-xs text-slate-400">
-              {completedQuestions + 1} de {totalQuestions} perguntas
-            </span>
-            <span className="text-xs text-slate-500 font-medium">{section.title}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-2 min-h-0">
-        {/* Oracle Sphere */}
-        <div className="relative flex-shrink-0 mb-4">
-          <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-3xl scale-150" />
-          <FloatingOracle size={200} />
-        </div>
-
-        {/* Section Title */}
-        <div className="text-center mb-1 flex-shrink-0">
-          <span className="text-xs text-amber-600 font-medium uppercase tracking-wider">
-            {section.title}
-          </span>
-        </div>
-
-        {/* Question */}
-        <div className="w-full max-w-2xl flex-shrink-0">
-          <h2 className="text-lg font-semibold text-slate-900 text-center mb-4">
-            {question.question}
-          </h2>
-
-          {/* Input */}
-          <div className="mb-4">{renderInput()}</div>
-
-          {/* Navigation */}
-          <div className="flex justify-between">
-            <button
-              onClick={handleBack}
-              className="px-5 py-2.5 rounded-xl text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={handleNext}
-              className="px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all bg-slate-900 text-white hover:bg-slate-800"
-            >
-              {isLastQuestion ? (
-                <>
-                  Finalizar
-                  <Check className="w-4 h-4" />
-                </>
-              ) : (
-                <>
-                  Próxima
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Skip hint */}
-          <p className="text-center text-xs text-slate-400 mt-2">
-            Campos opcionais podem ser pulados
-          </p>
-        </div>
-      </main>
-    </div>
+    <OnboardingLayout
+      type="essential"
+      currentSection={currentSection}
+      currentQuestion={currentQuestion}
+      totalSections={sections.length}
+      totalQuestions={totalQuestions}
+      sectionTitle={section.title}
+      questionText={question.question}
+      onNext={handleNext}
+      onBack={handleBack}
+      saving={saving}
+      loading={onboardingLoading && !isInitialized}
+      error={onboardingError}
+      isLastQuestion={isLastQuestion}
+      sections={layoutSections}
+    >
+      {renderInput()}
+    </OnboardingLayout>
   );
 }
