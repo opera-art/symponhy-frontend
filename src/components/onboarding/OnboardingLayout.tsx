@@ -208,13 +208,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         </div>
       )}
 
-      {/* Saving Indicator */}
-      {saving && (
-        <div className="fixed top-4 left-4 bg-slate-900 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 z-50">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Salvando...
-        </div>
-      )}
 
       {/* Motivational Message */}
       {showMotivation && (

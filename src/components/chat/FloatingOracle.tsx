@@ -443,18 +443,20 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
         });
       }
 
-      // Spawn music notes when hovering
-      if (sceneRef.current.isHovering && sceneRef.current.mousePos) {
-        noteSpawnTimer++;
-        if (noteSpawnTimer > 8) {
-          noteSpawnTimer = 0;
-          const note = new MusicNote(
-            sceneRef.current.mousePos.x + (Math.random() - 0.5) * 2,
-            sceneRef.current.mousePos.y + (Math.random() - 0.5) * 2
-          );
-          activeNotes.push(note);
-          musicNotes.add(note.mesh);
-        }
+      // Spawn music notes continuously around the sphere
+      noteSpawnTimer++;
+      const spawnRate = sceneRef.current.isHovering ? 6 : 25; // Faster when hovering
+      if (noteSpawnTimer > spawnRate) {
+        noteSpawnTimer = 0;
+        // Spawn at random positions around the sphere edge
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 5 + Math.random() * 2;
+        const note = new MusicNote(
+          Math.cos(angle) * radius,
+          Math.sin(angle) * radius - 2
+        );
+        activeNotes.push(note);
+        musicNotes.add(note.mesh);
       }
 
       // Update music notes
