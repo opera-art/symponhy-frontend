@@ -76,7 +76,7 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
 
     try {
       const response = await api.get<ApiResponse<OnboardingData>>(
-        `/api/onboarding/all?type=${type}`
+        `/onboarding/all?type=${type}`
       );
       const result = response.data;
 
@@ -127,7 +127,7 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
     setError(null);
 
     try {
-      const response = await api.post<ApiResponse>('/api/onboarding/section', payload);
+      const response = await api.post<ApiResponse>('/onboarding/section', payload);
       const result = response.data;
 
       if (!result.success) {
@@ -192,7 +192,7 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
   const saveProgress = useCallback(async (payload: SaveProgressPayload) => {
     try {
       const response = await api.post<ApiResponse<OnboardingProgress>>(
-        '/api/onboarding/progress',
+        '/onboarding/progress',
         {
           ...payload,
           onboarding_type: type,
@@ -225,7 +225,7 @@ export function useOnboarding({ type, autoSave = true }: UseOnboardingOptions) {
       }
 
       const response = await api.patch<ApiResponse<OnboardingProgress>>(
-        '/api/onboarding/progress',
+        '/onboarding/progress',
         { onboarding_type: type }
       );
       const result = response.data;
