@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Topbar } from '@/components/layout';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
 import { useClientContext } from '@/context/ClientContext';
 import { useRouter } from 'next/navigation';
-import { useApi } from '@/hooks/useApi';
+import api from '@/lib/api';
 import { ProtectedRoute } from '@/components/auth';
 import {
   Users,
@@ -17,16 +17,18 @@ import {
   MoreVertical,
   Trash2,
   Edit,
-  UserCheck
+  UserCheck,
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Client {
   id: string;
   email: string;
-  fullName: string;
-  accessType: string;
-  createdAt: string;
+  full_name: string;
+  access_type: string;
+  created_at: string;
   agency_id?: string;
 }
 
@@ -35,38 +37,62 @@ const ClientsPage: React.FC = () => {
   const { user } = useAuth();
   const { setSelectedClient } = useClientContext();
   const router = useRouter();
-  const { get } = useApi();
 
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  // Mock data for now (will connect to backend later)
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setClients([
-        {
-          id: '1',
-          email: 'cliente1@example.com',
-          fullName: 'Cliente Exemplo 1',
-          accessType: 'client',
-          createdAt: '2024-01-15',
-        },
-        {
-          id: '2',
-          email: 'cliente2@example.com',
-          fullName: 'Cliente Exemplo 2',
-          accessType: 'client',
-          createdAt: '2024-02-10',
-        },
-      ]);
+  // Fetch clients from API
+  const fetchClients = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get('/api/clients');
+      setClients(response.data || []);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || 'Erro ao carregar clientes';
+      setError(errorMessage);
+      console.error('Error fetching clients:', err);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
+
+  // Delete client
+  const handleDeleteClient = async (clientId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      setDeleteLoading(clientId);
+      await api.delete(`/api/clients/${clientId}`);
+      setClients(clients.filter(c => c.id !== clientId));
+      setActiveDropdown(null);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || 'Erro ao excluir cliente';
+      alert(errorMessage);
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
+
   const handleViewAsClient = (client: Client) => {
-    setSelectedClient(client);
+    // Map to the format expected by ClientContext
+    setSelectedClient({
+      id: client.id,
+      email: client.email,
+      fullName: client.full_name,
+      accessType: client.access_type,
+      createdAt: client.created_at,
+    });
     router.push('/dashboard');
   };
 
@@ -138,6 +164,20 @@ const ClientsPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <p className="text-red-700 text-sm">{error}</p>
+              <button
+                onClick={fetchClients}
+                className="ml-auto text-red-600 hover:text-red-800 text-sm font-medium"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )}
+
           {/* Clients Table */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="overflow-x-auto">
@@ -164,8 +204,11 @@ const ClientsPage: React.FC = () => {
                 <tbody className="divide-y divide-slate-100">
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                        {t('loading')}
+                      <td colSpan={5} className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="w-8 h-8 text-gold animate-spin" />
+                          <p className="text-slate-500">{t('loading')}</p>
+                        </div>
                       </td>
                     </tr>
                   ) : clients.length === 0 ? (
@@ -189,10 +232,10 @@ const ClientsPage: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                              {client.fullName.charAt(0).toUpperCase()}
+                              {client.full_name?.charAt(0).toUpperCase() || '?'}
                             </div>
                             <div>
-                              <p className="font-medium text-slate-900">{client.fullName}</p>
+                              <p className="font-medium text-slate-900">{client.full_name}</p>
                             </div>
                           </div>
                         </td>
@@ -203,7 +246,7 @@ const ClientsPage: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          {new Date(client.createdAt).toLocaleDateString('pt-BR')}
+                          {new Date(client.created_at).toLocaleDateString('pt-BR')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -219,9 +262,32 @@ const ClientsPage: React.FC = () => {
                               <Eye className="w-4 h-4" />
                               Ver como
                             </button>
-                            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                              <MoreVertical className="w-4 h-4 text-slate-400" />
-                            </button>
+                            <div className="relative">
+                              <button
+                                onClick={() => setActiveDropdown(activeDropdown === client.id ? null : client.id)}
+                                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                              >
+                                <MoreVertical className="w-4 h-4 text-slate-400" />
+                              </button>
+
+                              {/* Dropdown Menu */}
+                              {activeDropdown === client.id && (
+                                <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-10">
+                                  <button
+                                    onClick={() => handleDeleteClient(client.id)}
+                                    disabled={deleteLoading === client.id}
+                                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
+                                  >
+                                    {deleteLoading === client.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="w-4 h-4" />
+                                    )}
+                                    Excluir cliente
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -235,10 +301,14 @@ const ClientsPage: React.FC = () => {
 
         {/* Add Client Modal */}
         {showAddModal && (
-          <AddClientModal onClose={() => setShowAddModal(false)} onSuccess={(newClient) => {
-            setClients([...clients, newClient]);
-            setShowAddModal(false);
-          }} />
+          <AddClientModal
+            onClose={() => setShowAddModal(false)}
+            onSuccess={(newClient) => {
+              // Add new client at the beginning (newest first)
+              setClients([newClient, ...clients]);
+              setShowAddModal(false);
+            }}
+          />
         )}
       </>
     </ProtectedRoute>
@@ -246,30 +316,37 @@ const ClientsPage: React.FC = () => {
 };
 
 // Add Client Modal Component
-const AddClientModal: React.FC<{ onClose: () => void; onSuccess: (client: any) => void }> = ({ onClose, onSuccess }) => {
+const AddClientModal: React.FC<{ onClose: () => void; onSuccess: (client: Client) => void }> = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     email: '',
     fullName: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    // Simulate API call
-    setTimeout(() => {
-      const newClient = {
-        id: Math.random().toString(),
+    try {
+      const response = await api.post('/api/clients', {
         email: formData.email,
         fullName: formData.fullName,
-        accessType: 'client',
-        createdAt: new Date().toISOString(),
-      };
-      onSuccess(newClient);
+        password: formData.password,
+      });
+
+      // Backend returns { message, client }
+      onSuccess(response.data.client);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error
+        || err.response?.data?.errors?.[0]?.msg
+        || 'Erro ao criar cliente';
+      setError(errorMessage);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -281,6 +358,14 @@ const AddClientModal: React.FC<{ onClose: () => void; onSuccess: (client: any) =
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Error Banner */}
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Nome Completo
@@ -292,6 +377,8 @@ const AddClientModal: React.FC<{ onClose: () => void; onSuccess: (client: any) =
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
               className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold"
               placeholder="João Silva"
+              minLength={2}
+              maxLength={100}
             />
           </div>
 
@@ -319,11 +406,11 @@ const AddClientModal: React.FC<{ onClose: () => void; onSuccess: (client: any) =
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold"
-              placeholder="Mínimo 6 caracteres"
-              minLength={6}
+              placeholder="Ex: Senha@123"
+              minLength={8}
             />
             <p className="text-xs text-slate-500 mt-1">
-              O cliente poderá alterar a senha no primeiro acesso
+              Mínimo 8 caracteres com maiúscula, minúscula, número e símbolo (@$!%*?&)
             </p>
           </div>
 
@@ -331,16 +418,24 @@ const AddClientModal: React.FC<{ onClose: () => void; onSuccess: (client: any) =
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+              disabled={loading}
+              className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-gold hover:bg-gold/90 text-white rounded-lg transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-gold hover:bg-gold/90 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {loading ? 'Criando...' : 'Criar Cliente'}
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Criando...
+                </>
+              ) : (
+                'Criar Cliente'
+              )}
             </button>
           </div>
         </form>

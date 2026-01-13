@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
-import { AuthProvider } from '@/context/AuthContext';
+import { ClerkProvider } from '@clerk/nextjs';
+import { ptBR } from '@clerk/localizations';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { ClientProvider } from '@/context/ClientContext';
 
@@ -13,7 +14,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Symponhy - Social Media Dashboard',
-  description: 'Gestão profissional de redes sociais com IA',
+  description: 'Gestao profissional de redes sociais com IA',
 };
 
 export default function RootLayout({
@@ -22,14 +23,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR">
-      <body className={inter.className}>
-        <LanguageProvider>
-          <AuthProvider>
+    <ClerkProvider localization={ptBR}>
+      <html lang="pt-BR">
+        <body className={inter.className}>
+          <LanguageProvider>
             <ClientProvider>{children}</ClientProvider>
-          </AuthProvider>
-        </LanguageProvider>
-      </body>
-    </html>
+          </LanguageProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -53,7 +53,17 @@
       "WebSearch",
       "mcp__supabase__apply_migration",
       "mcp__supabase__list_tables",
-      "mcp__supabase__list_projects"
+      "mcp__supabase__list_projects",
+      "mcp__railway__project_list",
+      "WebFetch(domain:symponhy-backend-production.up.railway.app)",
+      "Bash(ping:*)",
+      "mcp__railway__configure_api_token",
+      "mcp__railway__team-list",
+      "mcp__railway__github-repo-list",
+      "Bash(railway --help:*)",
+      "Bash(railway deployment list:*)",
+      "Bash(xargs ls:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

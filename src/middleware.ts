@@ -1,75 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-// Decodifica JWT e verifica expiração (sem verificar assinatura - isso é feito no backend)
-function isTokenValid(token: string): boolean {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return false;
+// Rotas públicas que não precisam de autenticação
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/api/webhooks(.*)',
+])
 
-    const payload = JSON.parse(atob(parts[1]));
-
-    // Verifica se tem campo de expiração
-    if (!payload.exp) return false;
-
-    // Verifica se não expirou (exp é em segundos)
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp < now) return false;
-
-    // Verifica campos obrigatórios
-    if (!payload.userId || !payload.email) return false;
-
-    return true;
-  } catch {
-    return false;
+export default clerkMiddleware(async (auth, request) => {
+  // Se não é rota pública, requer autenticação
+  if (!isPublicRoute(request)) {
+    await auth.protect()
   }
-}
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Rotas que não precisam de autenticação
-  const publicRoutes = ['/login', '/register', '/'];
-
-  const token = request.cookies.get('auth_token')?.value;
-  const isValidToken = token ? isTokenValid(token) : false;
-
-  // Se é uma rota pública, deixa passar
-  if (publicRoutes.includes(pathname)) {
-    // Se usuário está autenticado com token válido e tenta acessar login/register, redireciona para dashboard
-    if (isValidToken && (pathname === '/login' || pathname === '/register')) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-    return NextResponse.next();
-  }
-
-  // Rotas protegidas (dashboard e onboarding)
-  const protectedPaths = ['/dashboard', '/onboarding'];
-  const isProtectedRoute = protectedPaths.some(path => pathname.startsWith(path));
-
-  if (isProtectedRoute) {
-    if (!token || !isValidToken) {
-      // Sem token ou token inválido, redireciona para login com URL de retorno
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-
-      const response = NextResponse.redirect(loginUrl);
-      response.cookies.delete('auth_token');
-      return response;
-    }
-  }
-
-  return NextResponse.next();
-}
+})
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    // Skip Next.js internals and all static files
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
-};
+}
