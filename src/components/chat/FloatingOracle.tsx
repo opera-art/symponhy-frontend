@@ -151,19 +151,19 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       void main() {
         vec3 pos = position;
 
-        // Intensity affects distortion and animation speed
-        float intensityBoost = 0.5 + uIntensity * 1.5;
-        float noiseFreq = 0.5;
-        float noiseAmp = (uDistortion + uInteraction * 0.3) * intensityBoost;
-        float timeSpeed = 0.15 + uIntensity * 0.2;
+        // Intensity affects distortion and animation speed - SUBTLE values
+        float intensityBoost = 0.3 + uIntensity * 0.4;
+        float noiseFreq = 0.4;
+        float noiseAmp = (uDistortion * 0.5 + uInteraction * 0.15) * intensityBoost;
+        float timeSpeed = 0.08 + uIntensity * 0.05;
 
         float noise = snoise(vec3(pos.x * noiseFreq + uTime * timeSpeed, pos.y * noiseFreq, pos.z * noiseFreq));
         vNoise = noise;
         vec3 newPos = pos + (normalize(pos) * noise * noiseAmp);
 
-        // Pulsing effect - stronger with intensity
-        float pulseStrength = 0.05 + uIntensity * 0.08;
-        float pulse = 1.0 + sin(uTime * (3.0 + uIntensity * 2.0)) * pulseStrength * (1.0 + uInteraction);
+        // Pulsing effect - very subtle
+        float pulseStrength = 0.015 + uIntensity * 0.02;
+        float pulse = 1.0 + sin(uTime * (1.5 + uIntensity * 0.5)) * pulseStrength * (1.0 + uInteraction * 0.3);
         newPos *= pulse;
 
         // Mouse interaction - stronger effect
@@ -470,7 +470,7 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       sceneRef.current.animationId = requestAnimationFrame(animate);
 
       const currentIntensity = sceneRef.current.intensity || 0.5;
-      time += 0.01 * (1 + currentIntensity * 0.5);
+      time += 0.008 * (1 + currentIntensity * 0.2); // Slower overall animation
 
       // Update intensity uniform
       uniforms.uIntensity.value = currentIntensity;
@@ -484,10 +484,10 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       uniforms.uMouse.value.x += (targetMouseX - uniforms.uMouse.value.x) * 0.08;
       uniforms.uMouse.value.y += (targetMouseY - uniforms.uMouse.value.y) * 0.08;
 
-      // Rotate main sphere system - faster with intensity
+      // Rotate main sphere system - gentle rotation
       if (systemsGroup) {
-        systemsGroup.rotation.y = time * (0.05 + currentIntensity * 0.03);
-        systemsGroup.rotation.z = Math.sin(time * 0.1) * (0.05 + currentIntensity * 0.03);
+        systemsGroup.rotation.y = time * (0.03 + currentIntensity * 0.01);
+        systemsGroup.rotation.z = Math.sin(time * 0.05) * (0.02 + currentIntensity * 0.01);
       }
 
       // Animate atom orbits and electrons
