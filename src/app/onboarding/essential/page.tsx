@@ -8,86 +8,81 @@ import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react';
 interface FormData {
   companyName: string;
   segment: string;
-  targetAudience: string;
-  communicationTone: string;
+  whatYouDo: string;
+  socialNetworks: {
+    instagram?: string;
+    tiktok?: string;
+    youtube?: string;
+    linkedin?: string;
+  };
+  idealClient: string;
+  priorityProduct: string;
+  communicationTone: string[];
   socialGoals: string[];
-  competitors: string;
-  socialNetworks: string[];
-  postFrequency: string;
 }
 
 const questions = [
   {
     id: 'companyName',
-    question: 'Qual o nome da sua empresa ou marca?',
+    question: 'Qual o nome fantasia da sua empresa?',
     placeholder: 'Ex: Minha Marca',
     type: 'text',
   },
   {
     id: 'segment',
-    question: 'Qual o segmento de atuação?',
-    placeholder: 'Ex: Moda, Tecnologia, Alimentação...',
+    question: 'Qual é o segmento específico da empresa?',
+    placeholder: 'Ex: clínica de estética, consultoria financeira, agência de tráfego...',
     type: 'text',
   },
   {
-    id: 'targetAudience',
-    question: 'Quem é seu público-alvo principal?',
-    placeholder: 'Ex: Mulheres de 25-35 anos interessadas em moda sustentável',
+    id: 'whatYouDo',
+    question: 'O que sua empresa faz e para quem?',
+    placeholder: 'Ex: Ajudamos pequenos empresários a organizarem suas finanças através de consultoria personalizada',
+    type: 'textarea',
+  },
+  {
+    id: 'socialNetworks',
+    question: 'Quais são suas redes sociais?',
+    type: 'socialLinks',
+    placeholder: 'Cole os links das suas redes',
+  },
+  {
+    id: 'idealClient',
+    question: 'Descreva seu cliente ideal e suas maiores dores',
+    placeholder: 'Ex: Donos de PMEs, 30-50 anos, que sofrem com fluxo de caixa desorganizado e não sabem precificar...',
+    type: 'textarea',
+  },
+  {
+    id: 'priorityProduct',
+    question: 'Qual produto/serviço é PRIORIDADE para os próximos 90 dias?',
+    placeholder: 'Ex: Consultoria de 3 meses - R$ 2.500 - inclui análise financeira completa + 4 reuniões mensais',
     type: 'textarea',
   },
   {
     id: 'communicationTone',
-    question: 'Como você gostaria que sua marca se comunicasse?',
-    type: 'select',
+    question: 'Como você quer que sua marca soe?',
+    type: 'multiselect',
     options: [
-      { value: 'formal', label: 'Formal e Profissional' },
-      { value: 'casual', label: 'Casual e Descontraído' },
-      { value: 'friendly', label: 'Amigável e Próximo' },
-      { value: 'inspirational', label: 'Inspirador e Motivacional' },
-      { value: 'technical', label: 'Técnico e Educativo' },
+      { value: 'educativo', label: 'Educativo' },
+      { value: 'inspirador', label: 'Inspirador' },
+      { value: 'provocador', label: 'Provocador' },
+      { value: 'tecnico', label: 'Técnico' },
+      { value: 'humor', label: 'Com Humor' },
+      { value: 'sofisticado', label: 'Sofisticado' },
+      { value: 'popular', label: 'Popular' },
+      { value: 'polemico', label: 'Polêmico' },
     ],
   },
   {
     id: 'socialGoals',
-    question: 'Quais são seus principais objetivos nas redes sociais?',
+    question: 'Qual seu objetivo principal nas redes nos próximos 90 dias?',
     type: 'multiselect',
     options: [
-      { value: 'awareness', label: 'Aumentar reconhecimento da marca' },
-      { value: 'engagement', label: 'Aumentar engajamento' },
-      { value: 'sales', label: 'Gerar vendas' },
-      { value: 'leads', label: 'Captar leads' },
-      { value: 'community', label: 'Construir comunidade' },
-      { value: 'authority', label: 'Estabelecer autoridade' },
-    ],
-  },
-  {
-    id: 'competitors',
-    question: 'Quais são seus principais concorrentes?',
-    placeholder: 'Liste 2-3 concorrentes separados por vírgula',
-    type: 'text',
-  },
-  {
-    id: 'socialNetworks',
-    question: 'Em quais redes sociais deseja atuar?',
-    type: 'multiselect',
-    options: [
-      { value: 'instagram', label: 'Instagram' },
-      { value: 'tiktok', label: 'TikTok' },
-      { value: 'facebook', label: 'Facebook' },
-      { value: 'linkedin', label: 'LinkedIn' },
-      { value: 'youtube', label: 'YouTube' },
-      { value: 'twitter', label: 'X (Twitter)' },
-    ],
-  },
-  {
-    id: 'postFrequency',
-    question: 'Qual frequência de postagens você deseja?',
-    type: 'select',
-    options: [
-      { value: 'daily', label: 'Diária (7x por semana)' },
-      { value: 'frequent', label: 'Frequente (4-5x por semana)' },
-      { value: 'moderate', label: 'Moderada (2-3x por semana)' },
-      { value: 'weekly', label: 'Semanal (1x por semana)' },
+      { value: 'autoridade', label: 'Autoridade' },
+      { value: 'leads', label: 'Gerar Leads' },
+      { value: 'vendas', label: 'Vendas Diretas' },
+      { value: 'comunidade', label: 'Construir Comunidade' },
+      { value: 'branding', label: 'Branding' },
     ],
   },
 ];
@@ -98,12 +93,17 @@ export default function EssentialBriefingPage() {
   const [formData, setFormData] = useState<FormData>({
     companyName: '',
     segment: '',
-    targetAudience: '',
-    communicationTone: '',
+    whatYouDo: '',
+    socialNetworks: {
+      instagram: '',
+      tiktok: '',
+      youtube: '',
+      linkedin: '',
+    },
+    idealClient: '',
+    priorityProduct: '',
+    communicationTone: [],
     socialGoals: [],
-    competitors: '',
-    socialNetworks: [],
-    postFrequency: '',
   });
 
   const currentQuestion = questions[currentStep];
@@ -136,10 +136,18 @@ export default function EssentialBriefingPage() {
 
   const isCurrentStepValid = () => {
     const value = formData[currentQuestion.id as keyof FormData];
+    if (currentQuestion.id === 'socialNetworks') {
+      const networks = value as FormData['socialNetworks'];
+      // At least one social network should be filled
+      return Object.values(networks).some(v => v && v.trim() !== '');
+    }
     if (Array.isArray(value)) {
       return value.length > 0;
     }
-    return value && value.trim() !== '';
+    if (typeof value === 'string') {
+      return value.trim() !== '';
+    }
+    return false;
   };
 
   const renderInput = () => {
@@ -215,6 +223,71 @@ export default function EssentialBriefingPage() {
                 </button>
               );
             })}
+          </div>
+        );
+
+      case 'socialLinks':
+        const socialData = formData.socialNetworks;
+        const handleSocialChange = (network: keyof FormData['socialNetworks'], value: string) => {
+          setFormData({
+            ...formData,
+            socialNetworks: {
+              ...formData.socialNetworks,
+              [network]: value,
+            },
+          });
+        };
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-sm font-bold">IG</span>
+              </div>
+              <input
+                type="url"
+                value={socialData.instagram || ''}
+                onChange={(e) => handleSocialChange('instagram', e.target.value)}
+                placeholder="instagram.com/suamarca"
+                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 transition-colors"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-sm font-bold">TT</span>
+              </div>
+              <input
+                type="url"
+                value={socialData.tiktok || ''}
+                onChange={(e) => handleSocialChange('tiktok', e.target.value)}
+                placeholder="tiktok.com/@suamarca"
+                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 transition-colors"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-sm font-bold">YT</span>
+              </div>
+              <input
+                type="url"
+                value={socialData.youtube || ''}
+                onChange={(e) => handleSocialChange('youtube', e.target.value)}
+                placeholder="youtube.com/@suamarca"
+                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 transition-colors"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-700 flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-sm font-bold">IN</span>
+              </div>
+              <input
+                type="url"
+                value={socialData.linkedin || ''}
+                onChange={(e) => handleSocialChange('linkedin', e.target.value)}
+                placeholder="linkedin.com/company/suamarca"
+                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 transition-colors"
+              />
+            </div>
+            <p className="text-xs text-slate-400 text-center mt-2">Preencha pelo menos uma rede social</p>
           </div>
         );
 
