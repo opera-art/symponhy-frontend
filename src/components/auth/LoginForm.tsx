@@ -7,9 +7,10 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export interface LoginFormProps {
   onSubmit?: (data: { email: string; password: string; accessType: string }) => Promise<void>;
+  redirectTo?: string;
 }
 
-export function LoginForm({ onSubmit }: LoginFormProps) {
+export function LoginForm({ onSubmit, redirectTo = '/dashboard' }: LoginFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,10 +24,10 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
 
     try {
       await login(email, password);
-      console.log('Login bem-sucedido, redirecionando...');
+      console.log('Login bem-sucedido, redirecionando para:', redirectTo);
 
-      // Redireciona para dashboard após login bem-sucedido
-      window.location.href = '/dashboard';
+      // Redireciona para destino após login bem-sucedido
+      window.location.href = redirectTo;
     } catch (err) {
       console.error('Erro no login:', err);
       // Erro já está no estado

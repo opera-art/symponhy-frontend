@@ -53,7 +53,7 @@ function LoginContent() {
             </div>
 
             {/* Form Component */}
-            <LoginForm onSubmit={handleLoginSubmit} />
+            <LoginForm redirectTo={redirectTo} />
 
           </div>
         </div>
