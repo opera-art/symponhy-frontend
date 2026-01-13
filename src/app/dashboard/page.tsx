@@ -31,7 +31,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-5 animate-fade-in">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 animate-fade-in">
         <StatsCard
           title={t('totalReach')}
           value={dashboardStats.totalReach.value}
