@@ -3,12 +3,10 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginForm } from '@/components/auth/LoginForm';
-import { GoldenOracle } from '@/components/background/GoldenOracle';
-import { useLanguage } from '@/context/LanguageContext';
+import { FloatingOracle } from '@/components/chat/FloatingOracle';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { t } = useLanguage();
 
   const handleLoginSubmit = async (data: { email: string; password: string; accessType: string }) => {
     console.log('Login attempt:', data);
@@ -22,10 +20,10 @@ export default function LoginPage() {
       {/* Main Card Container */}
       <div className="bg-white w-full max-w-[1200px] rounded-[32px] shadow-2xl flex flex-col lg:flex-row overflow-hidden">
 
-        {/* Left Column: Golden Oracle */}
-        <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden bg-white">
-          {/* Golden Oracle Background */}
-          <GoldenOracle />
+        {/* Left Column: Floating Oracle Sphere */}
+        <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden bg-gradient-to-br from-slate-50 to-white items-center justify-center">
+          <div className="absolute inset-0 bg-amber-500/5 rounded-full blur-3xl scale-150" />
+          <FloatingOracle size={420} />
         </div>
 
         {/* Right Column: Login Form */}
@@ -42,10 +40,10 @@ export default function LoginPage() {
               />
               <div>
                 <h1 className="text-2xl lg:text-3xl font-medium tracking-tight text-slate-900">
-                  {t('welcome')}
+                  Bem-vindo ao
                 </h1>
                 <h2 className="text-2xl lg:text-3xl font-medium tracking-tight text-slate-900">
-                  {t('symphony')}
+                  Symponhy
                 </h2>
               </div>
             </div>

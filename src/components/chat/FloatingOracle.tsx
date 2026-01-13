@@ -25,10 +25,12 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     uniforms?: any;
     animationId?: number;
     systemsGroup?: THREE.Group;
-    lineGroup?: THREE.Group;
+    atomGroup?: THREE.Group;
     musicNotes?: THREE.Group;
     mousePos?: THREE.Vector2;
     isHovering?: boolean;
+    electrons?: THREE.Mesh[];
+    interactionStrength?: number;
   }>({});
 
   useEffect(() => {
@@ -56,10 +58,15 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     container.appendChild(renderer.domElement);
     sceneRef.current.renderer = renderer;
 
-    // Systems Group
+    // Systems Group (for main sphere)
     const systemsGroup = new THREE.Group();
     scene.add(systemsGroup);
     sceneRef.current.systemsGroup = systemsGroup;
+
+    // Atom Group (for orbit lines and electrons)
+    const atomGroup = new THREE.Group();
+    scene.add(atomGroup);
+    sceneRef.current.atomGroup = atomGroup;
 
     // Music Notes Group
     const musicNotes = new THREE.Group();
@@ -67,13 +74,15 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     sceneRef.current.musicNotes = musicNotes;
     sceneRef.current.mousePos = new THREE.Vector2(0, 0);
     sceneRef.current.isHovering = false;
+    sceneRef.current.interactionStrength = 0;
 
-    // Vertex Shader - Gold luxury feel
+    // Vertex Shader - Gold luxury feel with enhanced interaction
     const vertexShader = `
       uniform float uTime;
       uniform float uDistortion;
       uniform float uSize;
       uniform vec2 uMouse;
+      uniform float uInteraction;
 
       varying float vAlpha;
       varying vec3 vPos;
@@ -130,28 +139,33 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       void main() {
         vec3 pos = position;
         float noiseFreq = 0.5;
-        float noiseAmp = uDistortion;
-        float noise = snoise(vec3(pos.x * noiseFreq + uTime * 0.1, pos.y * noiseFreq, pos.z * noiseFreq));
+        float noiseAmp = uDistortion + uInteraction * 0.3;
+        float noise = snoise(vec3(pos.x * noiseFreq + uTime * 0.15, pos.y * noiseFreq, pos.z * noiseFreq));
         vNoise = noise;
         vec3 newPos = pos + (normalize(pos) * noise * noiseAmp);
+
+        // Pulsing effect on interaction
+        float pulse = 1.0 + sin(uTime * 3.0) * 0.05 * uInteraction;
+        newPos *= pulse;
 
         // Mouse interaction - stronger effect
         float dist = distance(uMouse * 10.0, newPos.xy);
         float interaction = smoothstep(6.0, 0.0, dist);
-        newPos += normalize(pos) * interaction * 0.8;
+        newPos += normalize(pos) * interaction * (0.8 + uInteraction * 0.5);
 
         vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
-        gl_PointSize = uSize * (24.0 / -mvPosition.z) * (1.0 + noise * 0.5);
+        gl_PointSize = uSize * (24.0 / -mvPosition.z) * (1.0 + noise * 0.5 + uInteraction * 0.2);
         vAlpha = 1.0;
         vPos = newPos;
       }
     `;
 
-    // Fragment Shader - Luxurious gold effect
+    // Fragment Shader - Luxurious gold effect with glow
     const fragmentShader = `
       uniform vec3 uColor;
       uniform float uOpacity;
+      uniform float uInteraction;
 
       varying float vNoise;
       varying vec3 vPos;
@@ -171,6 +185,9 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
         vec3 finalColor = mix(darkGold, brightGold, vNoise * 0.5 + 0.5);
         finalColor += shimmer * pow(vNoise * 0.5 + 0.5, 2.0);
 
+        // Extra glow on interaction
+        finalColor += vec3(0.2, 0.15, 0.05) * uInteraction;
+
         gl_FragColor = vec4(finalColor, alpha);
       }
     `;
@@ -186,6 +203,7 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       uColor: { value: new THREE.Color(color) },
       uOpacity: { value: 0.9 },
       uMouse: { value: new THREE.Vector2(0, 0) },
+      uInteraction: { value: 0 },
     };
     sceneRef.current.uniforms = uniforms;
 
@@ -203,34 +221,69 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     systemsGroup.add(particles);
     sceneRef.current.particles = particles;
 
-    // Orbit lines - Gold color
-    const lineGroup = new THREE.Group();
-    sceneRef.current.lineGroup = lineGroup;
+    // Create atom orbits with electrons
+    const electrons: THREE.Mesh[] = [];
+    sceneRef.current.electrons = electrons;
 
     if (showOrbits) {
-      systemsGroup.add(lineGroup);
+      // Orbit configurations: [radiusX, radiusY, rotationX, rotationY, rotationZ, speed, electronCount]
+      const orbitConfigs = [
+        { rx: 6.5, ry: 6.5, rotX: Math.PI / 2, rotY: 0, rotZ: 0, speed: 0.8, electrons: 2 },
+        { rx: 7.0, ry: 5.5, rotX: Math.PI / 3, rotY: Math.PI / 6, rotZ: 0.2, speed: 1.2, electrons: 1 },
+        { rx: 5.8, ry: 7.2, rotX: Math.PI / 1.5, rotY: Math.PI / 4, rotZ: -0.3, speed: 1.0, electrons: 2 },
+        { rx: 6.2, ry: 6.8, rotX: Math.PI / 2.5, rotY: -Math.PI / 5, rotZ: 0.4, speed: 0.9, electrons: 1 },
+      ];
 
-      const createOrbit = (radius: number, rotationX: number, rotationY: number) => {
-        const curve = new THREE.EllipseCurve(0, 0, radius, radius, 0, 2 * Math.PI, false, 0);
+      orbitConfigs.forEach((config, orbitIndex) => {
+        // Create elliptical orbit path
+        const curve = new THREE.EllipseCurve(0, 0, config.rx, config.ry, 0, 2 * Math.PI, false, 0);
         const points = curve.getPoints(128);
-        const geo = new THREE.BufferGeometry().setFromPoints(
+        const orbitGeo = new THREE.BufferGeometry().setFromPoints(
           points.map(p => new THREE.Vector3(p.x, p.y, 0))
         );
-        const mat = new THREE.LineBasicMaterial({
+
+        // Glowing orbit line
+        const orbitMat = new THREE.LineBasicMaterial({
           color: 0xD4AF37,
           transparent: true,
-          opacity: 0.2,
+          opacity: 0.15,
         });
-        const orbit = new THREE.Line(geo, mat);
-        orbit.rotation.x = rotationX;
-        orbit.rotation.y = rotationY;
-        lineGroup.add(orbit);
-        return orbit;
-      };
+        const orbit = new THREE.Line(orbitGeo, orbitMat);
+        orbit.rotation.x = config.rotX;
+        orbit.rotation.y = config.rotY;
+        orbit.rotation.z = config.rotZ;
+        atomGroup.add(orbit);
 
-      createOrbit(5.5, Math.PI / 2, 0);
-      createOrbit(5.2, Math.PI / 3, Math.PI / 6);
-      createOrbit(6.0, Math.PI / 1.8, Math.PI / 4);
+        // Create electrons (small glowing spheres) on this orbit
+        for (let i = 0; i < config.electrons; i++) {
+          const electronGeo = new THREE.SphereGeometry(0.25, 16, 16);
+          const electronMat = new THREE.MeshBasicMaterial({
+            color: 0xFFD700,
+            transparent: true,
+            opacity: 0.9,
+          });
+          const electron = new THREE.Mesh(electronGeo, electronMat);
+
+          // Store orbit data on electron
+          (electron as any).orbitConfig = config;
+          (electron as any).orbitIndex = orbitIndex;
+          (electron as any).electronIndex = i;
+          (electron as any).phase = (i / config.electrons) * Math.PI * 2;
+
+          atomGroup.add(electron);
+          electrons.push(electron);
+
+          // Add glow effect to electron
+          const glowGeo = new THREE.SphereGeometry(0.4, 16, 16);
+          const glowMat = new THREE.MeshBasicMaterial({
+            color: 0xD4AF37,
+            transparent: true,
+            opacity: 0.3,
+          });
+          const glow = new THREE.Mesh(glowGeo, glowMat);
+          electron.add(glow);
+        }
+      });
     }
 
     // Music Note class
@@ -241,13 +294,11 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       maxLife: number;
 
       constructor(x: number, y: number) {
-        // Create canvas for music note
         const canvas = document.createElement('canvas');
         canvas.width = 64;
         canvas.height = 64;
         const ctx = canvas.getContext('2d')!;
 
-        // Draw music note symbol
         ctx.font = '48px serif';
         ctx.fillStyle = '#D4AF37';
         ctx.textAlign = 'center';
@@ -266,7 +317,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
         this.mesh.position.set(x, y, 0);
         this.mesh.scale.set(1.2, 1.2, 1);
 
-        // Random upward velocity with slight horizontal drift
         this.velocity = new THREE.Vector3(
           (Math.random() - 0.5) * 0.15,
           0.08 + Math.random() * 0.08,
@@ -281,14 +331,10 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
         this.life++;
         this.mesh.position.add(this.velocity);
 
-        // Fade out
         const progress = this.life / this.maxLife;
         this.mesh.material.opacity = 1 - progress;
-
-        // Slight wave motion
         this.mesh.position.x += Math.sin(this.life * 0.1) * 0.02;
 
-        // Scale down slightly
         const scale = 1.2 * (1 - progress * 0.3);
         this.mesh.scale.set(scale, scale, 1);
 
@@ -310,6 +356,7 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     let mouseY = 0;
     let targetMouseX = 0;
     let targetMouseY = 0;
+    let targetInteraction = 0;
 
     // Mouse interaction
     const handleMouseMove = (e: MouseEvent) => {
@@ -324,10 +371,12 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
 
     const handleMouseEnter = () => {
       sceneRef.current.isHovering = true;
+      targetInteraction = 1;
     };
 
     const handleMouseLeave = () => {
       sceneRef.current.isHovering = false;
+      targetInteraction = 0;
     };
 
     // Global mouse for camera sway
@@ -349,21 +398,48 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       sceneRef.current.animationId = requestAnimationFrame(animate);
       time += 0.01;
 
+      // Smooth interaction transition
+      const currentInteraction = sceneRef.current.interactionStrength || 0;
+      sceneRef.current.interactionStrength = currentInteraction + (targetInteraction - currentInteraction) * 0.1;
+      uniforms.uInteraction.value = sceneRef.current.interactionStrength;
+
       // Smooth mouse following
       uniforms.uMouse.value.x += (targetMouseX - uniforms.uMouse.value.x) * 0.08;
       uniforms.uMouse.value.y += (targetMouseY - uniforms.uMouse.value.y) * 0.08;
 
-      // Rotate system
+      // Rotate main sphere system
       if (systemsGroup) {
         systemsGroup.rotation.y = time * 0.05;
         systemsGroup.rotation.z = Math.sin(time * 0.1) * 0.05;
       }
 
-      // Rotate orbits
-      if (lineGroup && showOrbits) {
-        lineGroup.rotation.x = Math.sin(time * 0.05) * 0.2;
-        lineGroup.children.forEach((orbit, i) => {
-          orbit.rotation.z += 0.002 * (i + 1);
+      // Animate atom orbits and electrons
+      if (atomGroup && showOrbits) {
+        // Subtle rotation of whole atom group
+        atomGroup.rotation.y = time * 0.02;
+        atomGroup.rotation.x = Math.sin(time * 0.03) * 0.1;
+
+        // Update electron positions along their orbits
+        const interactionBoost = 1 + (sceneRef.current.interactionStrength || 0) * 0.5;
+
+        electrons.forEach((electron) => {
+          const config = (electron as any).orbitConfig;
+          const phase = (electron as any).phase;
+          const baseAngle = time * config.speed * interactionBoost + phase;
+
+          // Position on ellipse
+          const x = Math.cos(baseAngle) * config.rx;
+          const y = Math.sin(baseAngle) * config.ry;
+
+          // Apply orbit rotation
+          const pos = new THREE.Vector3(x, y, 0);
+          pos.applyEuler(new THREE.Euler(config.rotX, config.rotY, config.rotZ));
+
+          electron.position.copy(pos);
+
+          // Pulse electron size on interaction
+          const scale = 1 + Math.sin(time * 5 + phase) * 0.1 * (sceneRef.current.interactionStrength || 0);
+          electron.scale.setScalar(scale);
         });
       }
 
@@ -412,7 +488,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
         cancelAnimationFrame(sceneRef.current.animationId);
       }
 
-      // Cleanup notes
       activeNotes.forEach(note => note.dispose());
 
       if (sceneRef.current.renderer) {
@@ -427,9 +502,13 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
         (sceneRef.current.particles.material as THREE.Material).dispose();
       }
 
-      if (sceneRef.current.lineGroup) {
-        sceneRef.current.lineGroup.children.forEach((child) => {
+      if (sceneRef.current.atomGroup) {
+        sceneRef.current.atomGroup.children.forEach((child) => {
           if (child instanceof THREE.Line) {
+            child.geometry.dispose();
+            (child.material as THREE.Material).dispose();
+          }
+          if (child instanceof THREE.Mesh) {
             child.geometry.dispose();
             (child.material as THREE.Material).dispose();
           }

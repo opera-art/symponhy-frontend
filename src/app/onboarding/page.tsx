@@ -40,15 +40,15 @@ export default function OnboardingPage() {
             className="group flex-1 bg-white rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-300 text-left"
           >
             <div className="flex flex-col">
-              <span className="text-[13px] text-slate-400 mb-1">Rápido</span>
+              <span className="text-[13px] text-slate-400 mb-1">Completo</span>
               <h3 className="text-lg font-semibold text-slate-900 mb-2">
                 Briefing Essencial
               </h3>
               <p className="text-[13px] text-slate-500 leading-relaxed">
-                Perguntas objetivas para começar rapidamente
+                Formulário completo para personalizar sua experiência
               </p>
               <div className="mt-4 pt-3 border-t border-slate-100">
-                <span className="text-xs text-slate-400">5 min · 8 perguntas</span>
+                <span className="text-xs text-slate-400">15-20 min · 70+ perguntas</span>
               </div>
             </div>
           </button>

@@ -46,7 +46,11 @@
       "mcp__github__search_repositories",
       "mcp__github__get_file_contents",
       "Bash(railway login:*)",
-      "Bash(railway project list:*)"
+      "Bash(railway project list:*)",
+      "Bash(railway variables:*)",
+      "Bash(findstr:*)",
+      "mcp__supabase__execute_sql",
+      "WebSearch"
     ]
   }
 }

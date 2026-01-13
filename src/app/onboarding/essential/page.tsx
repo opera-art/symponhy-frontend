@@ -3,125 +3,485 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FloatingOracle } from '@/components/chat/FloatingOracle';
-import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Sparkles, Upload } from 'lucide-react';
 
 interface FormData {
-  companyName: string;
-  segment: string;
-  whatYouDo: string;
-  socialNetworks: {
-    instagram?: string;
-    tiktok?: string;
-    youtube?: string;
-    linkedin?: string;
-  };
-  idealClient: string;
-  priorityProduct: string;
-  communicationTone: string[];
-  socialGoals: string[];
+  // Dados básicos
+  razaoSocial: string;
+  nomeFantasia: string;
+  cnpj: string;
+  dataFundacao: string;
+  siteInstitucional: string;
+  estadosCidades: string;
+  paisesInternacionais: string;
+  temSedeFixa: string;
+  enderecoSede: string;
+  segmentoEspecifico: string;
+  faturamentoAnual: string;
+
+  // Redes sociais
+  instagram: string;
+  tiktok: string;
+  youtubeShorts: string;
+  threads: string;
+  reclameAqui: string;
+  googleMeuNegocio: string;
+  outrosCanais: string;
+
+  // Identidade
+  oQueFaz: string;
+  paraQuem: string;
+  comoComecou: string;
+  missao: string;
+  visao3a5Anos: string;
+  valores: string;
+
+  // Oferta prioritária
+  produtoPrioritario: string;
+  precoProduto: string;
+  formasPagamento: string[];
+  oQueIncluso: string;
+  oQueNaoIncluso: string;
+  transformacaoEntrega: string;
+  temProvasSociais: string;
+  linksProvasSociais: string;
+  linkPaginaProduto: string;
+
+  // Cliente ideal
+  tipoCliente: string;
+  clienteIdeal: string;
+  tresDores: string;
+  tresDesejos: string;
+  tresObjecoes: string;
+  frasesCliente: string;
+  ondeClienteVive: string[];
+  pesquisasGoogle: string;
+
+  // Funil e vendas
+  comoClienteChega: string[];
+  proximoPasso: string[];
+  capacidadeEntrega: string;
+  maioresGargalos: string[];
+  faqPerguntas: string;
+  porQueNaoFecham: string;
+  sabeNumeros: string;
+  ticketMedio: string;
+  cac: string;
+  taxaConversao: string;
+
+  // Marca e comunicação
+  tomMarca: string[];
+  palavrasUsaMuito: string;
+  palavrasEvita: string;
+  temasProibidos: string;
+  verdadeIncomoda: string;
+  comoRespondeCriticas: string;
+
+  // Conteúdo e produção
+  objetivoRedes: string[];
+  primeiraImpressao: string;
+  plataformasPrioritarias: string[];
+  frequenciaDesejada: string;
+  formatosConsegueProduzir: string[];
+  rostoConteudo: string[];
+  quemGrava: string;
+  temEditor: string;
+  quadroSerie: string;
+  qualQuadro: string;
+  ctasPermitidos: string[];
+  temLeadMagnet: string;
+  linkLeadMagnet: string;
+  temasPublicoAma: string;
+  agenda90Dias: string;
+
+  // Concorrência
+  concorrentesDiretos: string;
+  ondeConcorrentesMelhores: string;
+  porQueEscolhemVoce: string;
+  referenciasConteudo: string;
+  oQueQuerCopiar: string;
+  referenciaNaoGosta: string;
+
+  // Final
+  algoMais: string;
+  restricaoLegal: string;
 }
 
-const questions = [
+const sections = [
   {
-    id: 'companyName',
-    question: 'Qual o nome fantasia da sua empresa?',
-    placeholder: 'Ex: Minha Marca',
-    type: 'text',
-  },
-  {
-    id: 'segment',
-    question: 'Qual é o segmento específico da empresa?',
-    placeholder: 'Ex: clínica de estética, consultoria financeira, agência de tráfego...',
-    type: 'text',
-  },
-  {
-    id: 'whatYouDo',
-    question: 'O que sua empresa faz e para quem?',
-    placeholder: 'Ex: Ajudamos pequenos empresários a organizarem suas finanças através de consultoria personalizada',
-    type: 'textarea',
-  },
-  {
-    id: 'socialNetworks',
-    question: 'Quais são suas redes sociais?',
-    type: 'socialLinks',
-    placeholder: 'Cole os links das suas redes',
-  },
-  {
-    id: 'idealClient',
-    question: 'Descreva seu cliente ideal e suas maiores dores',
-    placeholder: 'Ex: Donos de PMEs, 30-50 anos, que sofrem com fluxo de caixa desorganizado e não sabem precificar...',
-    type: 'textarea',
-  },
-  {
-    id: 'priorityProduct',
-    question: 'Qual produto/serviço é PRIORIDADE para os próximos 90 dias?',
-    placeholder: 'Ex: Consultoria de 3 meses - R$ 2.500 - inclui análise financeira completa + 4 reuniões mensais',
-    type: 'textarea',
-  },
-  {
-    id: 'communicationTone',
-    question: 'Como você quer que sua marca soe?',
-    type: 'multiselect',
-    options: [
-      { value: 'educativo', label: 'Educativo' },
-      { value: 'inspirador', label: 'Inspirador' },
-      { value: 'provocador', label: 'Provocador' },
-      { value: 'tecnico', label: 'Técnico' },
-      { value: 'humor', label: 'Com Humor' },
-      { value: 'sofisticado', label: 'Sofisticado' },
-      { value: 'popular', label: 'Popular' },
-      { value: 'polemico', label: 'Polêmico' },
+    title: 'Dados Básicos',
+    questions: [
+      { id: 'razaoSocial', question: 'Razão social', type: 'text', placeholder: 'Nome legal da empresa' },
+      { id: 'nomeFantasia', question: 'Nome fantasia / nome comercial', type: 'text', placeholder: 'Como sua marca é conhecida' },
+      { id: 'cnpj', question: 'CNPJ (opcional)', type: 'text', placeholder: '00.000.000/0000-00' },
+      { id: 'dataFundacao', question: 'Data de fundação da empresa', type: 'date', placeholder: '' },
+      { id: 'siteInstitucional', question: 'Site institucional', type: 'url', placeholder: 'https://seusite.com.br' },
+      { id: 'estadosCidades', question: 'Quais estados/cidades você atende?', type: 'textarea', placeholder: 'Ex: São Paulo, Rio de Janeiro, Minas Gerais...' },
+      { id: 'paisesInternacionais', question: 'Se internacional: quais países?', type: 'text', placeholder: 'Ex: EUA, Portugal, México...' },
+      { id: 'temSedeFixa', question: 'A empresa tem sede física fixa?', type: 'select', options: [
+        { value: 'sim', label: 'Sim' },
+        { value: 'nao', label: 'Não' },
+      ]},
+      { id: 'enderecoSede', question: 'Endereço da sede (se tiver)', type: 'text', placeholder: 'Rua, número, cidade, estado' },
+      { id: 'segmentoEspecifico', question: 'Qual é o segmento específico da empresa?', type: 'text', placeholder: 'Ex: clínica de estética, consultoria financeira, agência de tráfego...' },
+      { id: 'faturamentoAnual', question: 'Faturamento anual atual (estimativa)', type: 'select', options: [
+        { value: 'ate100k', label: 'Até R$ 100 mil' },
+        { value: '100k-500k', label: 'R$ 100 mil - R$ 500 mil' },
+        { value: '500k-1m', label: 'R$ 500 mil - R$ 1 milhão' },
+        { value: '1m-5m', label: 'R$ 1 milhão - R$ 5 milhões' },
+        { value: '5m+', label: 'Acima de R$ 5 milhões' },
+      ]},
     ],
   },
   {
-    id: 'socialGoals',
-    question: 'Qual seu objetivo principal nas redes nos próximos 90 dias?',
-    type: 'multiselect',
-    options: [
-      { value: 'autoridade', label: 'Autoridade' },
-      { value: 'leads', label: 'Gerar Leads' },
-      { value: 'vendas', label: 'Vendas Diretas' },
-      { value: 'comunidade', label: 'Construir Comunidade' },
-      { value: 'branding', label: 'Branding' },
+    title: 'Redes Sociais e Canais',
+    questions: [
+      { id: 'instagram', question: 'Instagram', type: 'url', placeholder: 'instagram.com/suamarca' },
+      { id: 'tiktok', question: 'TikTok', type: 'url', placeholder: 'tiktok.com/@suamarca' },
+      { id: 'youtubeShorts', question: 'YouTube Shorts', type: 'url', placeholder: 'youtube.com/@suamarca' },
+      { id: 'threads', question: 'Threads', type: 'url', placeholder: 'threads.net/@suamarca' },
+      { id: 'reclameAqui', question: 'Reclame Aqui', type: 'url', placeholder: 'Link do perfil' },
+      { id: 'googleMeuNegocio', question: 'Google Meu Negócio', type: 'url', placeholder: 'Link do perfil' },
+      { id: 'outrosCanais', question: 'Outros canais (YouTube longo, LinkedIn, Blog, Pinterest, E-mail, Podcast)', type: 'textarea', placeholder: 'Cole os links dos outros canais, um por linha' },
+    ],
+  },
+  {
+    title: 'Identidade da Empresa',
+    questions: [
+      { id: 'oQueFaz', question: 'O que sua empresa faz?', type: 'textarea', placeholder: 'Descreva em poucas palavras o que vocês fazem' },
+      { id: 'paraQuem', question: 'Para quem você faz isso?', type: 'textarea', placeholder: 'Quem são seus clientes' },
+      { id: 'comoComecou', question: 'Como a empresa começou? (resumo em 3-6 linhas)', type: 'textarea', placeholder: 'Conte brevemente a história da empresa' },
+      { id: 'missao', question: 'Qual é a missão da empresa?', type: 'textarea', placeholder: 'Pode ser informal' },
+      { id: 'visao3a5Anos', question: 'Onde você quer estar em 3-5 anos?', type: 'textarea', placeholder: 'Qual resultado você quer alcançar' },
+      { id: 'valores', question: 'Quais são os valores da empresa?', type: 'text', placeholder: 'Ex: transparência, agilidade, excelência...' },
+    ],
+  },
+  {
+    title: 'Oferta Prioritária',
+    questions: [
+      { id: 'produtoPrioritario', question: 'Qual é o produto/serviço PRIORITÁRIO para os próximos 90 dias?', type: 'textarea', placeholder: 'O que vamos vender no conteúdo' },
+      { id: 'precoProduto', question: 'Quanto custa esse produto/serviço?', type: 'text', placeholder: 'Valor ou faixa de preço' },
+      { id: 'formasPagamento', question: 'Como o cliente paga hoje?', type: 'multiselect', options: [
+        { value: 'pix', label: 'Pix' },
+        { value: 'cartao_avista', label: 'Cartão à vista' },
+        { value: 'parcelado', label: 'Parcelado' },
+        { value: 'assinatura', label: 'Assinatura' },
+        { value: 'boleto', label: 'Boleto' },
+        { value: 'outro', label: 'Outro' },
+      ]},
+      { id: 'oQueIncluso', question: 'O que está incluso na entrega?', type: 'textarea', placeholder: 'Liste o que o cliente recebe' },
+      { id: 'oQueNaoIncluso', question: 'O que NÃO está incluso?', type: 'textarea', placeholder: 'O que não faz parte da entrega' },
+      { id: 'transformacaoEntrega', question: 'Em 1 frase: qual transformação/resultado esse produto entrega?', type: 'text', placeholder: 'A promessa principal' },
+      { id: 'temProvasSociais', question: 'Você tem provas sociais desse produto?', type: 'select', options: [
+        { value: 'sim', label: 'Sim' },
+        { value: 'nao', label: 'Não' },
+      ]},
+      { id: 'linksProvasSociais', question: 'Links das provas sociais (Drive/Notion/Instagram)', type: 'textarea', placeholder: 'Cole os links dos depoimentos' },
+      { id: 'linkPaginaProduto', question: 'Link da página/WhatsApp/checkout (se existir)', type: 'url', placeholder: 'https://...' },
+    ],
+  },
+  {
+    title: 'Cliente Ideal',
+    questions: [
+      { id: 'tipoCliente', question: 'Você vende principalmente para:', type: 'select', options: [
+        { value: 'pf', label: 'Pessoa física' },
+        { value: 'pj', label: 'Empresa (B2B)' },
+        { value: 'ambos', label: 'Ambos' },
+      ]},
+      { id: 'clienteIdeal', question: 'Descreva seu cliente ideal (quem é + contexto)', type: 'textarea', placeholder: 'Perfil detalhado do seu cliente ideal' },
+      { id: 'tresDores', question: 'Quais são as 3 maiores dores desse cliente? (com exemplo real)', type: 'textarea', placeholder: 'O que mais incomoda seu cliente' },
+      { id: 'tresDesejos', question: 'Quais são os 3 maiores desejos desse cliente?', type: 'textarea', placeholder: 'O que seu cliente mais quer' },
+      { id: 'tresObjecoes', question: 'Quais são as 3 objeções mais comuns antes de comprar?', type: 'textarea', placeholder: 'O que impede a compra' },
+      { id: 'frasesCliente', question: 'Escreva 5 frases reais que o cliente fala (do jeito que ele fala)', type: 'textarea', placeholder: 'Copie falas reais dos seus clientes' },
+      { id: 'ondeClienteVive', question: 'Onde esse cliente mais "vive" (atenção)?', type: 'multiselect', options: [
+        { value: 'instagram', label: 'Instagram' },
+        { value: 'tiktok', label: 'TikTok' },
+        { value: 'youtube', label: 'YouTube' },
+        { value: 'google', label: 'Google' },
+        { value: 'linkedin', label: 'LinkedIn' },
+        { value: 'whatsapp', label: 'Grupos WhatsApp/Telegram' },
+        { value: 'eventos', label: 'Eventos' },
+        { value: 'podcasts', label: 'Podcasts' },
+      ]},
+      { id: 'pesquisasGoogle', question: 'O que esse cliente pesquisa no Google? (3-10 termos)', type: 'textarea', placeholder: 'Termos de busca que ele usa' },
+    ],
+  },
+  {
+    title: 'Funil e Vendas',
+    questions: [
+      { id: 'comoClienteChega', question: 'Como o cliente chega hoje?', type: 'multiselect', options: [
+        { value: 'organico', label: 'Orgânico redes' },
+        { value: 'indicacao', label: 'Indicação' },
+        { value: 'trafego_pago', label: 'Tráfego pago' },
+        { value: 'google_seo', label: 'Google/SEO' },
+        { value: 'parcerias', label: 'Parcerias' },
+        { value: 'outbound', label: 'Outbound' },
+      ]},
+      { id: 'proximoPasso', question: 'Qual é o "próximo passo" que você quer que o cliente faça?', type: 'multiselect', options: [
+        { value: 'dm', label: 'Mandar DM' },
+        { value: 'link', label: 'Clicar no link' },
+        { value: 'whatsapp', label: 'Chamar no WhatsApp' },
+        { value: 'formulario', label: 'Preencher formulário' },
+        { value: 'call', label: 'Agendar call' },
+        { value: 'comprar', label: 'Comprar direto' },
+      ]},
+      { id: 'capacidadeEntrega', question: 'Qual a sua capacidade de entrega hoje? (clientes por mês)', type: 'text', placeholder: 'Número estimado' },
+      { id: 'maioresGargalos', question: 'Marque os 2-3 maiores gargalos hoje', type: 'multiselect', options: [
+        { value: 'falta_leads', label: 'Falta de leads' },
+        { value: 'leads_ruins', label: 'Leads ruins' },
+        { value: 'baixa_conversao', label: 'Baixa conversão' },
+        { value: 'ticket_baixo', label: 'Ticket baixo' },
+        { value: 'pouca_prova', label: 'Pouca prova social' },
+        { value: 'comercial_fraco', label: 'Processo comercial fraco' },
+        { value: 'churn', label: 'Churn' },
+        { value: 'oferta_confusa', label: 'Oferta confusa' },
+        { value: 'falta_conteudo', label: 'Falta de conteúdo' },
+        { value: 'operacao', label: 'Operação desorganizada' },
+      ]},
+      { id: 'faqPerguntas', question: 'Quais são as 10 perguntas mais comuns antes de comprar? (FAQ real)', type: 'textarea', placeholder: 'Liste as perguntas frequentes' },
+      { id: 'porQueNaoFecham', question: 'Por que as pessoas NÃO fecham? (motivo nº1)', type: 'textarea', placeholder: 'Principal razão de não comprar' },
+      { id: 'sabeNumeros', question: 'Você sabe seus números?', type: 'select', options: [
+        { value: 'sim', label: 'Sim' },
+        { value: 'nao', label: 'Não' },
+      ]},
+      { id: 'ticketMedio', question: 'Ticket médio', type: 'text', placeholder: 'R$ 0,00' },
+      { id: 'cac', question: 'CAC (Custo de Aquisição)', type: 'text', placeholder: 'R$ 0,00' },
+      { id: 'taxaConversao', question: 'Taxa call → venda (%)', type: 'text', placeholder: '0%' },
+    ],
+  },
+  {
+    title: 'Marca e Comunicação',
+    questions: [
+      { id: 'tomMarca', question: 'Como você quer que a marca soe?', type: 'multiselect', options: [
+        { value: 'educativo', label: 'Educativo' },
+        { value: 'inspirador', label: 'Inspirador' },
+        { value: 'provocador', label: 'Provocador' },
+        { value: 'tecnico', label: 'Técnico' },
+        { value: 'humor', label: 'Humor' },
+        { value: 'sofisticado', label: 'Sofisticado' },
+        { value: 'popular', label: 'Popular' },
+        { value: 'polemico', label: 'Polêmico' },
+        { value: 'espiritual', label: 'Espiritual' },
+      ]},
+      { id: 'palavrasUsaMuito', question: 'Cite 5 palavras que a marca usa muito', type: 'text', placeholder: 'Palavras-chave da marca' },
+      { id: 'palavrasEvita', question: 'Cite 5 palavras/temas que a marca evita', type: 'text', placeholder: 'O que nunca usar' },
+      { id: 'temasProibidos', question: 'Temas proibidos ou sensíveis (nunca falar / falar com cuidado)', type: 'textarea', placeholder: 'Assuntos delicados' },
+      { id: 'verdadeIncomoda', question: 'Qual "verdade incômoda/opinião forte" você defende no seu nicho?', type: 'textarea', placeholder: 'Seu posicionamento polêmico' },
+      { id: 'comoRespondeCriticas', question: 'Como vocês preferem responder críticas/hate?', type: 'select', options: [
+        { value: 'nao_responde', label: 'Não responde' },
+        { value: 'curto_educado', label: 'Responde curto e educado' },
+        { value: 'firmeza', label: 'Responde com firmeza' },
+        { value: 'privado', label: 'Leva pro privado' },
+      ]},
+    ],
+  },
+  {
+    title: 'Conteúdo e Produção',
+    questions: [
+      { id: 'objetivoRedes', question: 'Qual é seu objetivo principal nas redes nos próximos 90 dias?', type: 'multiselect', options: [
+        { value: 'autoridade', label: 'Autoridade' },
+        { value: 'leads', label: 'Leads' },
+        { value: 'vendas', label: 'Vendas' },
+        { value: 'comunidade', label: 'Comunidade' },
+        { value: 'branding', label: 'Branding' },
+      ]},
+      { id: 'primeiraImpressao', question: 'Que primeira impressão você quer causar? (3 adjetivos)', type: 'text', placeholder: 'Ex: profissional, acolhedor, inovador' },
+      { id: 'plataformasPrioritarias', question: 'Plataformas prioritárias (escolha até 2-3)', type: 'multiselect', options: [
+        { value: 'instagram', label: 'Instagram' },
+        { value: 'tiktok', label: 'TikTok' },
+        { value: 'youtube_shorts', label: 'YouTube Shorts' },
+        { value: 'threads', label: 'Threads' },
+        { value: 'linkedin', label: 'LinkedIn' },
+        { value: 'blog', label: 'Blog' },
+        { value: 'email', label: 'E-mail' },
+        { value: 'podcast', label: 'Podcast' },
+      ]},
+      { id: 'frequenciaDesejada', question: 'Frequência desejada (posts por semana)', type: 'select', options: [
+        { value: '3', label: '3x por semana' },
+        { value: '5', label: '5x por semana' },
+        { value: '7', label: '7x por semana (diário)' },
+        { value: 'outro', label: 'Outro' },
+      ]},
+      { id: 'formatosConsegueProduzir', question: 'Quais formatos você consegue produzir hoje?', type: 'multiselect', options: [
+        { value: 'reels_falando', label: 'Reels falando' },
+        { value: 'cortes', label: 'Cortes' },
+        { value: 'entrevista', label: 'Entrevista' },
+        { value: 'vlog', label: 'Vlog' },
+        { value: 'bastidores', label: 'Bastidores' },
+        { value: 'tutorial', label: 'Tutorial' },
+        { value: 'carrossel', label: 'Carrossel' },
+        { value: 'stories', label: 'Stories' },
+        { value: 'live', label: 'Live' },
+        { value: 'texto', label: 'Texto (LinkedIn)' },
+      ]},
+      { id: 'rostoConteudo', question: 'Quem será o rosto do conteúdo?', type: 'multiselect', options: [
+        { value: 'fundador', label: 'Fundador(a)' },
+        { value: 'time', label: 'Time' },
+        { value: 'ugc', label: 'Clientes (UGC)' },
+        { value: 'sem_rosto', label: 'Sem rosto (brand)' },
+      ]},
+      { id: 'quemGrava', question: 'Quem grava? Essa pessoa tem facilidade com câmera?', type: 'text', placeholder: 'Nome e se tem facilidade' },
+      { id: 'temEditor', question: 'Você tem editor/design?', type: 'select', options: [
+        { value: 'eu_mesmo', label: 'Eu mesmo(a)' },
+        { value: 'editor', label: 'Editor' },
+        { value: 'designer', label: 'Designer' },
+        { value: 'equipe', label: 'Equipe completa' },
+        { value: 'nao_tenho', label: 'Não tenho' },
+      ]},
+      { id: 'quadroSerie', question: 'Existe algum quadro/série que você quer manter?', type: 'select', options: [
+        { value: 'sim', label: 'Sim' },
+        { value: 'nao', label: 'Não' },
+      ]},
+      { id: 'qualQuadro', question: 'Qual quadro/série?', type: 'text', placeholder: 'Nome do quadro' },
+      { id: 'ctasPermitidos', question: 'Quais CTAs são permitidos?', type: 'multiselect', options: [
+        { value: 'comente', label: '"Comente [palavra]"' },
+        { value: 'link', label: '"Clique no link"' },
+        { value: 'whatsapp', label: '"Me chama no WhatsApp"' },
+        { value: 'baixe', label: '"Baixe o material"' },
+        { value: 'agende', label: '"Agende call"' },
+        { value: 'lista', label: '"Entre na lista"' },
+      ]},
+      { id: 'temLeadMagnet', question: 'Você tem alguma isca/lead magnet?', type: 'select', options: [
+        { value: 'sim', label: 'Sim' },
+        { value: 'nao', label: 'Não' },
+      ]},
+      { id: 'linkLeadMagnet', question: 'Link + descrição do lead magnet', type: 'textarea', placeholder: 'Link e o que é a isca' },
+      { id: 'temasPublicoAma', question: 'Lista rápida: 10 temas que o público ama e você quer bater', type: 'textarea', placeholder: 'Temas que funcionam bem' },
+      { id: 'agenda90Dias', question: 'Agenda dos próximos 90 dias (lançamentos/eventos/campanhas)', type: 'textarea', placeholder: 'O que está planejado' },
+    ],
+  },
+  {
+    title: 'Concorrência e Referências',
+    questions: [
+      { id: 'concorrentesDiretos', question: 'Liste 3 concorrentes diretos (links)', type: 'textarea', placeholder: 'Links dos concorrentes' },
+      { id: 'ondeConcorrentesMelhores', question: 'Em 1 linha cada: onde eles são melhores?', type: 'textarea', placeholder: 'Pontos fortes deles' },
+      { id: 'porQueEscolhemVoce', question: 'Em 1 frase: por que o cliente escolhe você e não eles?', type: 'textarea', placeholder: 'Seu diferencial' },
+      { id: 'referenciasConteudo', question: 'Liste 3 referências de conteúdo que você gosta (links)', type: 'textarea', placeholder: 'Contas que você admira' },
+      { id: 'oQueQuerCopiar', question: 'O que exatamente você quer copiar dessas referências?', type: 'textarea', placeholder: 'Estilo, formato, tom...' },
+      { id: 'referenciaNaoGosta', question: 'Liste 1 referência que você NÃO gosta (link) + por quê', type: 'textarea', placeholder: 'O que evitar' },
+    ],
+  },
+  {
+    title: 'Pergunta Final',
+    questions: [
+      { id: 'algoMais', question: 'Tem algo que você quer que a IA saiba e não foi perguntado?', type: 'textarea', placeholder: 'Informações adicionais importantes' },
+      { id: 'restricaoLegal', question: 'No seu nicho há alguma restrição legal de conteúdo? (Ex: OAB, medicina, etc)', type: 'textarea', placeholder: 'Restrições que devemos respeitar' },
     ],
   },
 ];
 
 export default function EssentialBriefingPage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentSection, setCurrentSection] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
   const [formData, setFormData] = useState<FormData>({
-    companyName: '',
-    segment: '',
-    whatYouDo: '',
-    socialNetworks: {
-      instagram: '',
-      tiktok: '',
-      youtube: '',
-      linkedin: '',
-    },
-    idealClient: '',
-    priorityProduct: '',
-    communicationTone: [],
-    socialGoals: [],
+    razaoSocial: '',
+    nomeFantasia: '',
+    cnpj: '',
+    dataFundacao: '',
+    siteInstitucional: '',
+    estadosCidades: '',
+    paisesInternacionais: '',
+    temSedeFixa: '',
+    enderecoSede: '',
+    segmentoEspecifico: '',
+    faturamentoAnual: '',
+    instagram: '',
+    tiktok: '',
+    youtubeShorts: '',
+    threads: '',
+    reclameAqui: '',
+    googleMeuNegocio: '',
+    outrosCanais: '',
+    oQueFaz: '',
+    paraQuem: '',
+    comoComecou: '',
+    missao: '',
+    visao3a5Anos: '',
+    valores: '',
+    produtoPrioritario: '',
+    precoProduto: '',
+    formasPagamento: [],
+    oQueIncluso: '',
+    oQueNaoIncluso: '',
+    transformacaoEntrega: '',
+    temProvasSociais: '',
+    linksProvasSociais: '',
+    linkPaginaProduto: '',
+    tipoCliente: '',
+    clienteIdeal: '',
+    tresDores: '',
+    tresDesejos: '',
+    tresObjecoes: '',
+    frasesCliente: '',
+    ondeClienteVive: [],
+    pesquisasGoogle: '',
+    comoClienteChega: [],
+    proximoPasso: [],
+    capacidadeEntrega: '',
+    maioresGargalos: [],
+    faqPerguntas: '',
+    porQueNaoFecham: '',
+    sabeNumeros: '',
+    ticketMedio: '',
+    cac: '',
+    taxaConversao: '',
+    tomMarca: [],
+    palavrasUsaMuito: '',
+    palavrasEvita: '',
+    temasProibidos: '',
+    verdadeIncomoda: '',
+    comoRespondeCriticas: '',
+    objetivoRedes: [],
+    primeiraImpressao: '',
+    plataformasPrioritarias: [],
+    frequenciaDesejada: '',
+    formatosConsegueProduzir: [],
+    rostoConteudo: [],
+    quemGrava: '',
+    temEditor: '',
+    quadroSerie: '',
+    qualQuadro: '',
+    ctasPermitidos: [],
+    temLeadMagnet: '',
+    linkLeadMagnet: '',
+    temasPublicoAma: '',
+    agenda90Dias: '',
+    concorrentesDiretos: '',
+    ondeConcorrentesMelhores: '',
+    porQueEscolhemVoce: '',
+    referenciasConteudo: '',
+    oQueQuerCopiar: '',
+    referenciaNaoGosta: '',
+    algoMais: '',
+    restricaoLegal: '',
   });
 
-  const currentQuestion = questions[currentStep];
-  const progress = ((currentStep + 1) / questions.length) * 100;
+  const section = sections[currentSection];
+  const question = section.questions[currentQuestion];
+
+  const totalQuestions = sections.reduce((acc, s) => acc + s.questions.length, 0);
+  const completedQuestions = sections.slice(0, currentSection).reduce((acc, s) => acc + s.questions.length, 0) + currentQuestion;
+  const progress = ((completedQuestions + 1) / totalQuestions) * 100;
 
   const handleNext = () => {
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (currentQuestion < section.questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else if (currentSection < sections.length - 1) {
+      setCurrentSection(currentSection + 1);
+      setCurrentQuestion(0);
     } else {
-      // Submit form and redirect
       console.log('Form submitted:', formData);
       router.push('/dashboard');
     }
   };
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+    } else if (currentSection > 0) {
+      setCurrentSection(currentSection - 1);
+      setCurrentQuestion(sections[currentSection - 1].questions.length - 1);
     } else {
       router.push('/onboarding');
     }
@@ -130,35 +490,39 @@ export default function EssentialBriefingPage() {
   const handleInputChange = (value: string | string[]) => {
     setFormData({
       ...formData,
-      [currentQuestion.id]: value,
+      [question.id]: value,
     });
   };
 
   const isCurrentStepValid = () => {
-    const value = formData[currentQuestion.id as keyof FormData];
-    if (currentQuestion.id === 'socialNetworks') {
-      const networks = value as FormData['socialNetworks'];
-      // At least one social network should be filled
-      return Object.values(networks).some(v => v && v.trim() !== '');
-    }
-    if (Array.isArray(value)) {
-      return value.length > 0;
-    }
-    if (typeof value === 'string') {
-      return value.trim() !== '';
-    }
-    return false;
+    const value = formData[question.id as keyof FormData];
+    // Most fields are optional in the essential form
+    return true;
   };
 
   const renderInput = () => {
-    switch (currentQuestion.type) {
+    const value = formData[question.id as keyof FormData];
+
+    switch (question.type) {
       case 'text':
+      case 'url':
         return (
           <input
-            type="text"
-            value={formData[currentQuestion.id as keyof FormData] as string}
+            type={question.type}
+            value={value as string}
             onChange={(e) => handleInputChange(e.target.value)}
-            placeholder={currentQuestion.placeholder}
+            placeholder={question.placeholder}
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 text-lg transition-colors"
+            autoFocus
+          />
+        );
+
+      case 'date':
+        return (
+          <input
+            type="date"
+            value={value as string}
+            onChange={(e) => handleInputChange(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 text-lg transition-colors"
             autoFocus
           />
@@ -167,10 +531,10 @@ export default function EssentialBriefingPage() {
       case 'textarea':
         return (
           <textarea
-            value={formData[currentQuestion.id as keyof FormData] as string}
+            value={value as string}
             onChange={(e) => handleInputChange(e.target.value)}
-            placeholder={currentQuestion.placeholder}
-            rows={3}
+            placeholder={question.placeholder}
+            rows={4}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 text-lg transition-colors resize-none"
             autoFocus
           />
@@ -179,12 +543,12 @@ export default function EssentialBriefingPage() {
       case 'select':
         return (
           <div className="space-y-2">
-            {currentQuestion.options?.map((option) => (
+            {question.options?.map((option) => (
               <button
                 key={option.value}
                 onClick={() => handleInputChange(option.value)}
                 className={`w-full px-4 py-3 rounded-xl border text-left transition-all ${
-                  formData[currentQuestion.id as keyof FormData] === option.value
+                  value === option.value
                     ? 'border-slate-900 bg-slate-900 text-white'
                     : 'border-slate-200 hover:border-slate-300 text-slate-700'
                 }`}
@@ -196,10 +560,10 @@ export default function EssentialBriefingPage() {
         );
 
       case 'multiselect':
-        const selectedValues = formData[currentQuestion.id as keyof FormData] as string[];
+        const selectedValues = (value as string[]) || [];
         return (
           <div className="grid grid-cols-2 gap-2">
-            {currentQuestion.options?.map((option) => {
+            {question.options?.map((option) => {
               const isSelected = selectedValues.includes(option.value);
               return (
                 <button
@@ -226,75 +590,12 @@ export default function EssentialBriefingPage() {
           </div>
         );
 
-      case 'socialLinks':
-        const socialData = formData.socialNetworks;
-        const handleSocialChange = (network: keyof FormData['socialNetworks'], value: string) => {
-          setFormData({
-            ...formData,
-            socialNetworks: {
-              ...formData.socialNetworks,
-              [network]: value,
-            },
-          });
-        };
-        return (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-sm font-bold">IG</span>
-              </div>
-              <input
-                type="url"
-                value={socialData.instagram || ''}
-                onChange={(e) => handleSocialChange('instagram', e.target.value)}
-                placeholder="instagram.com/suamarca"
-                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 transition-colors"
-              />
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-sm font-bold">TT</span>
-              </div>
-              <input
-                type="url"
-                value={socialData.tiktok || ''}
-                onChange={(e) => handleSocialChange('tiktok', e.target.value)}
-                placeholder="tiktok.com/@suamarca"
-                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 transition-colors"
-              />
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-sm font-bold">YT</span>
-              </div>
-              <input
-                type="url"
-                value={socialData.youtube || ''}
-                onChange={(e) => handleSocialChange('youtube', e.target.value)}
-                placeholder="youtube.com/@suamarca"
-                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 transition-colors"
-              />
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-700 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-sm font-bold">IN</span>
-              </div>
-              <input
-                type="url"
-                value={socialData.linkedin || ''}
-                onChange={(e) => handleSocialChange('linkedin', e.target.value)}
-                placeholder="linkedin.com/company/suamarca"
-                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 transition-colors"
-              />
-            </div>
-            <p className="text-xs text-slate-400 text-center mt-2">Preencha pelo menos uma rede social</p>
-          </div>
-        );
-
       default:
         return null;
     }
   };
+
+  const isLastQuestion = currentSection === sections.length - 1 && currentQuestion === section.questions.length - 1;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col">
@@ -319,7 +620,7 @@ export default function EssentialBriefingPage() {
 
       {/* Progress Bar */}
       <div className="px-6">
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-slate-900 transition-all duration-500 ease-out"
@@ -328,9 +629,9 @@ export default function EssentialBriefingPage() {
           </div>
           <div className="flex justify-between mt-2">
             <span className="text-xs text-slate-400">
-              Pergunta {currentStep + 1} de {questions.length}
+              {completedQuestions + 1} de {totalQuestions} perguntas
             </span>
-            <span className="text-xs text-slate-400">Briefing Essencial</span>
+            <span className="text-xs text-slate-500 font-medium">{section.title}</span>
           </div>
         </div>
       </div>
@@ -338,15 +639,22 @@ export default function EssentialBriefingPage() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         {/* Oracle Sphere */}
-        <div className="relative mb-8">
-          <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-2xl scale-150" />
-          <FloatingOracle size={120} />
+        <div className="relative mb-10">
+          <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-3xl scale-150" />
+          <FloatingOracle size={320} />
+        </div>
+
+        {/* Section Title */}
+        <div className="text-center mb-2">
+          <span className="text-xs text-amber-600 font-medium uppercase tracking-wider">
+            {section.title}
+          </span>
         </div>
 
         {/* Question */}
-        <div className="w-full max-w-xl">
-          <h2 className="text-2xl font-semibold text-slate-900 text-center mb-8">
-            {currentQuestion.question}
+        <div className="w-full max-w-2xl">
+          <h2 className="text-xl font-semibold text-slate-900 text-center mb-6">
+            {question.question}
           </h2>
 
           {/* Input */}
@@ -362,14 +670,9 @@ export default function EssentialBriefingPage() {
             </button>
             <button
               onClick={handleNext}
-              disabled={!isCurrentStepValid()}
-              className={`px-8 py-3 rounded-xl font-medium flex items-center gap-2 transition-all ${
-                isCurrentStepValid()
-                  ? 'bg-slate-900 text-white hover:bg-slate-800'
-                  : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-              }`}
+              className="px-8 py-3 rounded-xl font-medium flex items-center gap-2 transition-all bg-slate-900 text-white hover:bg-slate-800"
             >
-              {currentStep === questions.length - 1 ? (
+              {isLastQuestion ? (
                 <>
                   Finalizar
                   <Check className="w-4 h-4" />
@@ -382,6 +685,11 @@ export default function EssentialBriefingPage() {
               )}
             </button>
           </div>
+
+          {/* Skip hint */}
+          <p className="text-center text-xs text-slate-400 mt-4">
+            Campos opcionais podem ser pulados
+          </p>
         </div>
       </main>
     </div>

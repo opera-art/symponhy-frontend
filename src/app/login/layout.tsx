@@ -1,5 +1,7 @@
+import { LanguageProvider } from '@/context/LanguageContext';
+
 export const dynamic = 'force-dynamic';
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <LanguageProvider>{children}</LanguageProvider>;
 }
