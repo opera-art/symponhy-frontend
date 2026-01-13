@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
 // Rotas públicas que não precisam de autenticação
 const isPublicRoute = createRouteMatcher([
@@ -11,7 +12,14 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, request) => {
   // Se não é rota pública, requer autenticação
   if (!isPublicRoute(request)) {
-    await auth.protect()
+    const { userId } = await auth()
+
+    if (!userId) {
+      // Redirecionar para nossa página de sign-in local
+      const signInUrl = new URL('/sign-in', request.url)
+      signInUrl.searchParams.set('redirect_url', request.url)
+      return NextResponse.redirect(signInUrl)
+    }
   }
 })
 
