@@ -38,3 +38,6 @@ Thumbs.db
 .DS_Store
 
 .vercel
+
+# MCP Configuration (contains sensitive credentials)
+.mcp.json

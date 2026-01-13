@@ -654,6 +654,10 @@ export default function EssentialBriefingPage() {
 
   const isLastQuestion = currentSection === sections.length - 1 && currentQuestion === section.questions.length - 1;
 
+  // Valor atual para detectar digitação
+  const currentValue = formData[question.id as keyof FormData];
+  const currentValueString = Array.isArray(currentValue) ? currentValue.join(' ') : (currentValue || '');
+
   return (
     <OnboardingLayout
       type="essential"
@@ -670,6 +674,7 @@ export default function EssentialBriefingPage() {
       error={onboardingError}
       isLastQuestion={isLastQuestion}
       sections={layoutSections}
+      currentValue={currentValueString}
     >
       {renderInput()}
     </OnboardingLayout>

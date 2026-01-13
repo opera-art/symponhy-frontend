@@ -68,7 +68,34 @@
       "mcp__vercel__createEnvVar",
       "mcp__github__search_code",
       "mcp__github__list_commits",
-      "mcp__railway-mcp-server__generate-domain"
+      "mcp__railway-mcp-server__generate-domain",
+      "mcp__railway__project_environments",
+      "mcp__vercel__getDeployments",
+      "mcp__cloudflare-documentation",
+      "mcp__cloudflare-radar",
+      "mcp__cloudflare-dns-analytics",
+      "mcp__cloudflare-dem",
+      "mcp__cloudflare-ai-gateway",
+      "Bash(npm search:*)",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__postman__getAuthenticatedUser",
+      "mcp__postman__createCollection",
+      "mcp__postman__putCollection",
+      "mcp__postman__getCollection",
+      "mcp__postman__createCollectionRequest",
+      "mcp__postman__createEnvironment",
+      "mcp__postman__runCollection",
+      "Bash(git clone:*)",
+      "mcp__railway-mcp-server__get-logs",
+      "Bash(powershell -Command \"Get-ChildItem -Depth 1 | Select-Object -Property FullName, PSIsContainer | Format-Table -AutoSize\")",
+      "Bash(powershell -Command \"ls -Exclude node_modules,.next,tsconfig.tsbuildinfo | Format-Table -Property Name, @{Name=''Type''; Expression={if\\($_PSIsContainer\\) {''Folder''} else {''File''}}} -AutoSize\")"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "cloudflare-documentation",
+    "cloudflare-radar",
+    "cloudflare-dns-analytics",
+    "cloudflare-dem",
+    "cloudflare-ai-gateway"
+  ]
 }

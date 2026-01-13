@@ -9,6 +9,7 @@ interface FloatingOracleProps {
   color?: string;
   showOrbits?: boolean;
   intensity?: number; // 0-1, controls sphere energy/power
+  isListening?: boolean; // true when user is typing
 }
 
 export const FloatingOracle: React.FC<FloatingOracleProps> = ({
@@ -17,6 +18,7 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
   color = '#D4AF37',
   showOrbits = true,
   intensity = 0.5,
+  isListening = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
@@ -35,12 +37,19 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     electrons?: THREE.Mesh[];
     interactionStrength?: number;
     intensity?: number;
+    isListening?: boolean;
+    listeningStrength?: number;
   }>({});
 
   // Update intensity ref when prop changes
   useEffect(() => {
     sceneRef.current.intensity = intensity;
   }, [intensity]);
+
+  // Update isListening ref when prop changes
+  useEffect(() => {
+    sceneRef.current.isListening = isListening;
+  }, [isListening]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -470,10 +479,18 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       sceneRef.current.animationId = requestAnimationFrame(animate);
 
       const currentIntensity = sceneRef.current.intensity || 0.5;
-      time += 0.008 * (1 + currentIntensity * 0.2); // Slower overall animation
+      const listening = sceneRef.current.isListening || false;
 
-      // Update intensity uniform
-      uniforms.uIntensity.value = currentIntensity;
+      // Smooth transition for listening state
+      const targetListeningStrength = listening ? 1 : 0;
+      const currentListeningStrength = sceneRef.current.listeningStrength || 0;
+      sceneRef.current.listeningStrength = currentListeningStrength + (targetListeningStrength - currentListeningStrength) * 0.15;
+      const listeningBoost = sceneRef.current.listeningStrength;
+
+      time += 0.008 * (1 + currentIntensity * 0.2 + listeningBoost * 0.3); // Speed up slightly when listening
+
+      // Update intensity uniform with listening boost
+      uniforms.uIntensity.value = currentIntensity + listeningBoost * 0.2;
 
       // Smooth interaction transition
       const currentInteraction = sceneRef.current.interactionStrength || 0;

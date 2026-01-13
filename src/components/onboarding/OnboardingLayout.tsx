@@ -1,33 +1,93 @@
 'use client';
 
-import React, { useEffect, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import { FloatingOracle } from '@/components/chat/FloatingOracle';
 import { ArrowLeft, ArrowRight, Check, Sparkles, Crown, Loader2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 // Cores sofisticadas para progresso (dourado -> platina)
 const getOracleColor = (progressPercent: number): string => {
-  if (progressPercent < 20) return '#D4AF37';      // Dourado clássico
-  if (progressPercent < 40) return '#C9A227';      // Dourado escuro
-  if (progressPercent < 60) return '#B8A158';      // Dourado envelhecido
-  if (progressPercent < 80) return '#A8A8A8';      // Prata
-  if (progressPercent < 100) return '#C0C0C0';     // Prata clara
-  return '#E5E4E2';                                 // Platina
+  if (progressPercent < 20) return '#D4AF37';
+  if (progressPercent < 40) return '#C9A227';
+  if (progressPercent < 60) return '#B8A158';
+  if (progressPercent < 80) return '#A8A8A8';
+  if (progressPercent < 100) return '#C0C0C0';
+  return '#E5E4E2';
 };
 
-// Tamanho da esfera baseado no progresso
+// Tamanho da esfera - COMEÇA PEQUENA e CRESCE muito
 const getOracleSize = (progressPercent: number): number => {
-  const baseSize = 280;
-  const growth = Math.min(progressPercent / 100, 1) * 60;
-  return baseSize + growth;
+  const minSize = 120;  // Começa bem pequena
+  const maxSize = 320;  // Fica grande no final
+  const growth = Math.min(progressPercent / 100, 1);
+  // Curva de crescimento exponencial suave
+  const easedGrowth = Math.pow(growth, 0.7);
+  return minSize + easedGrowth * (maxSize - minSize);
 };
 
 // Intensidade da esfera baseada no progresso (0-1)
 const getOracleIntensity = (progressPercent: number): number => {
-  return Math.min(progressPercent / 100, 1);
+  return Math.min(progressPercent / 100, 1) * 0.8;
 };
 
-// Mensagens motivacionais sofisticadas (sem emojis infantis)
+// Dicas contextuais por seção
+const getSectionTips = (sectionTitle: string): string[] => {
+  const tips: Record<string, string[]> = {
+    'Dados Básicos': [
+      'Informações precisas ajudam a criar conteúdo relevante.',
+      'Seu segmento define o tom da comunicação.',
+      'O faturamento ajuda a calibrar as estratégias.',
+    ],
+    'Redes Sociais': [
+      'Cada plataforma tem sua linguagem.',
+      'Links corretos facilitam a análise.',
+      'Consistência entre canais fortalece a marca.',
+    ],
+    'Identidade': [
+      'Sua história conecta com o público.',
+      'Missão clara guia todo o conteúdo.',
+      'Valores autênticos geram identificação.',
+    ],
+    'Oferta Principal': [
+      'Foco em um produto maximiza resultados.',
+      'Clareza na entrega reduz objeções.',
+      'Provas sociais aceleram decisões.',
+    ],
+    'Cliente Ideal': [
+      'Quanto mais específico, melhor.',
+      'Dores reais geram conexão imediata.',
+      'Frases do cliente viram headlines.',
+    ],
+    'Funil de Vendas': [
+      'Conhecer seus números é poder.',
+      'Gargalos identificados são oportunidades.',
+      'FAQ vira conteúdo de alto impacto.',
+    ],
+    'Comunicação': [
+      'Tom de voz é a personalidade da marca.',
+      'Palavras proibidas evitam crises.',
+      'Opiniões fortes geram engajamento.',
+    ],
+    'Conteúdo': [
+      'Menos plataformas, mais profundidade.',
+      'Consistência vence quantidade.',
+      'CTAs claros convertem mais.',
+    ],
+    'Concorrência': [
+      'Referências aceleram a criação.',
+      'Diferenciais viram argumentos de venda.',
+      'Saber o que evitar é tão importante quanto inspiração.',
+    ],
+    'Final': [
+      'Detalhes extras fazem diferença.',
+      'Restrições legais evitam problemas.',
+      'Quase lá!',
+    ],
+  };
+  return tips[sectionTitle] || ['Cada resposta fortalece sua estratégia.'];
+};
+
+// Mensagens motivacionais
 const getMotivationalMessage = (progressPercent: number): string => {
   if (progressPercent < 10) return 'Vamos construir algo extraordinário.';
   if (progressPercent < 25) return 'Cada detalhe importa.';
@@ -39,18 +99,15 @@ const getMotivationalMessage = (progressPercent: number): string => {
   return 'Briefing completo.';
 };
 
-// Confetti elegante (dourado/prata, não colorido)
+// Confetti elegante
 const triggerConfetti = (intensity: 'low' | 'medium' | 'high' = 'medium') => {
   const colors = ['#D4AF37', '#C9A227', '#B8860B', '#E5E4E2', '#C0C0C0'];
-
   const configs = {
     low: { particleCount: 30, spread: 50, startVelocity: 20 },
     medium: { particleCount: 60, spread: 70, startVelocity: 30 },
     high: { particleCount: 100, spread: 100, startVelocity: 40 },
   };
-
   const config = configs[intensity];
-
   confetti({
     particleCount: config.particleCount,
     spread: config.spread,
@@ -64,10 +121,8 @@ const triggerConfetti = (intensity: 'low' | 'medium' | 'high' = 'medium') => {
   });
 };
 
-// Confetti de conclusão final
 const triggerFinalConfetti = () => {
   const colors = ['#D4AF37', '#FFD700', '#E5E4E2', '#C0C0C0'];
-
   confetti({
     particleCount: 80,
     spread: 100,
@@ -77,23 +132,74 @@ const triggerFinalConfetti = () => {
     gravity: 1,
     scalar: 1.1,
   });
-
   setTimeout(() => {
-    confetti({
-      particleCount: 40,
-      angle: 60,
-      spread: 60,
-      colors,
-      origin: { x: 0, y: 0.6 },
-    });
-    confetti({
-      particleCount: 40,
-      angle: 120,
-      spread: 60,
-      colors,
-      origin: { x: 1, y: 0.6 },
-    });
+    confetti({ particleCount: 40, angle: 60, spread: 60, colors, origin: { x: 0, y: 0.6 } });
+    confetti({ particleCount: 40, angle: 120, spread: 60, colors, origin: { x: 1, y: 0.6 } });
   }, 200);
+};
+
+// Componente de partícula de texto flutuante
+interface FloatingWord {
+  id: number;
+  text: string;
+  x: number;
+  y: number;
+  opacity: number;
+  scale: number;
+}
+
+// Componente de Typing Effect
+const TypingText: React.FC<{ text: string; speed?: number; onComplete?: () => void }> = ({
+  text,
+  speed = 30,
+  onComplete,
+}) => {
+  const [displayedText, setDisplayedText] = useState('');
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    setDisplayedText('');
+    setIsComplete(false);
+    let index = 0;
+    const timer = setInterval(() => {
+      if (index < text.length) {
+        setDisplayedText(text.slice(0, index + 1));
+        index++;
+      } else {
+        clearInterval(timer);
+        setIsComplete(true);
+        onComplete?.();
+      }
+    }, speed);
+    return () => clearInterval(timer);
+  }, [text, speed, onComplete]);
+
+  return (
+    <span>
+      {displayedText}
+      {!isComplete && <span className="animate-pulse">|</span>}
+    </span>
+  );
+};
+
+// Componente de Balão de Dica
+const TipBubble: React.FC<{ tip: string; color: string; visible: boolean }> = ({ tip, color, visible }) => {
+  if (!visible) return null;
+
+  return (
+    <div className="absolute -top-16 left-1/2 -translate-x-1/2 animate-fade-in z-10">
+      <div
+        className="px-4 py-2 rounded-2xl text-sm font-medium text-white shadow-lg max-w-xs text-center"
+        style={{ backgroundColor: color }}
+      >
+        {tip}
+      </div>
+      <div
+        className="w-3 h-3 rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2"
+        style={{ backgroundColor: color }}
+      />
+    </div>
+  );
 };
 
 interface Section {
@@ -117,6 +223,8 @@ interface OnboardingLayoutProps {
   error?: string | null;
   isLastQuestion?: boolean;
   sections?: Section[];
+  onTyping?: (isTyping: boolean) => void;
+  currentValue?: string;
 }
 
 export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
@@ -135,11 +243,20 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   error = null,
   isLastQuestion = false,
   sections = [],
+  currentValue = '',
 }) => {
   const [previousSection, setPreviousSection] = useState(currentSection);
   const [showMotivation, setShowMotivation] = useState(false);
   const [motivationText, setMotivationText] = useState('');
   const [buttonPulse, setButtonPulse] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showTip, setShowTip] = useState(false);
+  const [currentTip, setCurrentTip] = useState('');
+  const [floatingWords, setFloatingWords] = useState<FloatingWord[]>([]);
+  const [questionKey, setQuestionKey] = useState(0);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const wordIdRef = useRef(0);
+  const lastValueRef = useRef('');
   const inputContainerRef = useRef<HTMLDivElement>(null);
 
   // Calcular progresso
@@ -152,6 +269,103 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   const oracleColor = getOracleColor(progressPercent);
   const oracleSize = getOracleSize(progressPercent);
   const oracleIntensity = getOracleIntensity(progressPercent);
+
+  // Resetar typing effect quando muda a pergunta
+  useEffect(() => {
+    setQuestionKey(prev => prev + 1);
+  }, [currentSection, currentQuestion]);
+
+  // Detectar digitação e criar partículas de texto
+  useEffect(() => {
+    if (currentValue !== lastValueRef.current) {
+      const newText = currentValue.slice(lastValueRef.current.length);
+
+      if (newText.length > 0 && !newText.includes(' ')) {
+        setIsTyping(true);
+
+        // Limpar timeout anterior
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Parar de "ouvir" após 500ms sem digitar
+        typingTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+        }, 500);
+      }
+
+      // Criar partícula de palavra quando termina uma palavra (espaço)
+      if (newText.includes(' ') || newText.includes('\n')) {
+        const words = lastValueRef.current.split(/\s+/);
+        const lastWord = words[words.length - 1];
+
+        if (lastWord && lastWord.length > 2) {
+          const newWord: FloatingWord = {
+            id: wordIdRef.current++,
+            text: lastWord,
+            x: 50 + (Math.random() - 0.5) * 40,
+            y: 50,
+            opacity: 1,
+            scale: 1,
+          };
+          setFloatingWords(prev => [...prev.slice(-8), newWord]); // Máximo 8 palavras
+        }
+      }
+
+      lastValueRef.current = currentValue;
+    }
+  }, [currentValue]);
+
+  // Animar partículas flutuantes
+  useEffect(() => {
+    if (floatingWords.length === 0) return;
+
+    const interval = setInterval(() => {
+      setFloatingWords(prev =>
+        prev
+          .map(word => ({
+            ...word,
+            y: word.y - 1.5,
+            opacity: word.opacity - 0.015,
+            scale: word.scale * 0.995,
+          }))
+          .filter(word => word.opacity > 0)
+      );
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [floatingWords.length]);
+
+  // Resetar quando muda de pergunta
+  useEffect(() => {
+    lastValueRef.current = '';
+    setFloatingWords([]);
+    setIsTyping(false);
+  }, [currentSection, currentQuestion]);
+
+  // Mostrar dica periodicamente
+  useEffect(() => {
+    const tips = getSectionTips(sectionTitle);
+    let tipIndex = 0;
+
+    const showNextTip = () => {
+      setCurrentTip(tips[tipIndex % tips.length]);
+      setShowTip(true);
+      setTimeout(() => setShowTip(false), 3000);
+      tipIndex++;
+    };
+
+    // Primeira dica após 2 segundos
+    const initialTimeout = setTimeout(showNextTip, 2000);
+
+    // Dicas subsequentes a cada 12 segundos
+    const interval = setInterval(showNextTip, 12000);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [sectionTitle]);
 
   // Detectar mudança de seção
   useEffect(() => {
@@ -182,13 +396,11 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // Animação do botão
   const triggerButtonPulse = () => {
     setButtonPulse(true);
     setTimeout(() => setButtonPulse(false), 300);
   };
 
-  // Confetti final
   const handleNext = () => {
     triggerButtonPulse();
     if (isLastQuestion) {
@@ -197,7 +409,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     onNext();
   };
 
-  // Loading state
   if (loading) {
     return (
       <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center">
@@ -212,6 +423,25 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden"
       style={{ cursor: 'url("data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 32 32\'><text y=\'24\' font-size=\'24\' fill=\'%23D4AF37\'>♪</text></svg>") 16 16, auto' }}
     >
+      {/* Floating Words Particles */}
+      <div className="fixed inset-0 pointer-events-none z-20 overflow-hidden">
+        {floatingWords.map(word => (
+          <div
+            key={word.id}
+            className="absolute text-sm font-medium transition-none"
+            style={{
+              left: `${word.x}%`,
+              top: `${word.y}%`,
+              opacity: word.opacity,
+              transform: `scale(${word.scale})`,
+              color: oracleColor,
+            }}
+          >
+            {word.text}
+          </div>
+        ))}
+      </div>
+
       {/* Error Toast */}
       {error && (
         <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm z-50 animate-fade-in">
@@ -259,7 +489,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       {/* XP Progress Bar */}
       <div className="px-4 flex-shrink-0">
         <div className="max-w-3xl mx-auto">
-          {/* Checkpoints */}
           <div className="relative mb-2">
             <div className="flex justify-between">
               {sections.map((section, idx) => {
@@ -302,7 +531,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             </div>
           </div>
 
-          {/* Main Progress Bar */}
           <div className="relative">
             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
@@ -313,8 +541,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                 }}
               />
             </div>
-
-            {/* XP Label */}
             <div className="flex justify-between mt-1.5">
               <span className="text-xs text-slate-400">
                 {completedQuestions + 1} de {totalQuestions}
@@ -329,10 +555,12 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-4 min-h-0">
-        {/* Oracle Sphere */}
+        {/* Oracle Sphere with Tip Bubble */}
         <div className="relative flex-shrink-0 mb-4">
+          <TipBubble tip={currentTip} color={oracleColor} visible={showTip} />
+
           <div
-            className="absolute inset-0 rounded-full blur-3xl scale-150 transition-all duration-1000"
+            className="absolute inset-0 rounded-full blur-3xl transition-all duration-1000"
             style={{
               backgroundColor: `${oracleColor}15`,
               transform: `scale(${1.5 + oracleIntensity * 0.3})`
@@ -342,6 +570,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             size={oracleSize}
             color={oracleColor}
             intensity={oracleIntensity}
+            isListening={isTyping}
           />
         </div>
 
@@ -355,18 +584,16 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           </span>
         </div>
 
-        {/* Question */}
+        {/* Question with Typing Effect */}
         <div className="w-full max-w-2xl flex-shrink-0">
-          <h2 className="text-lg font-semibold text-slate-900 text-center mb-4">
-            {questionText}
+          <h2 className="text-lg font-semibold text-slate-900 text-center mb-4 min-h-[2rem]">
+            <TypingText key={questionKey} text={questionText} speed={25} />
           </h2>
 
-          {/* Input Container */}
           <div ref={inputContainerRef} className="mb-4">
             {children}
           </div>
 
-          {/* Navigation */}
           <div className="flex justify-between items-center">
             <button
               onClick={onBack}
@@ -406,7 +633,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             </button>
           </div>
 
-          {/* Skip hint */}
           <p className="text-center text-xs text-slate-400 mt-3">
             Campos opcionais podem ser pulados
           </p>
