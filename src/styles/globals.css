@@ -88,6 +88,36 @@
     50% { opacity: 0.8; filter: blur(50px); }
   }
 
+  /* Breathing animations for gradient mesh */
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.15; }
+    50% { transform: scale(1.1); opacity: 0.25; }
+  }
+
+  @keyframes breathe-delayed {
+    0%, 100% { transform: scale(1); opacity: 0.1; }
+    50% { transform: scale(1.15); opacity: 0.2; }
+  }
+
+  @keyframes breathe-slow {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.08; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.15; }
+  }
+
+  .animate-breathe {
+    animation: breathe 6s ease-in-out infinite;
+  }
+
+  .animate-breathe-delayed {
+    animation: breathe-delayed 8s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+
+  .animate-breathe-slow {
+    animation: breathe-slow 10s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+
   @keyframes orbit-slow {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }

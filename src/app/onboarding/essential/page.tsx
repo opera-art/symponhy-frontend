@@ -564,7 +564,7 @@ export default function EssentialBriefingPage() {
     handleInputChange(currentVal + (currentVal ? ' ' : '') + text);
   }, [question.id, formData]);
 
-  const { isListening, isSupported, toggleListening } = useVoiceInput({
+  const { isListening, isSupported, toggleListening, stopListening } = useVoiceInput({
     onResult: handleVoiceResult,
   });
 
@@ -717,6 +717,8 @@ export default function EssentialBriefingPage() {
       loading={onboardingLoading && !isInitialized}
       error={onboardingError}
       isLastQuestion={isLastQuestion}
+      isRecording={isListening}
+      onStopRecording={stopListening}
       sections={layoutSections}
       currentValue={currentValueString}
     >
