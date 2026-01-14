@@ -9,6 +9,12 @@
     @apply border-border;
   }
 
+  /* Remove border from canvas elements */
+  canvas {
+    border: none !important;
+    outline: none !important;
+  }
+
   body {
     @apply bg-background font-sans text-text-primary antialiased;
     font-feature-settings: 'rlig' 1, 'calt' 1;
