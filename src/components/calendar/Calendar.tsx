@@ -86,6 +86,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
   const handleContextMenu = (e: React.MouseEvent, post: CalendarPost) => {
     e.preventDefault();
     e.stopPropagation();
+    setHoveredPost(null); // Clear hover preview when opening context menu
     setContextMenu({
       post,
       x: e.clientX,
@@ -681,7 +682,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                                   top: `${topPosition}px`,
                                   height: '56px',
                                 }}
-                                onClick={() => setSelectedPost(post)}
+                                onClick={() => { setHoveredPost(null); setSelectedPost(post); }}
                                 onContextMenu={(e) => handleContextMenu(e, post)}
                                 onMouseEnter={(e) => {
                                   const rect = e.currentTarget.getBoundingClientRect();
@@ -721,7 +722,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                           return (
                             <div
                               key={`group-${hour}`}
-                              className="absolute left-0 right-0 z-10"
+                              className="absolute left-0 right-8 z-10"
                               style={{ top: `${topPosition}px` }}
                             >
                               {/* Collapsed view - stacked cards */}
@@ -803,7 +804,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                                         post.type === 'post' && 'bg-amber-50 border-amber-400'
                                       )}
                                       style={{ marginTop: idx === 0 ? 0 : '4px' }}
-                                      onClick={() => setSelectedPost(post)}
+                                      onClick={() => { setHoveredPost(null); setSelectedPost(post); }}
                                       onContextMenu={(e) => handleContextMenu(e, post)}
                                       onMouseEnter={(e) => {
                                         const rect = e.currentTarget.getBoundingClientRect();
@@ -1012,7 +1013,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                                   top: `${topPosition}px`,
                                   height: '76px',
                                 }}
-                                onClick={() => setSelectedPost(post)}
+                                onClick={() => { setHoveredPost(null); setSelectedPost(post); }}
                                 onContextMenu={(e) => handleContextMenu(e, post)}
                                 onMouseEnter={(e) => {
                                   const rect = e.currentTarget.getBoundingClientRect();
@@ -1066,7 +1067,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                           return (
                             <div
                               key={`group-${hour}`}
-                              className="absolute left-0 right-0 z-10"
+                              className="absolute left-0 right-12 z-10"
                               style={{ top: `${topPosition}px` }}
                             >
                               {/* Collapsed view - stacked cards */}
@@ -1162,7 +1163,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                                         post.type === 'post' && 'bg-amber-50 border-amber-400'
                                       )}
                                       style={{ marginTop: idx === 0 ? 0 : '6px' }}
-                                      onClick={() => setSelectedPost(post)}
+                                      onClick={() => { setHoveredPost(null); setSelectedPost(post); }}
                                       onContextMenu={(e) => handleContextMenu(e, post)}
                                       onMouseEnter={(e) => {
                                         const rect = e.currentTarget.getBoundingClientRect();
