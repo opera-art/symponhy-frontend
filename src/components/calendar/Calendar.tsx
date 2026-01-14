@@ -541,7 +541,20 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                           return postHour === timeHour;
                         });
 
-                        if (hasPostInSlot) return null;
+                        // If slot has posts, show a small "+" button instead of full slot
+                        if (hasPostInSlot) {
+                          return (
+                            <button
+                              key={slotKey}
+                              className="absolute right-0 w-5 h-5 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center text-xs z-20 opacity-0 hover:opacity-100 transition-opacity shadow-md"
+                              style={{ top: `${timeIdx * 60 + 2}px` }}
+                              onClick={() => handleSlotClick(dayData.day, time)}
+                              title="Adicionar mais conteúdo neste horário"
+                            >
+                              +
+                            </button>
+                          );
+                        }
 
                         return (
                           <div
@@ -854,7 +867,20 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                           return postHour === timeHour;
                         });
 
-                        if (hasPostInSlot) return null;
+                        // If slot has posts, show a small "+" button instead of full slot
+                        if (hasPostInSlot) {
+                          return (
+                            <button
+                              key={slotKey}
+                              className="absolute right-2 w-7 h-7 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center text-sm z-20 opacity-60 hover:opacity-100 transition-opacity shadow-md"
+                              style={{ top: `${timeIdx * 80 + 4}px` }}
+                              onClick={() => handleSlotClick(selectedDay, time)}
+                              title="Adicionar mais conteúdo neste horário"
+                            >
+                              +
+                            </button>
+                          );
+                        }
 
                         return (
                           <div

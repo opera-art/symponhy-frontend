@@ -17,6 +17,7 @@ export interface CalendarEvent {
   scheduled_at?: string;
   platform?: string;
   thumbnail_url?: string;
+  media_url?: string; // URL da mídia (imagem/vídeo)
   caption?: string;
   hashtags?: string[];
   rejection_reason?: string;
@@ -71,7 +72,8 @@ function eventToPost(event: CalendarEvent): CalendarPost {
       ? 'approved'
       : event.status as 'approved' | 'pending' | 'draft',
     scheduledTime: event.event_time?.substring(0, 5) || '09:00',
-    thumbnail: event.thumbnail_url,
+    // Prioriza media_url, depois thumbnail_url
+    thumbnail: event.media_url || event.thumbnail_url,
     caption: event.caption,
     platform: event.platform as CalendarPost['platform'],
   };
