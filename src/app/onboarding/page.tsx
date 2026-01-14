@@ -21,8 +21,8 @@ export default function OnboardingPage() {
     const isMobile = window.innerWidth < 768;
     const pCount = isMobile ? 25000 : 45000;
 
-    // Canvas much larger than visible sphere to prevent clipping
-    const canvasSize = isMobile ? 500 : 700;
+    // Canvas larger than visible sphere to prevent clipping
+    const canvasSize = isMobile ? 380 : 500;
 
     // State
     const STATE = {
@@ -57,9 +57,9 @@ export default function OnboardingPage() {
     const scene = new THREE.Scene();
     sceneRef.current.scene = scene;
 
-    // Camera - pulled back so sphere doesn't touch edges
+    // Camera - pulled back so sphere is smaller and doesn't touch edges
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-    camera.position.z = isMobile ? 45 : 40;
+    camera.position.z = isMobile ? 60 : 55;
     sceneRef.current.camera = camera;
 
     // Particle Shaders
@@ -264,7 +264,7 @@ export default function OnboardingPage() {
     // Resize - keep canvas size consistent
     const handleResize = () => {
       const newIsMobile = window.innerWidth < 768;
-      const newSize = newIsMobile ? 500 : 700;
+      const newSize = newIsMobile ? 380 : 500;
       renderer.setSize(newSize, newSize);
     };
     window.addEventListener('resize', handleResize);
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
       material.uniforms.uColor2.value.lerp(targetC2, 0.05);
 
       // Gentle breathing motion
-      const zTarget = (isMobile ? 45 : 40) + Math.sin(STATE.time * 0.5) * 1.5;
+      const zTarget = (isMobile ? 60 : 55) + Math.sin(STATE.time * 0.5) * 1.5;
       camera.position.z += (zTarget - camera.position.z) * 0.02;
       camera.position.x = Math.sin(STATE.time * 0.2) * 1.5;
       camera.position.y = Math.cos(STATE.time * 0.15) * 1.5;
