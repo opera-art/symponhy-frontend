@@ -57,9 +57,9 @@ export default function OnboardingPage() {
     const scene = new THREE.Scene();
     sceneRef.current.scene = scene;
 
-    // Camera - pulled back so sphere is smaller and doesn't touch edges
+    // Camera - balanced distance for visibility
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-    camera.position.z = isMobile ? 60 : 55;
+    camera.position.z = isMobile ? 38 : 32;
     sceneRef.current.camera = camera;
 
     // Particle Shaders
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
       material.uniforms.uColor2.value.lerp(targetC2, 0.05);
 
       // Gentle breathing motion
-      const zTarget = (isMobile ? 60 : 55) + Math.sin(STATE.time * 0.5) * 1.5;
+      const zTarget = (isMobile ? 38 : 32) + Math.sin(STATE.time * 0.5) * 1.5;
       camera.position.z += (zTarget - camera.position.z) * 0.02;
       camera.position.x = Math.sin(STATE.time * 0.2) * 1.5;
       camera.position.y = Math.cos(STATE.time * 0.15) * 1.5;
@@ -344,20 +344,13 @@ export default function OnboardingPage() {
       )}
 
       {/* Header */}
-      <header className="w-full p-4 md:p-6 flex justify-between items-center">
+      <header className="w-full p-4 md:p-6 flex items-center">
         <div className="flex items-center gap-3">
           <div className="relative w-2 h-2">
             <div className="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20" />
             <div className="absolute inset-0 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
           </div>
           <h1 className="text-xs md:text-sm font-medium tracking-tight uppercase text-white/90">Symponhy<span className="opacity-40">.AI</span></h1>
-        </div>
-
-        {/* Color palette selector - moved to header */}
-        <div className="flex items-center gap-2">
-          {[0, 1, 2].map(idx => (
-            <button key={idx} onClick={() => setColorPalette(idx)} className={`w-5 h-5 rounded-full transition-transform hover:scale-110 ${colorPalette === idx ? 'ring-2 ring-white/40 scale-110' : 'ring-1 ring-white/10'} ${idx === 0 ? 'bg-gradient-to-br from-indigo-500 to-teal-400' : idx === 1 ? 'bg-gradient-to-br from-pink-400 to-blue-500' : 'bg-gradient-to-br from-orange-400 to-rose-600'}`} />
-          ))}
         </div>
       </header>
 
@@ -366,7 +359,7 @@ export default function OnboardingPage() {
         {/* Oracle Sphere - floating at top */}
         <div className="relative flex items-center justify-center !border-0" style={{ border: 'none' }}>
           {/* Glow effect behind sphere */}
-          <div className="absolute w-[200px] h-[200px] md:w-[250px] md:h-[250px] rounded-full opacity-30 blur-3xl" style={{ background: colorPalette === 0 ? 'radial-gradient(circle, rgba(129,140,248,0.4), rgba(45,212,191,0.2), transparent)' : colorPalette === 1 ? 'radial-gradient(circle, rgba(244,114,182,0.4), rgba(96,165,250,0.2), transparent)' : 'radial-gradient(circle, rgba(251,146,60,0.4), rgba(225,29,72,0.2), transparent)' }} />
+          <div className="absolute w-[200px] h-[200px] md:w-[250px] md:h-[250px] rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.4), rgba(45,212,191,0.2), transparent)' }} />
 
           {/* Canvas container - NO borders, transparent */}
           <div
@@ -383,21 +376,8 @@ export default function OnboardingPage() {
           />
         </div>
 
-        {/* Mode selector - minimal, under sphere */}
-        <div className="flex items-center gap-1 mt-2 mb-8">
-          {['Nebula', 'Torus', 'Lattice', 'Vortex'].map((name, idx) => (
-            <button
-              key={name}
-              onClick={() => setCurrentMode(idx)}
-              className={`px-3 py-1.5 rounded-full text-[10px] font-medium tracking-wide transition-all ${currentMode === idx ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'}`}
-            >
-              {name}
-            </button>
-          ))}
-        </div>
-
         {/* Welcome text */}
-        <p className="text-white/50 text-center max-w-md mb-10 text-[15px] leading-relaxed">
+        <p className="text-white/50 text-center max-w-md mb-10 mt-4 text-[15px] leading-relaxed">
           Para personalizar sua experiencia, preciso conhecer melhor seu negocio.
           <br /><span className="text-white/30">Escolha o tipo de briefing.</span>
         </p>

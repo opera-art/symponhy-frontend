@@ -49,7 +49,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
   initialThumbnail,
   isEditing = false,
 }) => {
-  const { uploadFile, uploading, progress } = useFileUpload();
+  const { uploadFile, uploading, progress, error: uploadError } = useFileUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<CreateEventData>({
