@@ -64,9 +64,12 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
     renderer.setSize(size, size);
     renderer.setClearColor(0x000000, 0); // Fully transparent
 
-    // Force canvas to be transparent with no styling
+    // Force canvas to be transparent with no borders
     renderer.domElement.style.background = 'transparent';
     renderer.domElement.style.display = 'block';
+    renderer.domElement.style.border = 'none';
+    renderer.domElement.style.outline = 'none';
+    renderer.domElement.style.boxShadow = 'none';
 
     container.appendChild(renderer.domElement);
     sceneRef.current.renderer = renderer;
@@ -393,9 +396,7 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
       style={{
         width: size,
         height: size,
-        background: 'transparent',
-        border: 'none',
-        outline: 'none',
+        overflow: 'visible',
       }}
     />
   );
