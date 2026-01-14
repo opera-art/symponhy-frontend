@@ -727,6 +727,12 @@ export default function EssentialBriefingPage() {
     }
   }
 
+  // Callback para navegar para uma pergunta específica (quando clica no ponto vermelho)
+  const handleNavigateToQuestion = useCallback((sectionIdx: number, questionIdx: number) => {
+    setCurrentSection(sectionIdx);
+    setCurrentQuestion(questionIdx);
+  }, []);
+
   return (
     <>
       <OnboardingLayout
@@ -748,6 +754,7 @@ export default function EssentialBriefingPage() {
         sections={layoutSections}
         currentValue={currentValueString}
         skippedQuestions={skippedQuestions}
+        onNavigateToQuestion={handleNavigateToQuestion}
       >
         {/* Input com botão de comentários */}
         <div className="relative">
@@ -757,6 +764,7 @@ export default function EssentialBriefingPage() {
           {userId && (
             <div className="absolute -right-10 top-0">
               <FieldComments
+                key={`comments-${question.id}`}
                 fieldName={question.id}
                 briefingUserId={userId}
                 onboardingType="essential"

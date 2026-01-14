@@ -57,6 +57,13 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
     }
   };
 
+  // Reset comments when field changes (per-question)
+  useEffect(() => {
+    setComments([]);
+    setIsOpen(false);
+  }, [fieldName]);
+
+  // Fetch comments when panel opens
   useEffect(() => {
     if (isOpen) {
       fetchComments();

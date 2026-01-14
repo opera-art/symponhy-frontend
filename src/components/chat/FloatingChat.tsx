@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Upload, Sparkles, ArrowRight } from 'lucide-react';
+import { X, Send, Upload, Wand2, ArrowRight } from 'lucide-react';
 import { FloatingOracle } from './FloatingOracle';
 import { useChatContent } from '@/context/ChatContentContext';
 
@@ -209,8 +209,8 @@ export const FloatingChat: React.FC = () => {
         <FloatingOracle size={80} />
       </button>
 
-      {/* Animated Moving Sphere for Content Mode */}
-      {isAddingContent && (
+      {/* Animated Moving Sphere for Content Mode - Hide when modal shows */}
+      {isAddingContent && !showModal && (
         <div
           className="fixed z-[60] rounded-full pointer-events-none flex items-center justify-center animate-sphere-to-center"
           style={{
@@ -335,7 +335,7 @@ export const FloatingChat: React.FC = () => {
                         background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%)',
                       }}
                     >
-                      <Sparkles className="w-6 h-6 text-amber-400" />
+                      <Wand2 className="w-6 h-6 text-amber-400" />
                     </div>
                     <div className="text-left flex-1">
                       <div className="flex items-center gap-2">

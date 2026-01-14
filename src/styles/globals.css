@@ -62,6 +62,15 @@
   /* Animations */
   @keyframes shimmer {
     0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
+  }
+
+  @keyframes shimmer-bg {
+    0% {
       background-position: -200% 0;
     }
     100% {
@@ -265,7 +274,7 @@
       #f1f5f9 100%
     );
     background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    animation: shimmer-bg 1.5s infinite;
   }
 
   .animate-fade-in {
