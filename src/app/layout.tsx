@@ -5,6 +5,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { ptBR } from '@clerk/localizations';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { ClientProvider } from '@/context/ClientContext';
+import { ChatContentProvider } from '@/context/ChatContentContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,7 +28,9 @@ export default function RootLayout({
       <html lang="pt-BR">
         <body className={inter.className}>
           <LanguageProvider>
-            <ClientProvider>{children}</ClientProvider>
+            <ChatContentProvider>
+              <ClientProvider>{children}</ClientProvider>
+            </ChatContentProvider>
           </LanguageProvider>
         </body>
       </html>

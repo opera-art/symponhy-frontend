@@ -4,7 +4,7 @@ import { KanbanTask } from '@/data/newFeaturesData';
 import { KanbanCard } from './KanbanCard';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AddContentModal } from '@/components/calendar/AddContentModal';
+import { useChatContent } from '@/context/ChatContentContext';
 
 interface KanbanColumnProps {
   columnId: string;
@@ -17,24 +17,19 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   columnTitle,
   tasks,
 }) => {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [triggerPosition, setTriggerPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const { setIsAddingContent, setCallbacks } = useChatContent();
 
-  const handleAddButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setTriggerPosition({
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-    });
-    setIsAddModalOpen(true);
-  };
+  const handleAddButtonClick = () => {
+    const handleManualUpload = () => {
+      console.log(`Manual upload for column: ${columnId}`);
+    };
 
-  const handleManualUpload = () => {
-    console.log(`Manual upload for column: ${columnId}`);
-  };
+    const handleCreateWithAgents = () => {
+      console.log(`Create with agents for column: ${columnId}`);
+    };
 
-  const handleCreateWithAgents = () => {
-    console.log(`Create with agents for column: ${columnId}`);
+    setCallbacks(handleManualUpload, handleCreateWithAgents);
+    setIsAddingContent(true);
   };
 
   return (
@@ -87,14 +82,6 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         )}
       </Droppable>
 
-      {/* Add Content Modal */}
-      <AddContentModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onManualUpload={handleManualUpload}
-        onCreateWithAgents={handleCreateWithAgents}
-        triggerPosition={triggerPosition}
-      />
     </div>
   );
 };

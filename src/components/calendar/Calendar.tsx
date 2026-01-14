@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Plus, MoreH
 import { CalendarPost } from '@/data/calendarData';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
+import { useChatContent } from '@/context/ChatContentContext';
 import { AddContentModal } from './AddContentModal';
 
 interface CalendarProps {
@@ -19,11 +20,10 @@ type CalendarView = 'month' | 'week' | 'day';
 
 const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }) => {
   const { t } = useLanguage();
+  const { setIsAddingContent, setCallbacks } = useChatContent();
   const [selectedPost, setSelectedPost] = useState<CalendarPost | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
   const [view, setView] = useState<CalendarView>('week');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [triggerPosition, setTriggerPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const monthNames = useMemo(() => [
     t('january'), t('february'), t('march'), t('april'), t('may'), t('june'),
@@ -58,23 +58,17 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
     setSelectedDay(today.getDate());
   };
 
-  const handleAddButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setTriggerPosition({
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-    });
-    setIsAddModalOpen(true);
-  };
+  const handleAddButtonClick = () => {
+    const handleManualUpload = () => {
+      console.log('Manual upload selected');
+    };
 
-  const handleManualUpload = () => {
-    // TODO: Implement manual upload functionality
-    console.log('Manual upload selected');
-  };
+    const handleCreateWithAgents = () => {
+      console.log('Create with agents selected');
+    };
 
-  const handleCreateWithAgents = () => {
-    // TODO: Implement create with agents functionality
-    console.log('Create with agents selected');
+    setCallbacks(handleManualUpload, handleCreateWithAgents);
+    setIsAddingContent(true);
   };
 
   const getWeekDays = () => {
@@ -113,7 +107,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
     const [hours] = time.split(':').map(Number);
     const startHour = 8;
     if (hours < startHour) return 0;
-    return ((hours - startHour) / 2) * 60; // 60px per 2-hour slot
+    return ((hours - startHour) / 2) * 60;
   };
 
   const weekDaysData = getWeekDays();
@@ -259,7 +253,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
 
                   {dayPosts.map((post, postIdx) => {
                     const topPosition = getTimePosition(post.scheduledTime);
-                    const height = 80; // Reduced height
+                    const height = 80;
 
                     return (
                       <div
@@ -390,16 +384,13 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
             </div>
           </div>
         )}
-
-        {/* Add Content Modal */}
-        <AddContentModal
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onManualUpload={handleManualUpload}
-          onCreateWithAgents={handleCreateWithAgents}
-          triggerPosition={triggerPosition}
-        />
       </div>
+
+      {/* AddContentModal is now just for managing state */}
+      <AddContentModal
+        onManualUpload={() => console.log('Manual upload')}
+        onCreateWithAgents={() => console.log('Create with agents')}
+      />
     </div>
   );
 };

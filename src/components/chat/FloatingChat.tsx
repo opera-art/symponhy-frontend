@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send } from 'lucide-react';
+import { X, Send, Upload, Zap } from 'lucide-react';
 import { FloatingOracle } from './FloatingOracle';
+import { useChatContent } from '@/context/ChatContentContext';
 
 interface Message {
   id: string;
@@ -12,6 +13,7 @@ interface Message {
 }
 
 export const FloatingChat: React.FC = () => {
+  const { isAddingContent, setIsAddingContent, onManualUpload, onCreateWithAgents } = useChatContent();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -23,8 +25,10 @@ export const FloatingChat: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [animationProgress, setAnimationProgress] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const animationRef = useRef<number | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,6 +43,52 @@ export const FloatingChat: React.FC = () => {
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  // Handle content adding animation
+  useEffect(() => {
+    if (isAddingContent && animationProgress < 1) {
+      const startTime = performance.now();
+      const duration = 600; // 600ms animation
+
+      const animate = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        setAnimationProgress(progress);
+
+        if (progress < 1) {
+          animationRef.current = requestAnimationFrame(animate);
+        }
+      };
+
+      animationRef.current = requestAnimationFrame(animate);
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
+    }
+  }, [isAddingContent]);
+
+  const handleManualUploadClick = () => {
+    if (onManualUpload) {
+      onManualUpload();
+    }
+    setIsAddingContent(false);
+    setAnimationProgress(0);
+  };
+
+  const handleCreateWithAgentsClick = () => {
+    if (onCreateWithAgents) {
+      onCreateWithAgents();
+    }
+    setIsAddingContent(false);
+    setAnimationProgress(0);
+  };
+
+  const handleCloseContentModal = () => {
+    setIsAddingContent(false);
+    setAnimationProgress(0);
+  };
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -93,27 +143,133 @@ export const FloatingChat: React.FC = () => {
     }
   };
 
+  // Calculate animation values for sphere movement and size
+  const sphereSize = isAddingContent ? 80 + (120 - 80) * animationProgress : 80;
+  const sphereScale = isAddingContent ? 1 : (isOpen ? 0 : 1);
+  const offsetX = isAddingContent ? -((window.innerWidth / 2 - 24 - (window.innerWidth - 60)) * animationProgress) : 0;
+  const offsetY = isAddingContent ? -((window.innerHeight / 2 - 24 - (window.innerHeight - 60)) * animationProgress) : 0;
+
   return (
     <>
       {/* Floating Button with Oracle Sphere */}
       <button
-        onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 w-20 h-20 rounded-full
+        onClick={() => !isAddingContent && setIsOpen(true)}
+        className={`fixed bottom-6 right-6 z-50 rounded-full
           transition-all duration-500 ease-out
           hover:scale-110 cursor-pointer
-          ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
-        style={{ background: 'transparent', border: 'none' }}
+          ${isAddingContent || isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          width: `${sphereSize}px`,
+          height: `${sphereSize}px`,
+        }}
         aria-label="Abrir chat"
       >
-        <FloatingOracle size={80} />
+        <FloatingOracle size={Math.round(sphereSize)} />
       </button>
+
+      {/* Animated Moving Sphere for Content Mode */}
+      {isAddingContent && (
+        <div
+          className="fixed z-50 rounded-full pointer-events-none flex items-center justify-center"
+          style={{
+            width: `${sphereSize}px`,
+            height: `${sphereSize}px`,
+            left: `calc(50% - ${sphereSize / 2}px + ${offsetX}px)`,
+            top: `calc(50% - ${sphereSize / 2}px + ${offsetY}px)`,
+            transition: 'none',
+          }}
+        >
+          <FloatingOracle size={Math.round(sphereSize)} />
+        </div>
+      )}
+
+      {/* Content Selection Modal */}
+      {isAddingContent && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={handleCloseContentModal}
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
+            style={{
+              opacity: Math.min(animationProgress / 0.8, 1) * 0.2,
+            }}
+          />
+
+          {/* Modal */}
+          <div
+            className="relative z-50 bg-white rounded-3xl shadow-2xl w-96 p-8 flex flex-col items-center text-center transition-all duration-300"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              opacity: animationProgress >= 0.9 ? 1 : 0,
+              transform: `scale(${0.95 + 0.05 * Math.min((animationProgress - 0.8) / 0.2, 1)})`,
+            }}
+          >
+            {/* Sphere at top */}
+            <div className="w-32 h-32 mb-6 flex items-center justify-center">
+              <FloatingOracle size={128} />
+            </div>
+
+            {/* Question */}
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">
+              Como deseja criar seu conteúdo?
+            </h2>
+            <p className="text-sm text-slate-500 mb-6">
+              Escolha entre enviar manualmente ou usar nossos agentes de IA
+            </p>
+
+            {/* Options */}
+            <div className="space-y-3 w-full">
+              {/* Manual Upload Option */}
+              <button
+                onClick={handleManualUploadClick}
+                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-slate-900 hover:bg-slate-50 transition-all duration-200 group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <Upload className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="font-medium text-slate-900 text-sm">Upload Manual</p>
+                  <p className="text-xs text-slate-500">Envie seus arquivos diretamente</p>
+                </div>
+              </button>
+
+              {/* Create with Agents Option */}
+              <button
+                onClick={handleCreateWithAgentsClick}
+                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-slate-900 hover:bg-slate-50 transition-all duration-200 group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                  <Zap className="w-5 h-5 text-purple-600" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="font-medium text-slate-900 text-sm">Criar com Agentes</p>
+                  <p className="text-xs text-slate-500">Use IA para gerar estratégia</p>
+                </div>
+              </button>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={handleCloseContentModal}
+              className="mt-6 text-slate-400 hover:text-slate-600 transition-colors"
+              aria-label="Fechar"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Chat Window */}
       <div
         className={`fixed bottom-6 right-6 z-50 w-[380px] h-[520px]
           bg-white rounded-2xl shadow-2xl overflow-hidden
           flex flex-col transition-all duration-500 ease-out origin-bottom-right
-          ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}
+          ${isOpen && !isAddingContent ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}
       >
         {/* Header with Oracle Sphere */}
         <div className="relative h-20 bg-gradient-to-r from-slate-900 to-slate-800 flex items-center px-4">
