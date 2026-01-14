@@ -56,6 +56,46 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
     }
   };
 
+  const previousWeek = () => {
+    const currentDate = new Date(year, month, selectedDay);
+    currentDate.setDate(currentDate.getDate() - 7);
+    onMonthChange(currentDate.getFullYear(), currentDate.getMonth());
+    setSelectedDay(currentDate.getDate());
+  };
+
+  const nextWeek = () => {
+    const currentDate = new Date(year, month, selectedDay);
+    currentDate.setDate(currentDate.getDate() + 7);
+    onMonthChange(currentDate.getFullYear(), currentDate.getMonth());
+    setSelectedDay(currentDate.getDate());
+  };
+
+  const previousDay = () => {
+    const currentDate = new Date(year, month, selectedDay);
+    currentDate.setDate(currentDate.getDate() - 1);
+    onMonthChange(currentDate.getFullYear(), currentDate.getMonth());
+    setSelectedDay(currentDate.getDate());
+  };
+
+  const nextDay = () => {
+    const currentDate = new Date(year, month, selectedDay);
+    currentDate.setDate(currentDate.getDate() + 1);
+    onMonthChange(currentDate.getFullYear(), currentDate.getMonth());
+    setSelectedDay(currentDate.getDate());
+  };
+
+  const handlePrevious = () => {
+    if (view === 'month') previousMonth();
+    else if (view === 'week') previousWeek();
+    else previousDay();
+  };
+
+  const handleNext = () => {
+    if (view === 'month') nextMonth();
+    else if (view === 'week') nextWeek();
+    else nextDay();
+  };
+
   const goToToday = () => {
     const today = new Date();
     onMonthChange(today.getFullYear(), today.getMonth());
@@ -185,7 +225,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
         {/* Navigation */}
         <div className="flex items-center gap-1.5">
           <button
-            onClick={previousMonth}
+            onClick={handlePrevious}
             className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-lg hover:bg-slate-200 transition-all duration-200 text-slate-600"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -197,7 +237,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
             {t('today')}
           </button>
           <button
-            onClick={nextMonth}
+            onClick={handleNext}
             className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-lg hover:bg-slate-200 transition-all duration-200 text-slate-600"
           >
             <ChevronRight className="w-4 h-4" />

@@ -17,8 +17,8 @@ export const CalendarViewContainer: React.FC = () => {
   const { t } = useLanguage();
   const viewParam = searchParams.get('view') as ViewType | null;
   const [currentView, setCurrentView] = useState<ViewType>(viewParam || 'calendar');
-  const [currentYear, setCurrentYear] = useState(2024);
-  const [currentMonth, setCurrentMonth] = useState(0); // Janeiro
+  const [currentYear, setCurrentYear] = useState(() => new Date().getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(() => new Date().getMonth());
 
   const handleMonthChange = (year: number, month: number) => {
     setCurrentYear(year);
