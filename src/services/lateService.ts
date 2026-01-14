@@ -39,14 +39,29 @@ export interface LateAccount {
   connectedAt: string;
 }
 
+export interface PlatformTarget {
+  platform: Platform;
+  accountId: string;
+}
+
+export interface MediaItem {
+  type: 'image' | 'video';
+  url: string;
+}
+
 export interface LatePost {
-  id: string;
+  _id: string;
+  id?: string;
   content: string;
-  platforms: Platform[];
+  platforms: {
+    platform: Platform;
+    accountId: string;
+    platformPostUrl?: string;
+  }[];
   status: 'draft' | 'scheduled' | 'published' | 'failed';
-  scheduledAt?: string;
+  scheduledFor?: string;
   publishedAt?: string;
-  mediaUrls?: string[];
+  mediaItems?: MediaItem[];
 }
 
 class LateService {
@@ -118,15 +133,23 @@ class LateService {
   // POSTS
   // ==========================================
 
+  /**
+   * Create a post - Late API compliant
+   * @param options.content - Post text (required)
+   * @param options.platforms - Array of { platform, accountId } (required)
+   * @param options.publishNow - Publish immediately (default: true)
+   * @param options.scheduledFor - ISO 8601 date for scheduling
+   * @param options.mediaItems - Array of { type: 'image'|'video', url }
+   */
   async createPost(options: {
-    profileId: string;
-    platforms: Platform[];
     content: string;
-    mediaUrls?: string[];
-    scheduledAt?: string;
-    title?: string;
-    hashtags?: string[];
-  }): Promise<LatePost> {
+    platforms: PlatformTarget[];
+    publishNow?: boolean;
+    scheduledFor?: string;
+    isDraft?: boolean;
+    mediaItems?: MediaItem[];
+    timezone?: string;
+  }): Promise<{ message: string; post: LatePost }> {
     return this.request('/posts', {
       method: 'POST',
       body: JSON.stringify(options),
