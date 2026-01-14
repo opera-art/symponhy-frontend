@@ -887,11 +887,9 @@ export default function EssentialBriefingPage() {
       >
         {/* Input com botão de comentários */}
         <div className="relative">
-          {renderInput()}
-
-          {/* Botão de comentários do campo - posicionado no canto superior direito */}
+          {/* Botão de comentários - fixo no canto superior direito da área */}
           {userId && (
-            <div className="absolute right-2 -top-8 z-20">
+            <div className="flex justify-end mb-2">
               <FieldComments
                 key={`comments-${question.id}`}
                 fieldName={question.id}
@@ -900,6 +898,8 @@ export default function EssentialBriefingPage() {
               />
             </div>
           )}
+
+          {renderInput()}
         </div>
       </OnboardingLayout>
 
