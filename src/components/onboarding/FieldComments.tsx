@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { MessageCircle, Send, X, Check, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-import { useAuth } from '@clerk/nextjs';
+import React, { useState, useEffect, useRef } from 'react';
+import { MessageCircle, Send, X, Check, Trash2, AtSign } from 'lucide-react';
+import { useAuth, useOrganization } from '@clerk/nextjs';
 
 interface Comment {
   id: string;
@@ -13,6 +13,13 @@ interface Comment {
   comment: string;
   resolved: boolean;
   created_at: string;
+}
+
+interface OrgMember {
+  id: string;
+  name: string;
+  email: string;
+  imageUrl?: string;
 }
 
 interface FieldCommentsProps {
@@ -27,25 +34,47 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
   onboardingType,
 }) => {
   const { userId } = useAuth();
+  const { organization, memberships } = useOrganization({
+    memberships: {
+      infinite: true,
+    },
+  });
+
   const [comments, setComments] = useState<Comment[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
 
-  // Usar proxy do Next.js que adiciona headers do Clerk automaticamente
+  // Estado para menções
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState('');
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Membros da organização
+  const orgMembers: OrgMember[] = memberships?.data?.map(m => ({
+    id: m.publicUserData?.userId || '',
+    name: `${m.publicUserData?.firstName || ''} ${m.publicUserData?.lastName || ''}`.trim() || 'Usuário',
+    email: m.publicUserData?.identifier || '',
+    imageUrl: m.publicUserData?.imageUrl,
+  })) || [];
+
+  // Filtrar membros baseado na busca
+  const filteredMembers = orgMembers.filter(m =>
+    m.name.toLowerCase().includes(mentionSearch.toLowerCase()) ||
+    m.email.toLowerCase().includes(mentionSearch.toLowerCase())
+  );
+
   const API_BASE = '/api/proxy';
 
-  // Buscar comentários do campo
   const fetchComments = async () => {
     if (!briefingUserId) return;
-
     setLoading(true);
     try {
       const response = await fetch(
         `${API_BASE}/comments/${onboardingType}/${briefingUserId}/${fieldName}`
       );
-
       if (response.ok) {
         const data = await response.json();
         setComments(data.comments || []);
@@ -57,27 +86,74 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
     }
   };
 
-  // Reset comments when field changes (per-question)
   useEffect(() => {
     setComments([]);
     setIsOpen(false);
   }, [fieldName]);
 
-  // Fetch comments when panel opens
   useEffect(() => {
     if (isOpen) {
       fetchComments();
     }
   }, [isOpen, fieldName, briefingUserId]);
 
-  // Criar comentário - com update otimista
+  // Detectar @ no input
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewComment(value);
+
+    // Verificar se o usuário digitou @
+    const lastAtIndex = value.lastIndexOf('@');
+    if (lastAtIndex !== -1) {
+      const textAfterAt = value.slice(lastAtIndex + 1);
+      // Se não tem espaço depois do @, mostrar sugestões
+      if (!textAfterAt.includes(' ')) {
+        setMentionSearch(textAfterAt);
+        setShowMentions(true);
+        setMentionIndex(0);
+        return;
+      }
+    }
+    setShowMentions(false);
+  };
+
+  // Inserir menção
+  const insertMention = (member: OrgMember) => {
+    const lastAtIndex = newComment.lastIndexOf('@');
+    const textBefore = newComment.slice(0, lastAtIndex);
+    const newValue = `${textBefore}@${member.name} `;
+    setNewComment(newValue);
+    setShowMentions(false);
+    inputRef.current?.focus();
+  };
+
+  // Navegação com teclado nas menções
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (showMentions && filteredMembers.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setMentionIndex(prev => (prev + 1) % filteredMembers.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setMentionIndex(prev => (prev - 1 + filteredMembers.length) % filteredMembers.length);
+      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        insertMention(filteredMembers[mentionIndex]);
+        return;
+      } else if (e.key === 'Escape') {
+        setShowMentions(false);
+      }
+    } else if (e.key === 'Enter' && !e.shiftKey && newComment.trim()) {
+      e.preventDefault();
+      handleSubmit(e as unknown as React.FormEvent);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || sending) return;
 
     const commentText = newComment.trim();
-
-    // Update otimista - adiciona imediatamente na UI
     const optimisticComment: Comment = {
       id: `temp-${Date.now()}`,
       clerk_user_id: briefingUserId,
@@ -96,9 +172,7 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
     try {
       const response = await fetch(`${API_BASE}/comments`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clerkUserId: briefingUserId,
           onboardingType,
@@ -108,24 +182,19 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
       });
 
       if (response.ok) {
-        // Buscar comentários atualizados em background
         fetchComments();
-        // Fechar após um breve delay para o usuário ver
         setTimeout(() => setIsOpen(false), 500);
       } else {
-        // Se falhar, remove o comentário otimista
         setComments(prev => prev.filter(c => c.id !== optimisticComment.id));
       }
     } catch (error) {
       console.error('Error creating comment:', error);
-      // Remove comentário otimista em caso de erro
       setComments(prev => prev.filter(c => c.id !== optimisticComment.id));
     } finally {
       setSending(false);
     }
   };
 
-  // Resolver comentário
   const handleResolve = async (commentId: string) => {
     try {
       await fetch(`${API_BASE}/comments/${onboardingType}/${commentId}/resolve`, {
@@ -137,7 +206,6 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
     }
   };
 
-  // Deletar comentário
   const handleDelete = async (commentId: string) => {
     try {
       await fetch(`${API_BASE}/comments/${onboardingType}/${commentId}`, {
@@ -147,6 +215,21 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
+  };
+
+  // Renderizar texto do comentário com menções destacadas
+  const renderCommentText = (text: string) => {
+    const parts = text.split(/(@\w+(?:\s\w+)?)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        return (
+          <span key={i} className="text-amber-600 font-medium bg-amber-50 px-0.5 rounded">
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
   };
 
   const unresolvedCount = comments.filter(c => !c.resolved).length;
@@ -172,10 +255,10 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
         )}
       </button>
 
-      {/* Painel de comentários - abre para baixo e à esquerda */}
+      {/* Painel de comentários */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
-          {/* Header - compacto */}
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
+          {/* Header */}
           <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-b border-slate-200">
             <span className="text-xs font-medium text-slate-600">
               Comentários ({comments.length})
@@ -188,8 +271,8 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
             </button>
           </div>
 
-          {/* Lista de comentários - mais compacta */}
-          <div className="max-h-40 overflow-y-auto">
+          {/* Lista de comentários */}
+          <div className="max-h-48 overflow-y-auto">
             {loading ? (
               <div className="p-3 text-center text-slate-400 text-xs">
                 Carregando...
@@ -203,14 +286,14 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
                 {comments.map((comment) => (
                   <div
                     key={comment.id}
-                    className={`p-2 ${comment.resolved ? 'bg-slate-50 opacity-60' : ''}`}
+                    className={`p-2.5 ${comment.resolved ? 'bg-slate-50 opacity-60' : ''}`}
                   >
                     <div className="flex items-start justify-between gap-1">
                       <div className="flex-1 min-w-0">
-                        <p className={`text-xs ${comment.resolved ? 'line-through text-slate-400' : 'text-slate-700'}`}>
-                          {comment.comment}
+                        <p className={`text-xs leading-relaxed ${comment.resolved ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                          {renderCommentText(comment.comment)}
                         </p>
-                        <p className="text-[9px] text-slate-400 mt-0.5">
+                        <p className="text-[9px] text-slate-400 mt-1">
                           {comment.author_name || 'Usuário'} • {new Date(comment.created_at).toLocaleDateString('pt-BR', {
                             day: '2-digit',
                             month: 'short',
@@ -246,28 +329,55 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
             )}
           </div>
 
-          {/* Input de novo comentário - compacto */}
-          <form onSubmit={handleSubmit} className="p-2 border-t border-slate-200 bg-slate-50">
-            <div className="flex gap-1.5">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && newComment.trim()) {
-                    e.preventDefault();
-                    handleSubmit(e as unknown as React.FormEvent);
-                  }
-                }}
-                placeholder="Comentário..."
-                className="flex-1 px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-amber-400"
-              />
+          {/* Input com menções */}
+          <form onSubmit={handleSubmit} className="p-2 border-t border-slate-200 bg-slate-50 relative">
+            {/* Lista de sugestões de menção */}
+            {showMentions && filteredMembers.length > 0 && (
+              <div className="absolute bottom-full left-2 right-2 mb-1 bg-white rounded-lg shadow-lg border border-slate-200 max-h-32 overflow-y-auto">
+                {filteredMembers.map((member, idx) => (
+                  <button
+                    key={member.id}
+                    type="button"
+                    onClick={() => insertMention(member)}
+                    className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-50 transition-colors ${
+                      idx === mentionIndex ? 'bg-amber-50' : ''
+                    }`}
+                  >
+                    {member.imageUrl ? (
+                      <img src={member.imageUrl} alt="" className="w-6 h-6 rounded-full" />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center">
+                        <span className="text-[10px] text-slate-500">{member.name[0]}</span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-slate-700 truncate">{member.name}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{member.email}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-1.5 items-center">
+              <div className="relative flex-1">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={newComment}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Comentário... Use @ para mencionar"
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-amber-400 pr-8"
+                />
+                <AtSign className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
+              </div>
               <button
                 type="submit"
                 disabled={!newComment.trim() || sending}
-                className="px-2 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-2.5 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <Send className="w-3 h-3" />
+                <Send className="w-3.5 h-3.5" />
               </button>
             </div>
           </form>
