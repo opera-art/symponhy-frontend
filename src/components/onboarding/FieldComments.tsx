@@ -172,75 +172,70 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
         )}
       </button>
 
-      {/* Painel de comentários */}
+      {/* Painel de comentários - abre para cima */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
-            <span className="text-sm font-medium text-slate-700">
+        <div className="absolute right-0 bottom-full mb-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
+          {/* Header - compacto */}
+          <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-b border-slate-200">
+            <span className="text-xs font-medium text-slate-600">
               Comentários ({comments.length})
             </span>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-slate-200 rounded-lg transition-colors"
+              className="p-0.5 hover:bg-slate-200 rounded transition-colors"
             >
-              <X className="w-4 h-4 text-slate-500" />
+              <X className="w-3.5 h-3.5 text-slate-500" />
             </button>
           </div>
 
-          {/* Lista de comentários */}
-          <div className="max-h-60 overflow-y-auto">
+          {/* Lista de comentários - mais compacta */}
+          <div className="max-h-40 overflow-y-auto">
             {loading ? (
-              <div className="p-4 text-center text-slate-400 text-sm">
+              <div className="p-3 text-center text-slate-400 text-xs">
                 Carregando...
               </div>
             ) : comments.length === 0 ? (
-              <div className="p-4 text-center text-slate-400 text-sm">
-                Nenhum comentário ainda
+              <div className="p-3 text-center text-slate-400 text-xs">
+                Nenhum comentário
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
                 {comments.map((comment) => (
                   <div
                     key={comment.id}
-                    className={`p-3 ${comment.resolved ? 'bg-slate-50 opacity-60' : ''}`}
+                    className={`p-2 ${comment.resolved ? 'bg-slate-50 opacity-60' : ''}`}
                   >
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start justify-between gap-1">
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-slate-600">
-                          {comment.author_name || 'Usuário'}
-                        </p>
-                        <p className={`text-sm mt-1 ${comment.resolved ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                        <p className={`text-xs ${comment.resolved ? 'line-through text-slate-400' : 'text-slate-700'}`}>
                           {comment.comment}
                         </p>
-                        <p className="text-[10px] text-slate-400 mt-1">
-                          {new Date(comment.created_at).toLocaleDateString('pt-BR', {
+                        <p className="text-[9px] text-slate-400 mt-0.5">
+                          {comment.author_name || 'Usuário'} • {new Date(comment.created_at).toLocaleDateString('pt-BR', {
                             day: '2-digit',
                             month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit',
                           })}
                         </p>
                       </div>
 
                       {/* Ações */}
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center">
                         {!comment.resolved && (
                           <button
                             onClick={() => handleResolve(comment.id)}
-                            className="p-1 hover:bg-green-100 rounded text-slate-400 hover:text-green-600 transition-colors"
-                            title="Marcar como resolvido"
+                            className="p-0.5 hover:bg-green-100 rounded text-slate-400 hover:text-green-600 transition-colors"
+                            title="Resolver"
                           >
-                            <Check className="w-3.5 h-3.5" />
+                            <Check className="w-3 h-3" />
                           </button>
                         )}
                         {comment.author_clerk_user_id === userId && (
                           <button
                             onClick={() => handleDelete(comment.id)}
-                            className="p-1 hover:bg-red-100 rounded text-slate-400 hover:text-red-600 transition-colors"
+                            className="p-0.5 hover:bg-red-100 rounded text-slate-400 hover:text-red-600 transition-colors"
                             title="Deletar"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3 h-3" />
                           </button>
                         )}
                       </div>
@@ -251,22 +246,22 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
             )}
           </div>
 
-          {/* Input de novo comentário */}
-          <form onSubmit={handleSubmit} className="p-3 border-t border-slate-200 bg-slate-50">
-            <div className="flex gap-2">
+          {/* Input de novo comentário - compacto */}
+          <form onSubmit={handleSubmit} className="p-2 border-t border-slate-200 bg-slate-50">
+            <div className="flex gap-1.5">
               <input
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Adicionar comentário..."
-                className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-amber-400"
+                placeholder="Comentário..."
+                className="flex-1 px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-amber-400"
               />
               <button
                 type="submit"
                 disabled={!newComment.trim() || sending}
-                className="px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-2 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-3 h-3" />
               </button>
             </div>
           </form>

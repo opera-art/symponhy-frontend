@@ -6,7 +6,7 @@ import { useAuth } from '@clerk/nextjs';
 import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout';
 import { FieldComments } from '@/components/onboarding/FieldComments';
 import { BriefingPreview } from '@/components/onboarding/BriefingPreview';
-import { Check, Mic, MicOff, Eye, MessageCircle } from 'lucide-react';
+import { Check, Mic, MicOff, Glasses, MessageCircle } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 
@@ -474,6 +474,7 @@ export default function EssentialBriefingPage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [maxProgressReached, setMaxProgressReached] = useState(0); // Progresso máximo alcançado
 
   // Hook de onboarding
   const {
@@ -507,6 +508,9 @@ export default function EssentialBriefingPage() {
       if (savedProgress) {
         setCurrentSection(savedProgress.current_section);
         setCurrentQuestion(savedProgress.current_question);
+        // Restaurar progresso máximo baseado na posição salva
+        const savedGlobalIdx = sections.slice(0, savedProgress.current_section).reduce((acc, s) => acc + s.questions.length, 0) + savedProgress.current_question;
+        setMaxProgressReached(savedGlobalIdx);
       }
 
       setIsInitialized(true);
@@ -710,7 +714,15 @@ export default function EssentialBriefingPage() {
   // Calcular índice global da pergunta atual
   const completedQuestions = sections.slice(0, currentSection).reduce((acc, s) => acc + s.questions.length, 0) + currentQuestion;
 
-  // Calcular perguntas puladas individualmente (índices globais de perguntas vazias já passadas)
+  // Atualizar progresso máximo quando avançar
+  useEffect(() => {
+    if (completedQuestions > maxProgressReached) {
+      setMaxProgressReached(completedQuestions);
+    }
+  }, [completedQuestions, maxProgressReached]);
+
+  // Calcular perguntas puladas usando o progresso MÁXIMO (não o atual)
+  // Assim quando voltar, as perguntas puladas continuam aparecendo
   const skippedQuestions: number[] = [];
   let globalIdx = 0;
   for (let secIdx = 0; secIdx < sections.length; secIdx++) {
@@ -719,8 +731,8 @@ export default function EssentialBriefingPage() {
       const value = formData[q.id as keyof FormData];
       const isEmpty = !value || (Array.isArray(value) ? value.length === 0 : String(value).trim().length === 0);
 
-      // Só marca como pulada se já passou dessa pergunta e está vazia
-      if (globalIdx < completedQuestions && isEmpty) {
+      // Usa maxProgressReached para manter os pontos vermelhos mesmo quando volta
+      if (globalIdx < maxProgressReached && isEmpty) {
         skippedQuestions.push(globalIdx);
       }
       globalIdx++;
@@ -774,14 +786,13 @@ export default function EssentialBriefingPage() {
         </div>
       </OnboardingLayout>
 
-      {/* Botão flutuante para preview */}
+      {/* Botão flutuante para preview - discreto */}
       <button
         onClick={() => setShowPreview(true)}
-        className="fixed bottom-4 right-4 flex items-center gap-1.5 px-3 py-2 bg-amber-500/90 hover:bg-amber-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all z-40 text-xs"
+        className="fixed bottom-4 right-4 p-2.5 bg-white/80 hover:bg-white text-slate-600 hover:text-amber-600 rounded-full shadow-sm hover:shadow-md transition-all z-40 backdrop-blur-sm border border-slate-200/50"
         title="Ver preview do briefing"
       >
-        <Eye className="w-3.5 h-3.5" />
-        Preview
+        <Glasses className="w-4 h-4" />
       </button>
 
       {/* Modal de preview */}

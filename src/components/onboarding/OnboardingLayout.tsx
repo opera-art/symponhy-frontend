@@ -378,64 +378,45 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         </div>
       </header>
 
-      {/* Progress Bar - Luxury Surreal Design */}
-      <div className="px-6 flex-shrink-0 relative z-10 py-4">
-        <div className="max-w-2xl mx-auto">
-          {/* Glass container with luxury styling */}
-          <div className="relative p-4 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden">
-            {/* Animated shimmer effect */}
+      {/* Progress Bar - Compact Luxury Design */}
+      <div className="px-4 flex-shrink-0 relative z-10 py-2">
+        <div className="max-w-3xl mx-auto">
+          {/* Minimal glass container */}
+          <div className="relative px-3 py-2 rounded-xl bg-white/50 backdrop-blur-md border border-white/60 shadow-sm overflow-hidden">
+            {/* Subtle shimmer */}
             <div
-              className="absolute inset-0 opacity-30"
+              className="absolute inset-0 opacity-20"
               style={{
-                background: `linear-gradient(120deg, transparent 30%, ${oracleColor}20 50%, transparent 70%)`,
-                animation: 'shimmer 3s ease-in-out infinite',
+                background: `linear-gradient(120deg, transparent 40%, ${oracleColor}15 50%, transparent 60%)`,
+                animation: 'shimmer 4s ease-in-out infinite',
               }}
             />
 
-            {/* Floating particles container */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-1 h-1 rounded-full animate-float"
-                  style={{
-                    backgroundColor: oracleColor,
-                    left: `${15 + i * 15}%`,
-                    top: `${20 + (i % 3) * 20}%`,
-                    opacity: 0.4,
-                    animationDelay: `${i * 0.5}s`,
-                    animationDuration: `${3 + i * 0.5}s`,
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Main progress constellation */}
-            <div className="relative flex items-center justify-between gap-1">
+            {/* Progress dots with section indicators */}
+            <div className="relative flex items-center justify-between gap-0.5">
               {sections.map((section, sectionIdx) => {
                 const sectionStart = sections.slice(0, sectionIdx).reduce((acc, s) => acc + s.questionCount, 0);
                 const isCurrentSection = sectionIdx === currentSection;
                 const isFutureSection = sectionIdx > currentSection;
+                const isPastSection = sectionIdx < currentSection;
 
                 return (
-                  <div key={sectionIdx} className="flex-1 relative">
-                    {/* Section label on top */}
-                    {isCurrentSection && (
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                        <span
-                          className="text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full"
-                          style={{
-                            color: oracleColor,
-                            backgroundColor: `${oracleColor}15`,
-                          }}
-                        >
-                          {section.title}
-                        </span>
-                      </div>
-                    )}
+                  <div key={sectionIdx} className="flex-1 relative group">
+                    {/* Section indicator - shows on hover or current */}
+                    <div className={`absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap transition-opacity ${isCurrentSection ? 'opacity-100' : 'opacity-0 group-hover:opacity-70'}`}>
+                      <span
+                        className="text-[8px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        style={{
+                          color: isCurrentSection ? oracleColor : '#64748b',
+                          backgroundColor: isCurrentSection ? `${oracleColor}10` : 'transparent',
+                        }}
+                      >
+                        {section.title}
+                      </span>
+                    </div>
 
-                    {/* Question gems/diamonds */}
-                    <div className="flex items-center justify-center gap-1.5">
+                    {/* Question dots - minimal */}
+                    <div className="flex items-center justify-center gap-0.5">
                       {Array.from({ length: section.questionCount }).map((_, questionIdx) => {
                         const globalIdx = sectionStart + questionIdx;
                         const isCurrent = sectionIdx === currentSection && questionIdx === currentQuestion;
@@ -443,35 +424,22 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                         const isSkipped = skippedQuestions.includes(globalIdx);
                         const canNavigate = isSkipped && onNavigateToQuestion;
 
-                        // Diamond/gem styling based on state
-                        let gemSize = isCurrent ? 'w-4 h-4' : 'w-2.5 h-2.5';
-                        let gemBg = '';
-                        let gemShadow = '';
-                        let gemBorder = '';
-                        let animation = '';
+                        // Minimal dot styling
+                        let dotSize = isCurrent ? 'w-2.5 h-2.5' : 'w-1.5 h-1.5';
+                        let dotBg = '';
+                        let dotShadow = '';
 
                         if (isCurrent) {
-                          // Current: Glowing gold diamond
-                          gemBg = `linear-gradient(135deg, ${oracleColor} 0%, #FFE55C 50%, ${oracleColor} 100%)`;
-                          gemShadow = `0 0 20px ${oracleColor}80, 0 0 40px ${oracleColor}40, inset 0 0 10px rgba(255,255,255,0.5)`;
-                          gemBorder = `2px solid ${oracleColor}`;
-                          animation = 'pulse-glow 2s ease-in-out infinite';
+                          dotBg = oracleColor;
+                          dotShadow = `0 0 8px ${oracleColor}60`;
                         } else if (isSkipped) {
-                          // Skipped: Red gem with attention effect
-                          gemBg = 'linear-gradient(135deg, #ef4444 0%, #f87171 50%, #ef4444 100%)';
-                          gemShadow = '0 0 12px rgba(239,68,68,0.5), inset 0 0 4px rgba(255,255,255,0.3)';
-                          gemBorder = '1px solid #dc2626';
-                          gemSize = 'w-3 h-3';
+                          dotBg = '#ef4444';
+                          dotShadow = '0 0 4px rgba(239,68,68,0.4)';
+                          dotSize = 'w-2 h-2';
                         } else if (isPast) {
-                          // Completed: Dark elegant gem
-                          gemBg = 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)';
-                          gemShadow = '0 2px 8px rgba(0,0,0,0.2), inset 0 0 4px rgba(255,255,255,0.1)';
-                          gemBorder = '1px solid #475569';
+                          dotBg = '#334155';
                         } else {
-                          // Future: Subtle glass gem
-                          gemBg = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%)';
-                          gemShadow = '0 1px 4px rgba(0,0,0,0.05), inset 0 0 4px rgba(255,255,255,0.8)';
-                          gemBorder = '1px solid #e2e8f0';
+                          dotBg = '#e2e8f0';
                         }
 
                         return (
@@ -479,36 +447,24 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                             key={questionIdx}
                             onClick={() => canNavigate && onNavigateToQuestion(sectionIdx, questionIdx)}
                             disabled={!canNavigate}
-                            className={`relative ${gemSize} transition-all duration-300 ${canNavigate ? 'cursor-pointer hover:scale-125' : 'cursor-default'}`}
+                            className={`${dotSize} rounded-full transition-all duration-200 ${canNavigate ? 'cursor-pointer hover:scale-150' : 'cursor-default'}`}
                             style={{
-                              background: gemBg,
-                              boxShadow: gemShadow,
-                              border: gemBorder,
-                              borderRadius: isCurrent ? '6px' : '4px',
-                              transform: `rotate(45deg)`,
-                              animation: animation,
+                              backgroundColor: dotBg,
+                              boxShadow: dotShadow,
                             }}
-                            title={`${section.title} - Pergunta ${questionIdx + 1}${isSkipped ? ' (clique para voltar)' : ''}`}
-                          >
-                            {/* Inner shine effect */}
-                            <div
-                              className="absolute inset-0 rounded-[inherit] opacity-60"
-                              style={{
-                                background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%)',
-                              }}
-                            />
-                          </button>
+                            title={isSkipped ? `${section.title} - Pergunta ${questionIdx + 1} (clique para voltar)` : undefined}
+                          />
                         );
                       })}
                     </div>
 
-                    {/* Connection line between sections */}
+                    {/* Section divider */}
                     {sectionIdx < sections.length - 1 && (
                       <div
-                        className="absolute top-1/2 -right-1 w-2 h-px transition-colors duration-500"
+                        className="absolute top-1/2 -right-0.5 w-1 h-px"
                         style={{
-                          backgroundColor: isFutureSection ? '#e2e8f0' : oracleColor,
-                          opacity: isFutureSection ? 0.5 : 0.8,
+                          backgroundColor: isPastSection ? oracleColor : '#e2e8f0',
+                          opacity: 0.5,
                         }}
                       />
                     )}
@@ -517,52 +473,28 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
               })}
             </div>
 
-            {/* Bottom info bar */}
-            <div className="flex justify-between items-center mt-4 pt-3 border-t border-slate-100/50">
-              {/* Progress text */}
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-2 h-2 rounded-full animate-pulse"
-                  style={{ backgroundColor: oracleColor }}
-                />
-                <span className="text-xs text-slate-500">
-                  Pergunta <span className="font-semibold text-slate-700">{completedQuestions + 1}</span> de {totalQuestions}
-                </span>
-              </div>
-
-              {/* Percentage badge */}
-              <div
-                className="relative px-3 py-1.5 rounded-full overflow-hidden"
-                style={{
-                  background: `linear-gradient(135deg, ${oracleColor}15 0%, ${oracleColor}25 100%)`,
-                }}
+            {/* Minimal info bar */}
+            <div className="flex justify-between items-center mt-1.5 pt-1.5 border-t border-slate-100/30">
+              <span className="text-[10px] text-slate-400">
+                {completedQuestions + 1}/{totalQuestions}
+              </span>
+              <span
+                className="text-[10px] font-semibold"
+                style={{ color: oracleColor }}
               >
-                {/* Progress fill inside badge */}
-                <div
-                  className="absolute inset-0 transition-all duration-500"
-                  style={{
-                    background: `linear-gradient(90deg, ${oracleColor}30 0%, transparent 100%)`,
-                    width: `${progressPercent}%`,
-                  }}
-                />
-                <span
-                  className="relative text-xs font-bold tracking-wide"
-                  style={{ color: oracleColor }}
-                >
-                  {Math.round(progressPercent)}%
-                </span>
-              </div>
+                {Math.round(progressPercent)}%
+              </span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center px-4 py-2 min-h-0 overflow-y-auto relative z-10">
-        {/* Sphere Container with breathing */}
+      <main className="flex-1 flex flex-col items-center px-4 py-1 min-h-0 relative z-10">
+        {/* Sphere Container - Compact */}
         <div
-          className={`relative flex-shrink-0 mb-4 transition-all duration-300 ${isOverSphere ? 'scale-105' : ''}`}
-          style={{ width: 320, height: 320 }}
+          className={`relative flex-shrink-0 mb-2 transition-all duration-300 ${isOverSphere ? 'scale-105' : ''}`}
+          style={{ width: 200, height: 200 }}
           onDragOver={handleSphereDragOver}
           onDragLeave={handleSphereDragLeave}
           onDrop={handleSphereDrop}
@@ -571,27 +503,22 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           <div className="absolute inset-0 rounded-full blur-3xl transition-all duration-1000" style={{ backgroundColor: `${oracleColor}15`, transform: `scale(${1.2 + oracleIntensity * 0.2})` }} />
           {/* Sphere with breathing + scale */}
           <div className="absolute inset-0 flex items-center justify-center transition-transform duration-700" style={{ transform: `scale(${oracleScale * breatheScale})` }}>
-            <FloatingOracle size={280} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
+            <FloatingOracle size={180} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
           </div>
         </div>
 
-        {/* Section Title */}
-        <div className="text-center mb-1 flex-shrink-0">
-          <span className="text-xs font-medium uppercase tracking-wider" style={{ color: oracleColor }}>{sectionTitle}</span>
-        </div>
-
         {/* Question with 3D Transition */}
-        <div className="w-full max-w-2xl flex-shrink-0" style={{ perspective: '1000px' }}>
+        <div className="w-full max-w-2xl flex-1 flex flex-col min-h-0" style={{ perspective: '1000px' }}>
           <div
-            className="transition-all duration-300 ease-out"
+            className="transition-all duration-300 ease-out flex-shrink-0"
             style={{ transform: getQuestionTransform(), transformStyle: 'preserve-3d', opacity: questionTransition === 'exit' ? 0 : 1 }}
           >
-            <h2 className="text-lg font-semibold text-slate-900 text-center mb-3 min-h-[1.75rem]">
+            <h2 className="text-base font-semibold text-slate-900 text-center mb-2 min-h-[1.5rem]">
               <TypingText key={questionKey} text={questionText} speed={20} />
             </h2>
           </div>
 
-          <div className="mb-4">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             {React.Children.map(children, child => {
               if (React.isValidElement(child)) {
                 return React.cloneElement(child as React.ReactElement<any>, { onDragStart: handleDragStart, onDragEnd: handleDragEnd, draggable: true });
@@ -600,20 +527,20 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             })}
           </div>
 
-          {/* Navigation - sticky at bottom */}
-          <div className="flex justify-between items-center sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent pt-4 pb-2">
-            <button onClick={onBack} className="px-5 py-2 rounded-xl text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors text-sm">Anterior</button>
-            <span className="text-xs text-slate-400">Enter para continuar</span>
+          {/* Navigation - fixed at bottom */}
+          <div className="flex justify-between items-center pt-3 pb-1 flex-shrink-0 bg-gradient-to-t from-white to-transparent">
+            <button onClick={onBack} className="px-4 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors text-sm">Anterior</button>
+            <span className="text-[10px] text-slate-400">Enter ↵</span>
             <button
               onClick={handleNext}
               disabled={saving}
-              className={`px-5 py-2 rounded-xl font-medium flex items-center gap-2 transition-all text-sm ${buttonPulse ? 'scale-110 ring-4 ring-opacity-50' : ''}`}
+              className={`px-4 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all text-sm ${buttonPulse ? 'scale-110 ring-4 ring-opacity-50' : ''}`}
               style={{ backgroundColor: oracleColor, color: progressPercent > 60 ? '#1e293b' : '#fff', '--tw-ring-color': oracleColor } as React.CSSProperties}
             >
-              {isLastQuestion ? <><Check className="w-4 h-4" /> Finalizar</> : <>Próxima <ArrowRight className="w-4 h-4" /></>}
+              {isLastQuestion ? <><Check className="w-3.5 h-3.5" /> Finalizar</> : <>Próxima <ArrowRight className="w-3.5 h-3.5" /></>}
             </button>
           </div>
-          {draggedItem && <p className="text-center text-xs text-amber-600 mt-2 animate-pulse">Arraste até a esfera</p>}
+          {draggedItem && <p className="text-center text-xs text-amber-600 animate-pulse">Arraste até a esfera</p>}
         </div>
       </main>
     </div>
