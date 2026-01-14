@@ -616,7 +616,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         </div>
 
         {/* Question with 3D Transition */}
-        <div className="w-full max-w-2xl flex-1 flex flex-col min-h-0 overflow-hidden" style={{ perspective: '1000px' }}>
+        <div className="w-full max-w-2xl flex-1 flex flex-col min-h-0" style={{ perspective: '1000px' }}>
           <div
             className="transition-all duration-300 ease-out flex-shrink-0"
             style={{ transform: getQuestionTransform(), transformStyle: 'preserve-3d', opacity: questionTransition === 'exit' ? 0 : 1 }}
@@ -626,8 +626,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             </h2>
           </div>
 
-          {/* Área de conteúdo com scroll */}
-          <div className="flex-1 min-h-0 overflow-y-auto pb-16 scrollbar-hide">
+          {/* Área de conteúdo com scroll - overflow visível para selects */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible pb-20 scrollbar-hide px-1">
             {children}
           </div>
 

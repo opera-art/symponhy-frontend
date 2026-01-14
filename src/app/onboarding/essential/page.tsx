@@ -599,72 +599,143 @@ export default function EssentialBriefingPage() {
     switch (question.type) {
       case 'text':
       case 'url':
+        const textValue = value as string || '';
+        const hasTextValue = textValue.length > 0;
         return (
-          <div className="relative">
-            <input
-              type={question.type === 'url' ? 'url' : 'text'}
-              value={value as string}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder={question.placeholder}
-              className="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-slate-200 focus:border-current focus:ring-0 outline-none text-slate-800 text-base transition-all bg-white/80 backdrop-blur-sm"
-              style={{ '--tw-border-opacity': 1, borderColor: value ? themeColor : undefined } as React.CSSProperties}
-              autoFocus
+          <div className="relative group">
+            {/* Glow effect container */}
+            <div
+              className={`absolute -inset-1 rounded-3xl transition-all duration-500 ${hasTextValue ? 'opacity-100' : 'opacity-0 group-focus-within:opacity-50'}`}
+              style={{
+                background: `linear-gradient(135deg, ${themeColor}30, ${themeColor}10)`,
+                filter: 'blur(8px)',
+              }}
             />
-            {showMic && (
-              <button
-                type="button"
-                onClick={toggleListening}
-                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${
-                  isListening
-                    ? 'bg-red-100 text-red-600 animate-pulse'
-                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                }`}
-                title={isListening ? 'Parar gravação' : 'Falar resposta'}
-              >
-                {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-              </button>
-            )}
+
+            <div className="relative">
+              <input
+                type={question.type === 'url' ? 'url' : 'text'}
+                value={textValue}
+                onChange={(e) => handleInputChange(e.target.value)}
+                placeholder={question.placeholder}
+                className="w-full px-5 py-4 pr-14 rounded-2xl border-2 focus:ring-0 outline-none text-slate-800 text-base transition-all bg-white/90 backdrop-blur-sm shadow-sm focus:shadow-lg"
+                style={{
+                  borderColor: hasTextValue ? themeColor : '#e2e8f0',
+                }}
+                autoFocus
+              />
+
+              {/* Character indicator */}
+              {hasTextValue && (
+                <div
+                  className="absolute left-4 -bottom-6 text-xs font-medium transition-all"
+                  style={{ color: themeColor }}
+                >
+                  ✓ Preenchido
+                </div>
+              )}
+
+              {showMic && (
+                <button
+                  type="button"
+                  onClick={toggleListening}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-xl transition-all ${
+                    isListening
+                      ? 'text-white animate-pulse shadow-lg'
+                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:scale-105'
+                  }`}
+                  style={{
+                    backgroundColor: isListening ? themeColor : undefined,
+                  }}
+                  title={isListening ? 'Parar gravação' : 'Falar resposta'}
+                >
+                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
+              )}
+            </div>
           </div>
         );
 
       case 'date':
+        const dateValue = value as string || '';
         return (
-          <input
-            type="date"
-            value={value as string}
-            onChange={(e) => handleInputChange(e.target.value)}
-            className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:ring-0 outline-none text-slate-800 text-base transition-all bg-white/80 backdrop-blur-sm"
-            style={{ borderColor: value ? themeColor : undefined }}
-            autoFocus
-          />
+          <div className="relative group">
+            <div
+              className={`absolute -inset-1 rounded-3xl transition-all duration-500 ${dateValue ? 'opacity-100' : 'opacity-0 group-focus-within:opacity-50'}`}
+              style={{
+                background: `linear-gradient(135deg, ${themeColor}30, ${themeColor}10)`,
+                filter: 'blur(8px)',
+              }}
+            />
+            <input
+              type="date"
+              value={dateValue}
+              onChange={(e) => handleInputChange(e.target.value)}
+              className="relative w-full px-5 py-4 rounded-2xl border-2 focus:ring-0 outline-none text-slate-800 text-base transition-all bg-white/90 backdrop-blur-sm shadow-sm focus:shadow-lg"
+              style={{ borderColor: dateValue ? themeColor : '#e2e8f0' }}
+              autoFocus
+            />
+          </div>
         );
 
       case 'textarea':
+        const textareaValue = value as string || '';
+        const hasTextareaValue = textareaValue.length > 0;
+        const charCount = textareaValue.length;
         return (
-          <div className="relative">
-            <textarea
-              value={value as string}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder={question.placeholder}
-              rows={3}
-              className="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-slate-200 focus:ring-0 outline-none text-slate-800 text-base transition-all resize-none bg-white/80 backdrop-blur-sm"
-              style={{ borderColor: value ? themeColor : undefined }}
-              autoFocus
+          <div className="relative group">
+            {/* Glow effect */}
+            <div
+              className={`absolute -inset-1 rounded-3xl transition-all duration-500 ${hasTextareaValue ? 'opacity-100' : 'opacity-0 group-focus-within:opacity-50'}`}
+              style={{
+                background: `linear-gradient(135deg, ${themeColor}30, ${themeColor}10)`,
+                filter: 'blur(8px)',
+              }}
             />
-            {showMic && (
-              <button
-                type="button"
-                onClick={toggleListening}
-                className={`absolute right-3 top-3 p-2 rounded-xl transition-all ${
-                  isListening
-                    ? 'bg-red-100 text-red-600 animate-pulse'
-                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                }`}
-                title={isListening ? 'Parar gravação' : 'Falar resposta'}
-              >
-                {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-              </button>
-            )}
+
+            <div className="relative">
+              <textarea
+                value={textareaValue}
+                onChange={(e) => handleInputChange(e.target.value)}
+                placeholder={question.placeholder}
+                rows={4}
+                className="w-full px-5 py-4 pr-14 rounded-2xl border-2 focus:ring-0 outline-none text-slate-800 text-base transition-all resize-none bg-white/90 backdrop-blur-sm shadow-sm focus:shadow-lg"
+                style={{ borderColor: hasTextareaValue ? themeColor : '#e2e8f0' }}
+                autoFocus
+              />
+
+              {/* Character count and status */}
+              <div className="absolute left-4 -bottom-6 flex items-center gap-3">
+                {hasTextareaValue && (
+                  <>
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: themeColor }}
+                    >
+                      ✓ {charCount} caracteres
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {showMic && (
+                <button
+                  type="button"
+                  onClick={toggleListening}
+                  className={`absolute right-3 top-3 p-2.5 rounded-xl transition-all ${
+                    isListening
+                      ? 'text-white animate-pulse shadow-lg'
+                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:scale-105'
+                  }`}
+                  style={{
+                    backgroundColor: isListening ? themeColor : undefined,
+                  }}
+                  title={isListening ? 'Parar gravação' : 'Falar resposta'}
+                >
+                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
+              )}
+            </div>
           </div>
         );
 
