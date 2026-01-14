@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Upload, Zap, X } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { FloatingOracle } from '@/components/chat/FloatingOracle';
 
 interface AddContentModalProps {
   isOpen: boolean;
@@ -21,17 +22,53 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
 }) => {
   const { t } = useLanguage();
   const [showContent, setShowContent] = useState(false);
+  const [spherePosition, setSpherePosition] = useState({ x: 0, y: 0 });
+  const [sphereIntensity, setSphereIntensity] = useState(0.3);
 
   React.useEffect(() => {
     if (isOpen) {
-      // Show sphere first, then content after animation
+      // Start with sphere at trigger position
+      setSpherePosition(triggerPosition);
+      setSphereIntensity(0.3);
       setShowContent(false);
-      const timer = setTimeout(() => {
-        setShowContent(true);
-      }, 600);
-      return () => clearTimeout(timer);
+
+      // Animate sphere to center
+      const animationDuration = 600;
+      const startTime = Date.now();
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / animationDuration, 1);
+
+        // Easing function
+        const easeProgress = progress < 0.5
+          ? 2 * progress * progress
+          : -1 + (4 - 2 * progress) * progress;
+
+        // Interpolate position
+        setSpherePosition({
+          x: triggerPosition.x + (centerX - triggerPosition.x) * easeProgress,
+          y: triggerPosition.y + (centerY - triggerPosition.y) * easeProgress,
+        });
+
+        // Increase intensity
+        setSphereIntensity(0.3 + easeProgress * 0.4);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          // Animation complete, show content
+          setSpherePosition({ x: centerX, y: centerY });
+          setSphereIntensity(0.7);
+          setShowContent(true);
+        }
+      };
+
+      animate();
     }
-  }, [isOpen]);
+  }, [isOpen, triggerPosition]);
 
   if (!isOpen) return null;
 
@@ -42,11 +79,8 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
     }, 300);
   };
 
-  // Calculate initial position relative to center
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
-  const offsetX = triggerPosition.x - centerX;
-  const offsetY = triggerPosition.y - centerY;
 
   return (
     <>
@@ -58,53 +92,48 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
         onClick={handleClose}
       />
 
-      {/* Sphere Animation Container */}
-      <div className="fixed inset-0 z-50 pointer-events-none">
-        {/* Animated Expanding Sphere */}
-        <div
-          className="fixed w-16 h-16 rounded-full bg-gradient-to-br from-gold to-gold-dark shadow-lg shadow-gold/50"
-          style={{
-            left: '50%',
-            top: '50%',
-            transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
-            animation: 'sphereMove 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
-          }}
-        >
-          {/* Glow effect */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gold/40 to-gold/0 blur-xl animate-pulse" />
-        </div>
-
-        {/* Outer expanding ring */}
-        <div
-          className="fixed rounded-full border-2 border-gold/30"
-          style={{
-            width: '64px',
-            height: '64px',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            animation: 'sphereRingExpand 0.6s ease-out forwards',
-          }}
+      {/* Animated Sphere Container */}
+      <div
+        className="fixed z-50 pointer-events-none"
+        style={{
+          left: `${spherePosition.x}px`,
+          top: `${spherePosition.y}px`,
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <FloatingOracle
+          size={96}
+          intensity={sphereIntensity}
+          showOrbits={true}
         />
       </div>
 
-      {/* Modal Content - Shows after sphere arrives */}
+      {/* Modal Content - Shows after sphere arrives at center */}
       {showContent && (
         <div className="fixed z-50 inset-0 flex items-center justify-center pointer-events-auto">
           <div
-            className="bg-white rounded-3xl shadow-2xl shadow-slate-400/40 border border-slate-200 p-8 w-96 animate-fade-in"
+            className="bg-white rounded-3xl shadow-2xl shadow-slate-400/40 border border-slate-200 p-8 w-96 animate-fade-in relative"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Sphere integrated into the top of the modal */}
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 pointer-events-none">
+              <FloatingOracle
+                size={80}
+                intensity={0.8}
+                showOrbits={true}
+              />
+            </div>
+
             {/* Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors z-10"
             >
               <X className="w-4 h-4" />
             </button>
 
-            {/* Header */}
-            <div className="text-center mb-8">
+            {/* Header with spacing for sphere */}
+            <div className="text-center mb-8 mt-6">
               <h2 className="text-2xl font-bold text-slate-900 mb-2">
                 {t('addNewContent') || 'Adicionar novo conteúdo'}
               </h2>
@@ -177,33 +206,6 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
           </div>
         </div>
       )}
-
-      {/* Styles for animations */}
-      <style>{`
-        @keyframes sphereMove {
-          from {
-            transform: translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px));
-            opacity: 1;
-            filter: blur(0px);
-          }
-          to {
-            transform: translate(-50%, -50%);
-            opacity: 1;
-            filter: blur(0px);
-          }
-        }
-
-        @keyframes sphereRingExpand {
-          from {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-          }
-          to {
-            transform: translate(-50%, -50%) scale(4);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </>
   );
 };
