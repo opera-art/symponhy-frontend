@@ -340,7 +340,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
 
   return (
     <div
-      className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden relative"
+      className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden relative max-w-full"
     >
       {/* Animated Gradient Mesh Background */}
       <GradientMesh color={oracleColor} />
@@ -365,19 +365,16 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         </div>
       )}
 
-      {/* Header */}
-      <header className="p-4 flex-shrink-0 relative z-10">
-        <div className="flex items-center justify-between max-w-3xl mx-auto">
+      {/* Header - apenas logo */}
+      <header className="p-3 flex-shrink-0 relative z-10">
+        <div className="flex items-center justify-center max-w-3xl mx-auto">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
-              {type === 'complete' ? <Crown className="w-4 h-4 text-amber-400" /> : <Sparkles className="w-4 h-4 text-white" />}
+            <div className="w-7 h-7 bg-slate-900 rounded-lg flex items-center justify-center">
+              {type === 'complete' ? <Crown className="w-3.5 h-3.5 text-amber-400" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
             </div>
-            <span className="font-semibold text-slate-900">Symponhy</span>
-            {type === 'complete' && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Master</span>}
+            <span className="font-semibold text-slate-800 text-sm">Symponhy</span>
+            {type === 'complete' && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">Master</span>}
           </div>
-          <button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Voltar
-          </button>
         </div>
       </header>
 
@@ -442,7 +439,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                           dotShadow = '0 0 4px rgba(239,68,68,0.4)';
                           dotSize = 'w-2.5 h-2.5';
                         } else if (isPast) {
-                          dotBg = '#334155';
+                          dotBg = '#22c55e'; // Verde para respondidas
                         } else {
                           dotBg = '#e2e8f0';
                         }
@@ -501,7 +498,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center px-4 py-2 min-h-0 relative z-10 overflow-hidden">
+      <main className="flex-1 flex flex-col items-center px-4 py-2 min-h-0 relative z-10 overflow-x-hidden overflow-y-hidden">
         {/* Sphere Container - Maior */}
         <div
           className={`relative flex-shrink-0 mb-2 transition-all duration-300 ${isOverSphere ? 'scale-105' : ''}`}
