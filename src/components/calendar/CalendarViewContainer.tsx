@@ -8,7 +8,8 @@ import { kanbanTasksData } from '@/data/newFeaturesData';
 import { cn } from '@/lib/utils';
 import { LayoutGrid, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
-import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { useCalendarEvents, CreateEventData } from '@/hooks/useCalendarEvents';
+import { CreateEventModal } from '@/components/calendar/CreateEventModal';
 
 type ViewType = 'calendar' | 'kanban';
 
@@ -20,8 +21,29 @@ export const CalendarViewContainer: React.FC = () => {
   const [currentYear, setCurrentYear] = useState(() => new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(() => new Date().getMonth());
 
+  // Modal state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('09:00');
+
   // Fetch calendar events from backend
-  const { posts, loading, error } = useCalendarEvents(currentYear, currentMonth);
+  const { posts, loading, error, createEvent, refetch } = useCalendarEvents(currentYear, currentMonth);
+
+  // Handle create event from modal
+  const handleCreateEvent = async (data: CreateEventData) => {
+    const result = await createEvent(data);
+    if (result) {
+      setIsCreateModalOpen(false);
+      await refetch();
+    }
+  };
+
+  // Handle slot click from calendar
+  const handleSlotClick = (date: string, time: string) => {
+    setSelectedDate(date);
+    setSelectedTime(time);
+    setIsCreateModalOpen(true);
+  };
 
   const handleMonthChange = (year: number, month: number) => {
     setCurrentYear(year);
@@ -87,6 +109,7 @@ export const CalendarViewContainer: React.FC = () => {
               year={currentYear}
               month={currentMonth}
               onMonthChange={handleMonthChange}
+              onSlotClick={handleSlotClick}
             />
           )
         ) : (
@@ -95,6 +118,15 @@ export const CalendarViewContainer: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Create Event Modal */}
+      <CreateEventModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateEvent}
+        initialDate={selectedDate}
+        initialTime={selectedTime}
+      />
     </>
   );
 };

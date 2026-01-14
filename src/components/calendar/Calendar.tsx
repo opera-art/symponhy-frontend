@@ -15,6 +15,7 @@ interface CalendarProps {
   year: number;
   month: number;
   onMonthChange: (year: number, month: number) => void;
+  onSlotClick?: (date: string, time: string) => void;
 }
 
 type CalendarView = 'month' | 'week' | 'day';
@@ -25,7 +26,7 @@ interface SelectedSlot {
   date: string;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }) => {
+const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, onSlotClick }) => {
   const { t } = useLanguage();
   const { setIsAddingContent, setCallbacks, setIsPlanningDay, setPlanningDate } = useChatContent();
   const { weekDays: weekDayNames, monthNames: monthNamesList, format } = useDate();
@@ -172,6 +173,13 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
     const timeHour = parseInt(timeSlot.replace('h', ''));
     const formattedTime = `${String(timeHour).padStart(2, '0')}:00`;
 
+    // Call external handler if provided (for CreateEventModal)
+    if (onSlotClick) {
+      onSlotClick(dateStr, formattedTime);
+      return;
+    }
+
+    // Fallback to chat context modal
     const handleManualUpload = () => {
       console.log(`Manual upload for ${dateStr} at ${formattedTime}`);
     };
