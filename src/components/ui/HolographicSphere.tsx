@@ -462,28 +462,12 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative ${className}`}
+      className={className}
       style={{
         width: size,
         height: size,
       }}
-    >
-      {/* Scanlines overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-30 mix-blend-overlay z-10"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.06))',
-          backgroundSize: '100% 4px',
-        }}
-      />
-      {/* Vignette */}
-      <div
-        className="absolute inset-0 pointer-events-none z-10"
-        style={{
-          background: 'radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.5) 120%)',
-        }}
-      />
-    </div>
+    />
   );
 };
 
