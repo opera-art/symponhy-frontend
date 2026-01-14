@@ -520,13 +520,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             </h2>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            {React.Children.map(children, child => {
-              if (React.isValidElement(child)) {
-                return React.cloneElement(child as React.ReactElement<any>, { onDragStart: handleDragStart, onDragEnd: handleDragEnd, draggable: true });
-              }
-              return child;
-            })}
+          <div className="flex-1 min-h-0">
+            {children}
           </div>
 
           {/* Navigation - fixed at bottom */}
@@ -542,7 +537,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
               {isLastQuestion ? <><Check className="w-3.5 h-3.5" /> Finalizar</> : <>Próxima <ArrowRight className="w-3.5 h-3.5" /></>}
             </button>
           </div>
-          {draggedItem && <p className="text-center text-xs text-amber-600 animate-pulse">Arraste até a esfera</p>}
         </div>
       </main>
     </div>
