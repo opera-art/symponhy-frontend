@@ -266,6 +266,15 @@
     }
   }
 
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
   @keyframes pulse-gold {
     0%, 100% {
       opacity: 1;
@@ -292,6 +301,10 @@
 
   .animate-slide-in {
     animation: slideIn 0.3s ease-out;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.3s ease-out;
   }
 
   @keyframes fadeInUp {

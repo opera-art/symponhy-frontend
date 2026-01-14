@@ -69,6 +69,7 @@ export const translations = {
     last90Days: 'Last 90 Days',
     thisMonth: 'This Month',
     notifications: 'Notifications',
+    openMenu: 'Open menu',
 
     // Dashboard Page
     greeting: 'Hello',
@@ -335,6 +336,7 @@ export const translations = {
     last90Days: 'Últimos 90 Dias',
     thisMonth: 'Este Mês',
     notifications: 'Notificações',
+    openMenu: 'Abrir menu',
 
     // Dashboard Page
     greeting: 'Olá',
@@ -601,6 +603,7 @@ export const translations = {
     last90Days: 'Últimos 90 Días',
     thisMonth: 'Este Mes',
     notifications: 'Notificaciones',
+    openMenu: 'Abrir menú',
 
     // Dashboard Page
     greeting: 'Hola',

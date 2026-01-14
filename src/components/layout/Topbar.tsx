@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { OrganizationSwitcher } from '@clerk/nextjs';
 import { useLanguage } from '@/context/LanguageContext';
+import { useMobileNav } from '@/context/MobileNavContext';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Menu, Bell, User } from 'lucide-react';
 import type { TranslationKey } from '@/lib/translations';
@@ -19,13 +20,18 @@ const Topbar: React.FC<TopbarProps> = ({
   className,
 }) => {
   const { t } = useLanguage();
+  const { openMobileNav } = useMobileNav();
   const [period, setPeriod] = useState<TranslationKey>('last15Days');
 
   return (
     <header className={cn('flex justify-between items-center mb-4', className)}>
       {/* Left side */}
       <div className="flex items-center gap-3">
-        <button className="md:hidden p-1.5 text-slate-500">
+        <button
+          className="md:hidden p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+          onClick={openMobileNav}
+          aria-label={t('openMenu')}
+        >
           <Menu className="w-5 h-5" />
         </button>
 
