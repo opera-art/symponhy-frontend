@@ -172,9 +172,9 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
         )}
       </button>
 
-      {/* Painel de comentários - abre para cima */}
+      {/* Painel de comentários - abre para baixo e à esquerda */}
       {isOpen && (
-        <div className="absolute right-0 bottom-full mb-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
           {/* Header - compacto */}
           <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-b border-slate-200">
             <span className="text-xs font-medium text-slate-600">
