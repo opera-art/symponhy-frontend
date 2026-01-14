@@ -21,8 +21,8 @@ export default function OnboardingPage() {
     const isMobile = window.innerWidth < 768;
     const pCount = isMobile ? 25000 : 45000;
 
-    // Get container size for the sphere area
-    const sphereSize = isMobile ? 280 : 350;
+    // Canvas much larger than visible sphere to prevent clipping
+    const canvasSize = isMobile ? 500 : 700;
 
     // State
     const STATE = {
@@ -41,7 +41,7 @@ export default function OnboardingPage() {
       powerPreference: 'high-performance',
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(sphereSize, sphereSize);
+    renderer.setSize(canvasSize, canvasSize);
     renderer.setClearColor(0x000000, 0); // Transparent
 
     // Force no borders
@@ -57,9 +57,9 @@ export default function OnboardingPage() {
     const scene = new THREE.Scene();
     sceneRef.current.scene = scene;
 
-    // Camera - adjusted for smaller viewport
+    // Camera - pulled back so sphere doesn't touch edges
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-    camera.position.z = isMobile ? 32 : 26;
+    camera.position.z = isMobile ? 45 : 40;
     sceneRef.current.camera = camera;
 
     // Particle Shaders
@@ -261,10 +261,10 @@ export default function OnboardingPage() {
     };
     window.addEventListener('mousemove', handleMouseMove);
 
-    // Resize - keep sphere size consistent
+    // Resize - keep canvas size consistent
     const handleResize = () => {
       const newIsMobile = window.innerWidth < 768;
-      const newSize = newIsMobile ? 280 : 350;
+      const newSize = newIsMobile ? 500 : 700;
       renderer.setSize(newSize, newSize);
     };
     window.addEventListener('resize', handleResize);
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
       material.uniforms.uColor2.value.lerp(targetC2, 0.05);
 
       // Gentle breathing motion
-      const zTarget = (isMobile ? 32 : 26) + Math.sin(STATE.time * 0.5) * 1.5;
+      const zTarget = (isMobile ? 45 : 40) + Math.sin(STATE.time * 0.5) * 1.5;
       camera.position.z += (zTarget - camera.position.z) * 0.02;
       camera.position.x = Math.sin(STATE.time * 0.2) * 1.5;
       camera.position.y = Math.cos(STATE.time * 0.15) * 1.5;
