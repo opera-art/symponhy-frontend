@@ -294,7 +294,7 @@ export const PlatformIntegrations: React.FC = () => {
       {/* Debug info - remover depois */}
       {profile && (
         <div className="mt-4 p-3 bg-slate-100 rounded-lg text-xs text-slate-500">
-          <p>Profile ID: {profile.id}</p>
+          <p>Profile ID: {profile._id || profile.id}</p>
           <p>Contas conectadas: {accounts.length}</p>
         </div>
       )}

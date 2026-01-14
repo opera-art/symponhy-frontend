@@ -48,8 +48,9 @@ export function useLateProfile() {
         userProfile = await lateService.createProfile(userProfileName);
       }
 
-      // Save profile ID
-      localStorage.setItem(PROFILE_STORAGE_KEY, userProfile.id);
+      // Save profile ID (Late uses _id)
+      const profileId = userProfile._id || userProfile.id;
+      localStorage.setItem(PROFILE_STORAGE_KEY, profileId!);
       setProfile(userProfile);
       return userProfile;
     } catch (err) {
@@ -66,7 +67,8 @@ export function useLateProfile() {
     if (!profile) return;
 
     try {
-      const { accounts: loadedAccounts } = await lateService.getAccounts(profile.id);
+      const profileId = profile._id || profile.id;
+      const { accounts: loadedAccounts } = await lateService.getAccounts(profileId!);
       setAccounts(loadedAccounts);
     } catch (err) {
       console.error('Error loading accounts:', err);
@@ -80,8 +82,9 @@ export function useLateProfile() {
         throw new Error('Profile not initialized');
       }
 
+      const profileId = profile._id || profile.id;
       const redirectUrl = `${window.location.origin}/dashboard/settings?connected=${platform}`;
-      const { authUrl } = await lateService.getConnectUrl(platform, profile.id, redirectUrl);
+      const { authUrl } = await lateService.getConnectUrl(platform, profileId!, redirectUrl);
 
       // Redirect to OAuth
       window.location.href = authUrl;

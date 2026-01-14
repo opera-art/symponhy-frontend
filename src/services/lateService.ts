@@ -22,7 +22,8 @@ export type Platform =
   | 'google-business';
 
 export interface LateProfile {
-  id: string;
+  _id: string;
+  id?: string; // alias for _id
   name: string;
   createdAt: string;
 }
@@ -77,14 +78,16 @@ class LateService {
   // ==========================================
 
   async createProfile(name: string): Promise<LateProfile> {
-    return this.request('/profiles', {
+    const response = await this.request<{ profile: LateProfile }>('/profiles', {
       method: 'POST',
       body: JSON.stringify({ name }),
     });
+    return response.profile;
   }
 
   async getProfiles(): Promise<LateProfile[]> {
-    return this.request('/profiles');
+    const response = await this.request<{ profiles: LateProfile[] }>('/profiles');
+    return response.profiles || [];
   }
 
   async getProfile(profileId: string): Promise<LateProfile> {
