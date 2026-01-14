@@ -18,6 +18,16 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   tasks,
 }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [triggerPosition, setTriggerPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const handleAddButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTriggerPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    });
+    setIsAddModalOpen(true);
+  };
 
   const handleManualUpload = () => {
     console.log(`Manual upload for column: ${columnId}`);
@@ -36,7 +46,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
           <span className="text-slate-300 ml-1.5 font-normal text-sm">{tasks.length}</span>
         </h2>
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={handleAddButtonClick}
           className="text-slate-400 hover:text-slate-600 transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -83,6 +93,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         onClose={() => setIsAddModalOpen(false)}
         onManualUpload={handleManualUpload}
         onCreateWithAgents={handleCreateWithAgents}
+        triggerPosition={triggerPosition}
       />
     </div>
   );

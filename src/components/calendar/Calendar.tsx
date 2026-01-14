@@ -23,6 +23,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
   const [view, setView] = useState<CalendarView>('week');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [triggerPosition, setTriggerPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const monthNames = useMemo(() => [
     t('january'), t('february'), t('march'), t('april'), t('may'), t('june'),
@@ -55,6 +56,15 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
     const today = new Date();
     onMonthChange(today.getFullYear(), today.getMonth());
     setSelectedDay(today.getDate());
+  };
+
+  const handleAddButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTriggerPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    });
+    setIsAddModalOpen(true);
   };
 
   const handleManualUpload = () => {
@@ -238,7 +248,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
                 <div key={dayIdx} className="relative h-full">
                   {dayPosts.length === 0 && dayIdx === 2 && (
                     <button
-                      onClick={() => setIsAddModalOpen(true)}
+                      onClick={handleAddButtonClick}
                       className="absolute top-0 left-0 right-0 h-[60px] border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center hover:bg-slate-50 cursor-pointer transition-colors group w-full"
                     >
                       <div className="w-6 h-6 rounded-full border border-slate-300 flex items-center justify-center text-slate-400 group-hover:border-slate-400 group-hover:text-slate-600">
@@ -387,6 +397,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
           onClose={() => setIsAddModalOpen(false)}
           onManualUpload={handleManualUpload}
           onCreateWithAgents={handleCreateWithAgents}
+          triggerPosition={triggerPosition}
         />
       </div>
     </div>

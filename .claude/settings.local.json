@@ -88,7 +88,9 @@
       "Bash(git clone:*)",
       "mcp__railway-mcp-server__get-logs",
       "Bash(powershell -Command \"Get-ChildItem -Depth 1 | Select-Object -Property FullName, PSIsContainer | Format-Table -AutoSize\")",
-      "Bash(powershell -Command \"ls -Exclude node_modules,.next,tsconfig.tsbuildinfo | Format-Table -Property Name, @{Name=''Type''; Expression={if\\($_PSIsContainer\\) {''Folder''} else {''File''}}} -AutoSize\")"
+      "Bash(powershell -Command \"ls -Exclude node_modules,.next,tsconfig.tsbuildinfo | Format-Table -Property Name, @{Name=''Type''; Expression={if\\($_PSIsContainer\\) {''Folder''} else {''File''}}} -AutoSize\")",
+      "mcp__railway-mcp-server__list-services",
+      "mcp__railway-mcp-server__link-service"
     ]
   },
   "enabledMcpjsonServers": [
