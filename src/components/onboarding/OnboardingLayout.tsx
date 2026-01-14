@@ -142,15 +142,16 @@ interface OnboardingLayoutProps {
   currentValue?: string;
   isRecording?: boolean;
   onStopRecording?: () => void;
-  sectionsWithComments?: number[]; // Índices das seções com comentários
+  questionsWithComments?: string[]; // IDs das perguntas com comentários
   skippedQuestions?: number[]; // Índices globais das perguntas puladas
+  onNavigateToQuestion?: (sectionIdx: number, questionIdx: number) => void; // Callback para navegar
 }
 
 export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   type, currentSection, currentQuestion, totalSections, totalQuestions, sectionTitle, questionText,
   children, onNext, onBack, saving = false, loading = false, error = null, isLastQuestion = false,
   sections = [], currentValue = '', isRecording = false, onStopRecording,
-  sectionsWithComments = [], skippedQuestions = [],
+  questionsWithComments = [], skippedQuestions = [], onNavigateToQuestion,
 }) => {
   const [previousSection, setPreviousSection] = useState(currentSection);
   const [previousQuestion, setPreviousQuestion] = useState(currentQuestion);
@@ -377,94 +378,179 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         </div>
       </header>
 
-      {/* Progress Bar - Elegant minimal design */}
-      <div className="px-6 flex-shrink-0 relative z-10 py-3">
+      {/* Progress Bar - Luxury Surreal Design */}
+      <div className="px-6 flex-shrink-0 relative z-10 py-4">
         <div className="max-w-2xl mx-auto">
-          {/* Main progress track */}
-          <div className="relative">
-            {/* Background track */}
-            <div className="h-1 bg-slate-100 rounded-full" />
-
-            {/* Progress fill */}
+          {/* Glass container with luxury styling */}
+          <div className="relative p-4 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden">
+            {/* Animated shimmer effect */}
             <div
-              className="absolute top-0 left-0 h-1 rounded-full transition-all duration-500 ease-out"
+              className="absolute inset-0 opacity-30"
               style={{
-                width: `${progressPercent}%`,
-                background: `linear-gradient(90deg, ${oracleColor}, ${oracleColor}dd)`
+                background: `linear-gradient(120deg, transparent 30%, ${oracleColor}20 50%, transparent 70%)`,
+                animation: 'shimmer 3s ease-in-out infinite',
               }}
             />
 
-            {/* Question dots on the track */}
-            <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex justify-between px-0.5">
+            {/* Floating particles container */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-1 h-1 rounded-full animate-float"
+                  style={{
+                    backgroundColor: oracleColor,
+                    left: `${15 + i * 15}%`,
+                    top: `${20 + (i % 3) * 20}%`,
+                    opacity: 0.4,
+                    animationDelay: `${i * 0.5}s`,
+                    animationDuration: `${3 + i * 0.5}s`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Main progress constellation */}
+            <div className="relative flex items-center justify-between gap-1">
               {sections.map((section, sectionIdx) => {
                 const sectionStart = sections.slice(0, sectionIdx).reduce((acc, s) => acc + s.questionCount, 0);
-                const hasComments = sectionsWithComments.includes(sectionIdx);
+                const isCurrentSection = sectionIdx === currentSection;
+                const isFutureSection = sectionIdx > currentSection;
 
                 return (
-                  <div key={sectionIdx} className="flex items-center gap-px">
-                    {Array.from({ length: section.questionCount }).map((_, questionIdx) => {
-                      const globalIdx = sectionStart + questionIdx;
-                      const isCurrent = sectionIdx === currentSection && questionIdx === currentQuestion;
-                      const isPast = globalIdx < completedQuestions;
-                      const isSkipped = skippedQuestions.includes(globalIdx);
-
-                      // Determine dot appearance
-                      let size = 'w-2 h-2';
-                      let bgColor = '#e2e8f0';
-                      let ring = '';
-                      let glow = '';
-
-                      if (isCurrent) {
-                        size = 'w-3 h-3';
-                        bgColor = oracleColor;
-                        ring = 'ring-4 ring-offset-2';
-                        glow = 'shadow-lg';
-                      } else if (isSkipped) {
-                        bgColor = '#ef4444'; // red-500
-                        size = 'w-2.5 h-2.5';
-                      } else if (isPast) {
-                        bgColor = '#1e293b';
-                      }
-
-                      return (
-                        <div
-                          key={questionIdx}
-                          className={`${size} rounded-full transition-all duration-300 ${ring} ${glow}`}
+                  <div key={sectionIdx} className="flex-1 relative">
+                    {/* Section label on top */}
+                    {isCurrentSection && (
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                        <span
+                          className="text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full"
                           style={{
-                            backgroundColor: bgColor,
-                            '--tw-ring-color': `${oracleColor}30`,
-                            '--tw-ring-offset-color': 'white'
-                          } as React.CSSProperties}
-                          title={`${section.title} - Pergunta ${questionIdx + 1}${isSkipped ? ' (pulada)' : ''}`}
-                        />
-                      );
-                    })}
-                    {/* Section comment indicator */}
-                    {hasComments && (
+                            color: oracleColor,
+                            backgroundColor: `${oracleColor}15`,
+                          }}
+                        >
+                          {section.title}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Question gems/diamonds */}
+                    <div className="flex items-center justify-center gap-1.5">
+                      {Array.from({ length: section.questionCount }).map((_, questionIdx) => {
+                        const globalIdx = sectionStart + questionIdx;
+                        const isCurrent = sectionIdx === currentSection && questionIdx === currentQuestion;
+                        const isPast = globalIdx < completedQuestions;
+                        const isSkipped = skippedQuestions.includes(globalIdx);
+                        const canNavigate = isSkipped && onNavigateToQuestion;
+
+                        // Diamond/gem styling based on state
+                        let gemSize = isCurrent ? 'w-4 h-4' : 'w-2.5 h-2.5';
+                        let gemBg = '';
+                        let gemShadow = '';
+                        let gemBorder = '';
+                        let animation = '';
+
+                        if (isCurrent) {
+                          // Current: Glowing gold diamond
+                          gemBg = `linear-gradient(135deg, ${oracleColor} 0%, #FFE55C 50%, ${oracleColor} 100%)`;
+                          gemShadow = `0 0 20px ${oracleColor}80, 0 0 40px ${oracleColor}40, inset 0 0 10px rgba(255,255,255,0.5)`;
+                          gemBorder = `2px solid ${oracleColor}`;
+                          animation = 'pulse-glow 2s ease-in-out infinite';
+                        } else if (isSkipped) {
+                          // Skipped: Red gem with attention effect
+                          gemBg = 'linear-gradient(135deg, #ef4444 0%, #f87171 50%, #ef4444 100%)';
+                          gemShadow = '0 0 12px rgba(239,68,68,0.5), inset 0 0 4px rgba(255,255,255,0.3)';
+                          gemBorder = '1px solid #dc2626';
+                          gemSize = 'w-3 h-3';
+                        } else if (isPast) {
+                          // Completed: Dark elegant gem
+                          gemBg = 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)';
+                          gemShadow = '0 2px 8px rgba(0,0,0,0.2), inset 0 0 4px rgba(255,255,255,0.1)';
+                          gemBorder = '1px solid #475569';
+                        } else {
+                          // Future: Subtle glass gem
+                          gemBg = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%)';
+                          gemShadow = '0 1px 4px rgba(0,0,0,0.05), inset 0 0 4px rgba(255,255,255,0.8)';
+                          gemBorder = '1px solid #e2e8f0';
+                        }
+
+                        return (
+                          <button
+                            key={questionIdx}
+                            onClick={() => canNavigate && onNavigateToQuestion(sectionIdx, questionIdx)}
+                            disabled={!canNavigate}
+                            className={`relative ${gemSize} transition-all duration-300 ${canNavigate ? 'cursor-pointer hover:scale-125' : 'cursor-default'}`}
+                            style={{
+                              background: gemBg,
+                              boxShadow: gemShadow,
+                              border: gemBorder,
+                              borderRadius: isCurrent ? '6px' : '4px',
+                              transform: `rotate(45deg)`,
+                              animation: animation,
+                            }}
+                            title={`${section.title} - Pergunta ${questionIdx + 1}${isSkipped ? ' (clique para voltar)' : ''}`}
+                          >
+                            {/* Inner shine effect */}
+                            <div
+                              className="absolute inset-0 rounded-[inherit] opacity-60"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%)',
+                              }}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Connection line between sections */}
+                    {sectionIdx < sections.length - 1 && (
                       <div
-                        className="w-1.5 h-1.5 rounded-full animate-pulse ml-0.5"
-                        style={{ backgroundColor: oracleColor }}
+                        className="absolute top-1/2 -right-1 w-2 h-px transition-colors duration-500"
+                        style={{
+                          backgroundColor: isFutureSection ? '#e2e8f0' : oracleColor,
+                          opacity: isFutureSection ? 0.5 : 0.8,
+                        }}
                       />
                     )}
                   </div>
                 );
               })}
             </div>
-          </div>
 
-          {/* Labels */}
-          <div className="flex justify-between items-center mt-3">
-            <span className="text-xs font-medium text-slate-600">{sectionTitle}</span>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-400">{completedQuestions + 1} de {totalQuestions}</span>
+            {/* Bottom info bar */}
+            <div className="flex justify-between items-center mt-4 pt-3 border-t border-slate-100/50">
+              {/* Progress text */}
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-2 h-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: oracleColor }}
+                />
+                <span className="text-xs text-slate-500">
+                  Pergunta <span className="font-semibold text-slate-700">{completedQuestions + 1}</span> de {totalQuestions}
+                </span>
+              </div>
+
+              {/* Percentage badge */}
               <div
-                className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                className="relative px-3 py-1.5 rounded-full overflow-hidden"
                 style={{
-                  backgroundColor: `${oracleColor}15`,
-                  color: oracleColor
+                  background: `linear-gradient(135deg, ${oracleColor}15 0%, ${oracleColor}25 100%)`,
                 }}
               >
-                {Math.round(progressPercent)}%
+                {/* Progress fill inside badge */}
+                <div
+                  className="absolute inset-0 transition-all duration-500"
+                  style={{
+                    background: `linear-gradient(90deg, ${oracleColor}30 0%, transparent 100%)`,
+                    width: `${progressPercent}%`,
+                  }}
+                />
+                <span
+                  className="relative text-xs font-bold tracking-wide"
+                  style={{ color: oracleColor }}
+                >
+                  {Math.round(progressPercent)}%
+                </span>
               </div>
             </div>
           </div>

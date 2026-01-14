@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Upload, Zap } from 'lucide-react';
+import { X, Send, Upload, Sparkles, ArrowRight } from 'lucide-react';
 import { FloatingOracle } from './FloatingOracle';
 import { useChatContent } from '@/context/ChatContentContext';
 
@@ -25,10 +25,9 @@ export const FloatingChat: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [animationProgress, setAnimationProgress] = useState(0);
+  const [showModal, setShowModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const animationRef = useRef<number | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,28 +43,15 @@ export const FloatingChat: React.FC = () => {
     }
   }, [isOpen]);
 
-  // Handle content adding animation
+  // Trigger modal after sphere animation completes
   useEffect(() => {
-    if (isAddingContent && animationProgress < 1) {
-      const startTime = performance.now();
-      const duration = 600; // 600ms animation
-
-      const animate = (currentTime: number) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        setAnimationProgress(progress);
-
-        if (progress < 1) {
-          animationRef.current = requestAnimationFrame(animate);
-        }
-      };
-
-      animationRef.current = requestAnimationFrame(animate);
-      return () => {
-        if (animationRef.current) {
-          cancelAnimationFrame(animationRef.current);
-        }
-      };
+    if (isAddingContent) {
+      const timer = setTimeout(() => {
+        setShowModal(true);
+      }, 700);
+      return () => clearTimeout(timer);
+    } else {
+      setShowModal(false);
     }
   }, [isAddingContent]);
 
@@ -73,21 +59,21 @@ export const FloatingChat: React.FC = () => {
     if (onManualUpload) {
       onManualUpload();
     }
+    setShowModal(false);
     setIsAddingContent(false);
-    setAnimationProgress(0);
   };
 
   const handleCreateWithAgentsClick = () => {
     if (onCreateWithAgents) {
       onCreateWithAgents();
     }
+    setShowModal(false);
     setIsAddingContent(false);
-    setAnimationProgress(0);
   };
 
   const handleCloseContentModal = () => {
+    setShowModal(false);
     setIsAddingContent(false);
-    setAnimationProgress(0);
   };
 
   const handleSend = async () => {
@@ -143,124 +129,234 @@ export const FloatingChat: React.FC = () => {
     }
   };
 
-  // Calculate animation values for sphere movement and size
-  const sphereSize = isAddingContent ? 80 + (120 - 80) * animationProgress : 80;
-  const sphereScale = isAddingContent ? 1 : (isOpen ? 0 : 1);
-  const offsetX = isAddingContent ? -((window.innerWidth / 2 - 24 - (window.innerWidth - 60)) * animationProgress) : 0;
-  const offsetY = isAddingContent ? -((window.innerHeight / 2 - 24 - (window.innerHeight - 60)) * animationProgress) : 0;
-
   return (
     <>
+      {/* CSS for animations */}
+      <style jsx>{`
+        @keyframes sphereToCenter {
+          0% {
+            bottom: 24px;
+            right: 24px;
+            width: 80px;
+            height: 80px;
+            opacity: 1;
+          }
+          100% {
+            bottom: calc(50% - 70px);
+            right: calc(50% - 70px);
+            width: 140px;
+            height: 140px;
+            opacity: 1;
+          }
+        }
+        @keyframes sphereFromCenter {
+          0% {
+            bottom: calc(50% - 70px);
+            right: calc(50% - 70px);
+            width: 140px;
+            height: 140px;
+            opacity: 1;
+          }
+          100% {
+            bottom: 24px;
+            right: 24px;
+            width: 80px;
+            height: 80px;
+            opacity: 1;
+          }
+        }
+        @keyframes modalFadeIn {
+          0% {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        @keyframes shimmer {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
+        }
+        .animate-sphere-to-center {
+          animation: sphereToCenter 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .animate-modal-in {
+          animation: modalFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .shimmer-border {
+          background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+          background-size: 200% 100%;
+          animation: shimmer 2s infinite;
+        }
+      `}</style>
+
       {/* Floating Button with Oracle Sphere */}
       <button
         onClick={() => !isAddingContent && setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 rounded-full
+        className={`fixed bottom-6 right-6 z-50 w-20 h-20 rounded-full
           transition-all duration-500 ease-out
           hover:scale-110 cursor-pointer
-          ${isAddingContent || isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
-        style={{
-          background: 'transparent',
-          border: 'none',
-          width: `${sphereSize}px`,
-          height: `${sphereSize}px`,
-        }}
+          ${isAddingContent || isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}
+        style={{ background: 'transparent', border: 'none' }}
         aria-label="Abrir chat"
       >
-        <FloatingOracle size={Math.round(sphereSize)} />
+        <FloatingOracle size={80} />
       </button>
 
       {/* Animated Moving Sphere for Content Mode */}
       {isAddingContent && (
         <div
-          className="fixed z-50 rounded-full pointer-events-none flex items-center justify-center"
+          className="fixed z-[60] rounded-full pointer-events-none flex items-center justify-center animate-sphere-to-center"
           style={{
-            width: `${sphereSize}px`,
-            height: `${sphereSize}px`,
-            left: `calc(50% - ${sphereSize / 2}px + ${offsetX}px)`,
-            top: `calc(50% - ${sphereSize / 2}px + ${offsetY}px)`,
-            transition: 'none',
+            bottom: '24px',
+            right: '24px',
+            width: '80px',
+            height: '80px',
           }}
         >
-          <FloatingOracle size={Math.round(sphereSize)} />
+          <FloatingOracle size={140} />
         </div>
       )}
 
-      {/* Content Selection Modal */}
+      {/* Content Selection Modal - Luxurious Design */}
       {isAddingContent && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
           onClick={handleCloseContentModal}
         >
-          {/* Backdrop */}
+          {/* Backdrop with gradient */}
           <div
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
+            className={`absolute inset-0 transition-all duration-500 ${showModal ? 'opacity-100' : 'opacity-0'}`}
             style={{
-              opacity: Math.min(animationProgress / 0.8, 1) * 0.2,
+              background: 'radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%)',
+              backdropFilter: 'blur(12px)',
             }}
           />
 
           {/* Modal */}
-          <div
-            className="relative z-50 bg-white rounded-3xl shadow-2xl w-96 p-8 flex flex-col items-center text-center transition-all duration-300"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              opacity: animationProgress >= 0.9 ? 1 : 0,
-              transform: `scale(${0.95 + 0.05 * Math.min((animationProgress - 0.8) / 0.2, 1)})`,
-            }}
-          >
-            {/* Sphere at top */}
-            <div className="w-32 h-32 mb-6 flex items-center justify-center">
-              <FloatingOracle size={128} />
-            </div>
-
-            {/* Question */}
-            <h2 className="text-xl font-semibold text-slate-900 mb-2">
-              Como deseja criar seu conteúdo?
-            </h2>
-            <p className="text-sm text-slate-500 mb-6">
-              Escolha entre enviar manualmente ou usar nossos agentes de IA
-            </p>
-
-            {/* Options */}
-            <div className="space-y-3 w-full">
-              {/* Manual Upload Option */}
-              <button
-                onClick={handleManualUploadClick}
-                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-slate-900 hover:bg-slate-50 transition-all duration-200 group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                  <Upload className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="text-left flex-1">
-                  <p className="font-medium text-slate-900 text-sm">Upload Manual</p>
-                  <p className="text-xs text-slate-500">Envie seus arquivos diretamente</p>
-                </div>
-              </button>
-
-              {/* Create with Agents Option */}
-              <button
-                onClick={handleCreateWithAgentsClick}
-                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-slate-900 hover:bg-slate-50 transition-all duration-200 group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                  <Zap className="w-5 h-5 text-purple-600" />
-                </div>
-                <div className="text-left flex-1">
-                  <p className="font-medium text-slate-900 text-sm">Criar com Agentes</p>
-                  <p className="text-xs text-slate-500">Use IA para gerar estratégia</p>
-                </div>
-              </button>
-            </div>
-
-            {/* Close Button */}
-            <button
-              onClick={handleCloseContentModal}
-              className="mt-6 text-slate-400 hover:text-slate-600 transition-colors"
-              aria-label="Fechar"
+          {showModal && (
+            <div
+              className="relative z-50 w-[420px] overflow-hidden animate-modal-in"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%)',
+                borderRadius: '32px',
+                boxShadow: '0 25px 80px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(212, 175, 55, 0.2), inset 0 1px 0 rgba(255,255,255,0.8)',
+              }}
             >
-              <X size={20} />
-            </button>
-          </div>
+              {/* Shimmer border effect */}
+              <div className="absolute inset-0 rounded-[32px] p-[1px] shimmer-border pointer-events-none" />
+
+              {/* Inner content */}
+              <div className="relative p-10 flex flex-col items-center text-center">
+                {/* Close button - top right */}
+                <button
+                  onClick={handleCloseContentModal}
+                  className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-all duration-200 hover:scale-110"
+                  aria-label="Fechar"
+                >
+                  <X size={16} className="text-slate-500" />
+                </button>
+
+                {/* Sphere container with glow */}
+                <div className="relative w-36 h-36 mb-8 flex items-center justify-center">
+                  {/* Glow effect */}
+                  <div
+                    className="absolute inset-0 rounded-full opacity-60"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, transparent 70%)',
+                      filter: 'blur(20px)',
+                    }}
+                  />
+                  <FloatingOracle size={140} />
+                </div>
+
+                {/* Title with gradient */}
+                <h2
+                  className="text-2xl font-bold mb-3"
+                  style={{
+                    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  Criar novo conteúdo
+                </h2>
+                <p className="text-slate-500 text-sm mb-8 max-w-[280px]">
+                  Escolha como deseja adicionar seu conteúdo ao calendário
+                </p>
+
+                {/* Options */}
+                <div className="space-y-4 w-full">
+                  {/* Manual Upload Option */}
+                  <button
+                    onClick={handleManualUploadClick}
+                    className="w-full flex items-center gap-4 p-5 rounded-2xl bg-white border border-slate-200 hover:border-amber-300 hover:shadow-lg hover:shadow-amber-100/50 transition-all duration-300 group"
+                  >
+                    <div
+                      className="w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+                      style={{
+                        background: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)',
+                      }}
+                    >
+                      <Upload className="w-6 h-6 text-sky-600" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <p className="font-semibold text-slate-800">Upload Manual</p>
+                      <p className="text-sm text-slate-500 mt-0.5">Envie seus arquivos prontos</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-amber-500 group-hover:translate-x-1 transition-all duration-300" />
+                  </button>
+
+                  {/* Create with Agents Option - Premium highlight */}
+                  <button
+                    onClick={handleCreateWithAgentsClick}
+                    className="w-full flex items-center gap-4 p-5 rounded-2xl transition-all duration-300 group relative overflow-hidden"
+                    style={{
+                      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                      boxShadow: '0 10px 40px -10px rgba(26, 26, 46, 0.5)',
+                    }}
+                  >
+                    {/* Shine effect on hover */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                      style={{
+                        background: 'linear-gradient(45deg, transparent 30%, rgba(212, 175, 55, 0.1) 50%, transparent 70%)',
+                      }}
+                    />
+                    <div
+                      className="w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%)',
+                      }}
+                    >
+                      <Sparkles className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-white">Criar com Agentes</p>
+                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-400/20 text-amber-400">
+                          AI
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-400 mt-0.5">Use IA para estratégias inteligentes</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all duration-300" />
+                  </button>
+                </div>
+
+                {/* Footer hint */}
+                <p className="mt-6 text-xs text-slate-400">
+                  Pressione <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-500">ESC</kbd> para fechar
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
