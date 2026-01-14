@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Badge } from '@/components/ui';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MoreHorizontal, FileText, Plus, Layers, Image, Edit3, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MoreHorizontal, FileText, Plus, Layers, Image, Edit3, Trash2, UserCheck } from 'lucide-react';
 import { CalendarPost } from '@/data/calendarData';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
@@ -28,6 +28,7 @@ interface CalendarProps {
   onSlotClick?: (date: string, time: string) => void;
   onEditPost?: (post: CalendarPost) => void;
   onDeletePost?: (post: CalendarPost) => void;
+  onReviewPost?: (post: CalendarPost) => void;
 }
 
 interface ContextMenu {
@@ -44,7 +45,7 @@ interface SelectedSlot {
   date: string;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, onSlotClick, onEditPost, onDeletePost }) => {
+const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, onSlotClick, onEditPost, onDeletePost, onReviewPost }) => {
   const { t } = useLanguage();
   const { setIsAddingContent, setCallbacks, setIsPlanningDay, setPlanningDate } = useChatContent();
   const { weekDays: weekDayNames, monthNames: monthNamesList, format } = useDate();
@@ -104,6 +105,14 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
   const handleDelete = () => {
     if (contextMenu && onDeletePost) {
       onDeletePost(contextMenu.post);
+    }
+    setContextMenu(null);
+  };
+
+  // Handle review from context menu
+  const handleReview = () => {
+    if (contextMenu && onReviewPost) {
+      onReviewPost(contextMenu.post);
     }
     setContextMenu(null);
   };
@@ -1485,6 +1494,14 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
           >
             <Edit3 className="w-4 h-4" />
             <span>Editar</span>
+          </button>
+
+          <button
+            onClick={handleReview}
+            className="w-full px-3 py-2 flex items-center gap-2.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
+          >
+            <UserCheck className="w-4 h-4" />
+            <span>Solicitar Revisão</span>
           </button>
 
           <button
