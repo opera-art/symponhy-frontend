@@ -238,10 +238,12 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     setPreviousSection(currentSection);
   }, [currentSection, previousSection, progressPercent]);
 
-  // Enter
+  // Enter - só avança se não estiver em input/textarea
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && !isRecording) {
-      if (document.activeElement?.tagName === 'TEXTAREA') return;
+      const tag = document.activeElement?.tagName;
+      // Ignora se estiver em textarea ou input (ex: campo de comentário)
+      if (tag === 'TEXTAREA' || tag === 'INPUT') return;
       e.preventDefault();
       triggerButtonPulse();
       onNext();
@@ -427,8 +429,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                         // Permite navegar para qualquer pergunta já passada (não só puladas)
                         const canNavigate = (isPast || isSkipped) && !isCurrent && onNavigateToQuestion;
 
-                        // Minimal dot styling
-                        let dotSize = isCurrent ? 'w-2.5 h-2.5' : 'w-1.5 h-1.5';
+                        // Dot styling - maior para facilitar clique
+                        let dotSize = isCurrent ? 'w-3 h-3' : 'w-2 h-2';
                         let dotBg = '';
                         let dotShadow = '';
 
@@ -438,24 +440,30 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                         } else if (isSkipped) {
                           dotBg = '#ef4444';
                           dotShadow = '0 0 4px rgba(239,68,68,0.4)';
-                          dotSize = 'w-2 h-2';
+                          dotSize = 'w-2.5 h-2.5';
                         } else if (isPast) {
                           dotBg = '#334155';
                         } else {
                           dotBg = '#e2e8f0';
                         }
 
+                        const handleDotClick = () => {
+                          if (canNavigate && onNavigateToQuestion) {
+                            onNavigateToQuestion(sectionIdx, questionIdx);
+                          }
+                        };
+
                         return (
                           <button
                             key={questionIdx}
-                            onClick={() => canNavigate && onNavigateToQuestion(sectionIdx, questionIdx)}
-                            disabled={!canNavigate}
-                            className={`${dotSize} rounded-full transition-all duration-200 ${canNavigate ? 'cursor-pointer hover:scale-150' : 'cursor-default'}`}
+                            type="button"
+                            onClick={handleDotClick}
+                            className={`${dotSize} rounded-full transition-all duration-200 ${canNavigate ? 'cursor-pointer hover:scale-150 hover:opacity-80' : 'cursor-default'}`}
                             style={{
                               backgroundColor: dotBg,
                               boxShadow: dotShadow,
                             }}
-                            title={canNavigate ? `${section.title} - Pergunta ${questionIdx + 1} (clique para voltar)` : undefined}
+                            title={canNavigate ? `Voltar para: ${section.title} - Pergunta ${questionIdx + 1}` : undefined}
                           />
                         );
                       })}
