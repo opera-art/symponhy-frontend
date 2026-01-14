@@ -2,9 +2,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Cpu } from 'lucide-react';
-
-const modeNames = ['NEBULA CLOUD', 'QUANTUM TORUS', 'CYBER LATTICE', 'WARP VORTEX'];
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -12,7 +9,6 @@ export default function OnboardingPage() {
   const [currentMode, setCurrentMode] = useState(0);
   const [colorPalette, setColorPalette] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [particleCount, setParticleCount] = useState(65000);
 
   const sceneRef = useRef<any>({});
 
@@ -23,8 +19,10 @@ export default function OnboardingPage() {
     const THREE = await import('three');
 
     const isMobile = window.innerWidth < 768;
-    const pCount = isMobile ? 35000 : 65000;
-    setParticleCount(pCount);
+    const pCount = isMobile ? 25000 : 45000;
+
+    // Get container size for the sphere area
+    const sphereSize = isMobile ? 280 : 350;
 
     // State
     const STATE = {
@@ -36,27 +34,32 @@ export default function OnboardingPage() {
     };
     sceneRef.current.state = STATE;
 
-    // Renderer - FULL SCREEN
+    // Renderer - transparent background, sized to sphere container
     const renderer = new THREE.WebGLRenderer({
-      antialias: false,
-      alpha: false,
+      antialias: true,
+      alpha: true,
       powerPreference: 'high-performance',
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x030305, 1);
+    renderer.setSize(sphereSize, sphereSize);
+    renderer.setClearColor(0x000000, 0); // Transparent
+
+    // Force no borders
+    renderer.domElement.style.background = 'transparent';
+    renderer.domElement.style.border = 'none';
+    renderer.domElement.style.outline = 'none';
+    renderer.domElement.style.display = 'block';
+
     container.appendChild(renderer.domElement);
     sceneRef.current.renderer = renderer;
 
-    // Scene
+    // Scene - no background
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x030305, 0.015);
-    scene.background = new THREE.Color(0x030305);
     sceneRef.current.scene = scene;
 
-    // Camera
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
-    camera.position.z = isMobile ? 40 : 28;
+    // Camera - adjusted for smaller viewport
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
+    camera.position.z = isMobile ? 32 : 26;
     sceneRef.current.camera = camera;
 
     // Particle Shaders
@@ -248,18 +251,21 @@ export default function OnboardingPage() {
 
     const clock = new THREE.Clock();
 
-    // Mouse
+    // Mouse - relative to sphere container
     const handleMouseMove = (e: MouseEvent) => {
-      STATE.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      STATE.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      const rect = container.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      STATE.mouse.x = x;
+      STATE.mouse.y = y;
     };
     window.addEventListener('mousemove', handleMouseMove);
 
-    // Resize
+    // Resize - keep sphere size consistent
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      const newIsMobile = window.innerWidth < 768;
+      const newSize = newIsMobile ? 280 : 350;
+      renderer.setSize(newSize, newSize);
     };
     window.addEventListener('resize', handleResize);
 
@@ -284,10 +290,11 @@ export default function OnboardingPage() {
       material.uniforms.uColor1.value.lerp(targetC1, 0.05);
       material.uniforms.uColor2.value.lerp(targetC2, 0.05);
 
-      const zTarget = (isMobile ? 40 : 28) + Math.sin(STATE.time * 0.5) * 2;
+      // Gentle breathing motion
+      const zTarget = (isMobile ? 32 : 26) + Math.sin(STATE.time * 0.5) * 1.5;
       camera.position.z += (zTarget - camera.position.z) * 0.02;
-      camera.position.x = Math.sin(STATE.time * 0.2) * 2;
-      camera.position.y = Math.cos(STATE.time * 0.15) * 2;
+      camera.position.x = Math.sin(STATE.time * 0.2) * 1.5;
+      camera.position.y = Math.cos(STATE.time * 0.15) * 1.5;
       camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
@@ -322,16 +329,7 @@ export default function OnboardingPage() {
   }, [colorPalette]);
 
   return (
-    <div className="h-screen bg-[#030305] overflow-hidden relative">
-      {/* Scanlines */}
-      <div className="absolute inset-0 pointer-events-none z-30 opacity-40 mix-blend-overlay" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.06))', backgroundSize: '100% 4px' }} />
-
-      {/* Vignette */}
-      <div className="absolute inset-0 pointer-events-none z-30" style={{ background: 'radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 120%)' }} />
-
-      {/* Three.js Canvas - FULL SCREEN */}
-      <div ref={canvasRef} className="absolute inset-0 z-0" />
-
+    <div className="min-h-screen bg-[#030305] overflow-x-hidden">
       {/* Loading */}
       {isLoading && (
         <div className="fixed inset-0 z-50 bg-[#030305] flex flex-col items-center justify-center">
@@ -346,39 +344,69 @@ export default function OnboardingPage() {
       )}
 
       {/* Header */}
-      <header className="absolute top-0 left-0 w-full p-4 md:p-6 z-20 flex justify-between items-start pointer-events-none">
-        <div className="flex flex-col gap-2 pointer-events-auto">
-          <div className="flex items-center gap-3">
-            <div className="relative w-2 h-2">
-              <div className="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20" />
-              <div className="absolute inset-0 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-            </div>
-            <h1 className="text-xs md:text-sm font-medium tracking-tight uppercase text-white/90">Symponhy<span className="opacity-40">.AI</span></h1>
+      <header className="w-full p-4 md:p-6 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div className="relative w-2 h-2">
+            <div className="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20" />
+            <div className="absolute inset-0 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
           </div>
-          <div className="flex items-center gap-4 text-[10px] font-mono text-white/40 tracking-wider">
-            <span className="text-white/70">{modeNames[currentMode]}</span>
-            <span className="w-px h-2 bg-white/10" />
-            <span className="opacity-60">{(particleCount / 1000).toFixed(0)}K NODES</span>
-          </div>
+          <h1 className="text-xs md:text-sm font-medium tracking-tight uppercase text-white/90">Symponhy<span className="opacity-40">.AI</span></h1>
+        </div>
+
+        {/* Color palette selector - moved to header */}
+        <div className="flex items-center gap-2">
+          {[0, 1, 2].map(idx => (
+            <button key={idx} onClick={() => setColorPalette(idx)} className={`w-5 h-5 rounded-full transition-transform hover:scale-110 ${colorPalette === idx ? 'ring-2 ring-white/40 scale-110' : 'ring-1 ring-white/10'} ${idx === 0 ? 'bg-gradient-to-br from-indigo-500 to-teal-400' : idx === 1 ? 'bg-gradient-to-br from-pink-400 to-blue-500' : 'bg-gradient-to-br from-orange-400 to-rose-600'}`} />
+          ))}
         </div>
       </header>
 
-      {/* Content */}
-      <main className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 pointer-events-none">
-        <div className="h-[300px]" /> {/* Spacer for sphere */}
+      {/* Main Content */}
+      <main className="flex flex-col items-center px-6 pb-12">
+        {/* Oracle Sphere - floating at top */}
+        <div className="relative flex items-center justify-center">
+          {/* Glow effect behind sphere */}
+          <div className="absolute w-[200px] h-[200px] md:w-[250px] md:h-[250px] rounded-full opacity-30 blur-3xl" style={{ background: colorPalette === 0 ? 'radial-gradient(circle, rgba(129,140,248,0.4), rgba(45,212,191,0.2), transparent)' : colorPalette === 1 ? 'radial-gradient(circle, rgba(244,114,182,0.4), rgba(96,165,250,0.2), transparent)' : 'radial-gradient(circle, rgba(251,146,60,0.4), rgba(225,29,72,0.2), transparent)' }} />
 
-        <p className="text-white/50 text-center max-w-md mb-10 text-[15px] leading-relaxed pointer-events-auto">
+          {/* Canvas container - NO borders, transparent */}
+          <div
+            ref={canvasRef}
+            className="relative z-10"
+            style={{
+              width: 'auto',
+              height: 'auto',
+              overflow: 'visible',
+            }}
+          />
+        </div>
+
+        {/* Mode selector - minimal, under sphere */}
+        <div className="flex items-center gap-1 mt-2 mb-8">
+          {['Nebula', 'Torus', 'Lattice', 'Vortex'].map((name, idx) => (
+            <button
+              key={name}
+              onClick={() => setCurrentMode(idx)}
+              className={`px-3 py-1.5 rounded-full text-[10px] font-medium tracking-wide transition-all ${currentMode === idx ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'}`}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+
+        {/* Welcome text */}
+        <p className="text-white/50 text-center max-w-md mb-10 text-[15px] leading-relaxed">
           Para personalizar sua experiencia, preciso conhecer melhor seu negocio.
           <br /><span className="text-white/30">Escolha o tipo de briefing.</span>
         </p>
 
-        <div className="flex gap-4 w-full max-w-xl pointer-events-auto">
+        {/* Briefing Options */}
+        <div className="flex flex-col md:flex-row gap-4 w-full max-w-xl">
           <button onClick={() => router.push('/onboarding/essential')} className="flex-1 rounded-2xl p-5 border border-white/10 hover:border-white/20 hover:bg-white/5 transition-all text-left backdrop-blur-xl" style={{ background: 'rgba(10,10,12,0.75)' }}>
-            <span className="text-[13px] text-white/40 mb-1 block">Completo</span>
+            <span className="text-[13px] text-white/40 mb-1 block">Rapido</span>
             <h3 className="text-lg font-semibold text-white/90 mb-2">Briefing Essencial</h3>
-            <p className="text-[13px] text-white/50">Formulario completo para personalizar sua experiencia</p>
+            <p className="text-[13px] text-white/50">Formulario rapido para comecar</p>
             <div className="mt-4 pt-3 border-t border-white/5">
-              <span className="text-xs text-white/30 font-mono">15-20 min · 70+ perguntas</span>
+              <span className="text-xs text-white/30 font-mono">5 min · 10 perguntas</span>
             </div>
           </button>
 
@@ -393,40 +421,10 @@ export default function OnboardingPage() {
           </button>
         </div>
 
-        <button onClick={() => router.push('/dashboard')} className="mt-8 text-[13px] text-white/30 hover:text-white/60 transition-colors font-mono tracking-wider pointer-events-auto">
+        <button onClick={() => router.push('/dashboard')} className="mt-8 text-[13px] text-white/30 hover:text-white/60 transition-colors font-mono tracking-wider">
           CONFIGURAR DEPOIS
         </button>
       </main>
-
-      {/* Bottom Controls */}
-      <div className="absolute bottom-0 left-0 w-full z-20 p-4 md:p-6 flex justify-between items-end pointer-events-none">
-        <div className="p-3 rounded-xl pointer-events-auto w-64 backdrop-blur-xl border border-white/5" style={{ background: 'rgba(10,10,12,0.75)' }}>
-          <div className="flex items-center gap-2 mb-3 px-1">
-            <Cpu className="w-3 h-3 text-white/40" />
-            <span className="text-[10px] font-medium uppercase tracking-widest text-white/50">Visualization</span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {['Nebula', 'Torus', 'Lattice', 'Vortex'].map((name, idx) => (
-              <button key={name} onClick={() => setCurrentMode(idx)} className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all border text-left ${currentMode === idx ? 'bg-white/10 border-white/10' : 'bg-transparent border-transparent hover:bg-white/5'}`}>
-                <span className={`text-[10px] font-medium ${currentMode === idx ? 'text-white' : 'text-white/60'}`}>{name}</span>
-                <span className="text-[9px] font-mono text-white/20">0{idx + 1}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end gap-3 pointer-events-auto">
-          <div className="p-1.5 rounded-full flex flex-col gap-2" style={{ background: 'rgba(10,10,12,0.75)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            {[0, 1, 2].map(idx => (
-              <button key={idx} onClick={() => setColorPalette(idx)} className={`w-6 h-6 rounded-full ring-1 ring-white/10 hover:scale-110 transition-transform ${colorPalette === idx ? 'ring-2 ring-white/30' : ''} ${idx === 0 ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : idx === 1 ? 'bg-gradient-to-br from-pink-400 to-blue-500' : 'bg-gradient-to-br from-orange-400 to-rose-600'}`} />
-            ))}
-          </div>
-          <div className="text-[9px] font-mono text-right text-white/20">
-            <p>INTERACTION ENGINE V2.0</p>
-            <p>SYMPONHY.AI</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
