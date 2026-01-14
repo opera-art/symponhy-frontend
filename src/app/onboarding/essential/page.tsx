@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout';
-import { Check } from 'lucide-react';
+import { Check, Mic, MicOff } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useVoiceInput } from '@/hooks/useVoiceInput';
 
 interface FormData {
   // Dados básicos
@@ -557,21 +558,48 @@ export default function EssentialBriefingPage() {
     });
   };
 
+  // Voice input hook
+  const handleVoiceResult = useCallback((text: string) => {
+    const currentVal = formData[question.id as keyof FormData] as string || '';
+    handleInputChange(currentVal + (currentVal ? ' ' : '') + text);
+  }, [question.id, formData]);
+
+  const { isListening, isSupported, toggleListening } = useVoiceInput({
+    onResult: handleVoiceResult,
+  });
+
   const renderInput = () => {
     const value = formData[question.id as keyof FormData];
+    const showMic = isSupported && (question.type === 'text' || question.type === 'textarea' || question.type === 'url');
 
     switch (question.type) {
       case 'text':
       case 'url':
         return (
-          <input
-            type={question.type}
-            value={value as string}
-            onChange={(e) => handleInputChange(e.target.value)}
-            placeholder={question.placeholder}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 text-lg transition-colors"
-            autoFocus
-          />
+          <div className="relative">
+            <input
+              type={question.type === 'url' ? 'url' : 'text'}
+              value={value as string}
+              onChange={(e) => handleInputChange(e.target.value)}
+              placeholder={question.placeholder}
+              className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 text-lg transition-colors"
+              autoFocus
+            />
+            {showMic && (
+              <button
+                type="button"
+                onClick={toggleListening}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${
+                  isListening
+                    ? 'bg-red-100 text-red-600 animate-pulse'
+                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                }`}
+                title={isListening ? 'Parar gravação' : 'Falar resposta'}
+              >
+                {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </button>
+            )}
+          </div>
         );
 
       case 'date':
@@ -587,14 +615,30 @@ export default function EssentialBriefingPage() {
 
       case 'textarea':
         return (
-          <textarea
-            value={value as string}
-            onChange={(e) => handleInputChange(e.target.value)}
-            placeholder={question.placeholder}
-            rows={4}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 text-lg transition-colors resize-none"
-            autoFocus
-          />
+          <div className="relative">
+            <textarea
+              value={value as string}
+              onChange={(e) => handleInputChange(e.target.value)}
+              placeholder={question.placeholder}
+              rows={4}
+              className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-0 outline-none text-slate-800 text-lg transition-colors resize-none"
+              autoFocus
+            />
+            {showMic && (
+              <button
+                type="button"
+                onClick={toggleListening}
+                className={`absolute right-3 top-3 p-2 rounded-lg transition-all ${
+                  isListening
+                    ? 'bg-red-100 text-red-600 animate-pulse'
+                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                }`}
+                title={isListening ? 'Parar gravação' : 'Falar resposta'}
+              >
+                {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </button>
+            )}
+          </div>
         );
 
       case 'select':
