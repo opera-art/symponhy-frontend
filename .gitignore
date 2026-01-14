@@ -41,3 +41,6 @@ Thumbs.db
 
 # MCP Configuration (contains sensitive credentials)
 .mcp.json
+
+# Claude temp files
+tmpclaude-*
