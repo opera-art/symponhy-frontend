@@ -5,14 +5,14 @@ import { FloatingOracle } from '@/components/chat/FloatingOracle';
 import { ArrowLeft, ArrowRight, Check, Sparkles, Crown, Loader2, Square } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-// Cores para progresso
+// Cores para progresso - sempre tons dourados (sem cinza)
 const getOracleColor = (progressPercent: number): string => {
-  if (progressPercent < 20) return '#D4AF37';
-  if (progressPercent < 40) return '#C9A227';
-  if (progressPercent < 60) return '#B8A158';
-  if (progressPercent < 80) return '#A8A8A8';
-  if (progressPercent < 100) return '#C0C0C0';
-  return '#E5E4E2';
+  if (progressPercent < 20) return '#D4AF37';  // Dourado clássico
+  if (progressPercent < 40) return '#DAA520';  // Goldenrod
+  if (progressPercent < 60) return '#F4C430';  // Safron gold
+  if (progressPercent < 80) return '#FFD700';  // Gold puro
+  if (progressPercent < 100) return '#FFDF00'; // Golden yellow
+  return '#FFE55C';                             // Light gold
 };
 
 // Escala visual da esfera
