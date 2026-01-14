@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout';
-import { Check, Mic, MicOff } from 'lucide-react';
+import { FieldComments } from '@/components/onboarding/FieldComments';
+import { BriefingPreview } from '@/components/onboarding/BriefingPreview';
+import { Check, Mic, MicOff, Eye, MessageCircle } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 
@@ -465,10 +468,12 @@ const totalQuestions = sections.reduce((acc, s) => acc + s.questions.length, 0);
 
 export default function EssentialBriefingPage() {
   const router = useRouter();
+  const { userId } = useAuth();
   const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Hook de onboarding
   const {
@@ -703,26 +708,61 @@ export default function EssentialBriefingPage() {
   const currentValueString = Array.isArray(currentValue) ? currentValue.join(' ') : (currentValue || '');
 
   return (
-    <OnboardingLayout
-      type="essential"
-      currentSection={currentSection}
-      currentQuestion={currentQuestion}
-      totalSections={sections.length}
-      totalQuestions={totalQuestions}
-      sectionTitle={section.title}
-      questionText={question.question}
-      onNext={handleNext}
-      onBack={handleBack}
-      saving={saving}
-      loading={onboardingLoading && !isInitialized}
-      error={onboardingError}
-      isLastQuestion={isLastQuestion}
-      isRecording={isListening}
-      onStopRecording={stopListening}
-      sections={layoutSections}
-      currentValue={currentValueString}
-    >
-      {renderInput()}
-    </OnboardingLayout>
+    <>
+      <OnboardingLayout
+        type="essential"
+        currentSection={currentSection}
+        currentQuestion={currentQuestion}
+        totalSections={sections.length}
+        totalQuestions={totalQuestions}
+        sectionTitle={section.title}
+        questionText={question.question}
+        onNext={handleNext}
+        onBack={handleBack}
+        saving={saving}
+        loading={onboardingLoading && !isInitialized}
+        error={onboardingError}
+        isLastQuestion={isLastQuestion}
+        isRecording={isListening}
+        onStopRecording={stopListening}
+        sections={layoutSections}
+        currentValue={currentValueString}
+      >
+        {/* Input com botão de comentários */}
+        <div className="relative">
+          {renderInput()}
+
+          {/* Botão de comentários do campo */}
+          {userId && (
+            <div className="absolute -right-10 top-0">
+              <FieldComments
+                fieldName={question.id}
+                briefingUserId={userId}
+                onboardingType="essential"
+              />
+            </div>
+          )}
+        </div>
+      </OnboardingLayout>
+
+      {/* Botão flutuante para preview */}
+      <button
+        onClick={() => setShowPreview(true)}
+        className="fixed bottom-6 right-6 flex items-center gap-2 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all z-40"
+        title="Ver preview do briefing"
+      >
+        <Eye className="w-5 h-5" />
+        <span className="text-sm font-medium">Preview</span>
+      </button>
+
+      {/* Modal de preview */}
+      <BriefingPreview
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        formData={formData}
+        onboardingType="essential"
+        sections={sections}
+      />
+    </>
   );
 }
