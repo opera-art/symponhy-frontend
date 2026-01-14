@@ -766,6 +766,7 @@ export default function EssentialBriefingPage() {
         sections={layoutSections}
         currentValue={currentValueString}
         skippedQuestions={skippedQuestions}
+        maxProgress={maxProgressReached}
         onNavigateToQuestion={handleNavigateToQuestion}
       >
         {/* Input com botão de comentários */}

@@ -144,6 +144,7 @@ interface OnboardingLayoutProps {
   onStopRecording?: () => void;
   questionsWithComments?: string[]; // IDs das perguntas com comentários
   skippedQuestions?: number[]; // Índices globais das perguntas puladas
+  maxProgress?: number; // Progresso máximo alcançado (para manter dots escuros ao voltar)
   onNavigateToQuestion?: (sectionIdx: number, questionIdx: number) => void; // Callback para navegar
 }
 
@@ -151,7 +152,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   type, currentSection, currentQuestion, totalSections, totalQuestions, sectionTitle, questionText,
   children, onNext, onBack, saving = false, loading = false, error = null, isLastQuestion = false,
   sections = [], currentValue = '', isRecording = false, onStopRecording,
-  questionsWithComments = [], skippedQuestions = [], onNavigateToQuestion,
+  questionsWithComments = [], skippedQuestions = [], maxProgress = 0, onNavigateToQuestion,
 }) => {
   const [previousSection, setPreviousSection] = useState(currentSection);
   const [previousQuestion, setPreviousQuestion] = useState(currentQuestion);
@@ -420,7 +421,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                       {Array.from({ length: section.questionCount }).map((_, questionIdx) => {
                         const globalIdx = sectionStart + questionIdx;
                         const isCurrent = sectionIdx === currentSection && questionIdx === currentQuestion;
-                        const isPast = globalIdx < completedQuestions;
+                        // Usa maxProgress para manter dots escuros mesmo quando volta
+                        const isPast = globalIdx < Math.max(completedQuestions, maxProgress);
                         const isSkipped = skippedQuestions.includes(globalIdx);
                         const canNavigate = isSkipped && onNavigateToQuestion;
 
@@ -490,11 +492,11 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center px-4 py-1 min-h-0 relative z-10">
-        {/* Sphere Container - Compact */}
+      <main className="flex-1 flex flex-col items-center px-4 py-2 min-h-0 relative z-10">
+        {/* Sphere Container */}
         <div
-          className={`relative flex-shrink-0 mb-2 transition-all duration-300 ${isOverSphere ? 'scale-105' : ''}`}
-          style={{ width: 200, height: 200 }}
+          className={`relative flex-shrink-0 mb-3 transition-all duration-300 ${isOverSphere ? 'scale-105' : ''}`}
+          style={{ width: 260, height: 260 }}
           onDragOver={handleSphereDragOver}
           onDragLeave={handleSphereDragLeave}
           onDrop={handleSphereDrop}
@@ -503,7 +505,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           <div className="absolute inset-0 rounded-full blur-3xl transition-all duration-1000" style={{ backgroundColor: `${oracleColor}15`, transform: `scale(${1.2 + oracleIntensity * 0.2})` }} />
           {/* Sphere with breathing + scale */}
           <div className="absolute inset-0 flex items-center justify-center transition-transform duration-700" style={{ transform: `scale(${oracleScale * breatheScale})` }}>
-            <FloatingOracle size={180} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
+            <FloatingOracle size={240} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
           </div>
         </div>
 

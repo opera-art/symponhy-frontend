@@ -1,0 +1,31 @@
+TAREFAS ONBOARDING - CONCLUIDO
+==============================
+
+CORRECOES FEITAS (14/01/2026):
+1. [OK] Esfera aumentada para 260x260 (era 200x200)
+2. [OK] Bug da barra de progresso corrigido - adicionado prop "maxProgress"
+   - Agora usa Math.max(completedQuestions, maxProgress) para calcular isPast
+   - Pontos escuros continuam visiveis mesmo quando volta
+3. [OK] Modal de comentarios abre para cima
+4. [OK] Botao preview com icone de oculos
+5. [OK] Indicativo de secao no hover
+
+COMO FUNCIONA A NAVEGACAO:
+- skippedQuestions: array com indices das perguntas vazias (pontos vermelhos)
+- maxProgressReached: guarda ate onde o usuario ja chegou
+- Quando clica em ponto vermelho -> handleNavigateToQuestion(sectionIdx, questionIdx)
+- Os pontos escuros continuam visiveis porque usamos maxProgress
+
+ARQUIVOS MODIFICADOS:
+- src/components/onboarding/OnboardingLayout.tsx
+  - Prop maxProgress adicionada
+  - isPast usa Math.max(completedQuestions, maxProgress)
+  - Esfera: 260x260, FloatingOracle size=240
+
+- src/app/onboarding/essential/page.tsx
+  - Estado maxProgressReached
+  - useEffect para atualizar maxProgressReached
+  - Passa maxProgress={maxProgressReached} para o layout
+
+- src/components/onboarding/FieldComments.tsx
+  - Modal abre para cima (bottom-full mb-2)
