@@ -1,0 +1,139 @@
+/**
+ * Hook for managing Late profiles and connected accounts
+ */
+
+import { useState, useEffect, useCallback } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { lateService, LateProfile, LateAccount, Platform } from '@/services/lateService';
+
+const PROFILE_STORAGE_KEY = 'late_profile_id';
+
+export function useLateProfile() {
+  const { user } = useUser();
+  const [profile, setProfile] = useState<LateProfile | null>(null);
+  const [accounts, setAccounts] = useState<LateAccount[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Get or create profile for current user
+  const initProfile = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Check if we have a saved profile ID
+      const savedProfileId = localStorage.getItem(PROFILE_STORAGE_KEY);
+
+      if (savedProfileId) {
+        // Try to fetch the existing profile
+        try {
+          const existingProfile = await lateService.getProfile(savedProfileId);
+          setProfile(existingProfile);
+          return existingProfile;
+        } catch {
+          // Profile might not exist anymore, create new one
+          localStorage.removeItem(PROFILE_STORAGE_KEY);
+        }
+      }
+
+      // Get all profiles and find one matching our user
+      const profiles = await lateService.getProfiles();
+      const userProfileName = `user_${user.id}`;
+      let userProfile = profiles.find((p) => p.name === userProfileName);
+
+      if (!userProfile) {
+        // Create a new profile for this user
+        userProfile = await lateService.createProfile(userProfileName);
+      }
+
+      // Save profile ID
+      localStorage.setItem(PROFILE_STORAGE_KEY, userProfile.id);
+      setProfile(userProfile);
+      return userProfile;
+    } catch (err) {
+      console.error('Error initializing profile:', err);
+      setError('Falha ao inicializar perfil');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  // Load connected accounts
+  const loadAccounts = useCallback(async () => {
+    if (!profile) return;
+
+    try {
+      const { accounts: loadedAccounts } = await lateService.getAccounts(profile.id);
+      setAccounts(loadedAccounts);
+    } catch (err) {
+      console.error('Error loading accounts:', err);
+    }
+  }, [profile]);
+
+  // Connect a platform
+  const connectPlatform = useCallback(
+    async (platform: Platform) => {
+      if (!profile) {
+        throw new Error('Profile not initialized');
+      }
+
+      const redirectUrl = `${window.location.origin}/dashboard/settings?connected=${platform}`;
+      const { authUrl } = await lateService.getConnectUrl(platform, profile.id, redirectUrl);
+
+      // Redirect to OAuth
+      window.location.href = authUrl;
+    },
+    [profile]
+  );
+
+  // Disconnect an account
+  const disconnectAccount = useCallback(
+    async (accountId: string) => {
+      await lateService.disconnectAccount(accountId);
+      setAccounts((prev) => prev.filter((a) => a.id !== accountId));
+    },
+    []
+  );
+
+  // Initialize on mount
+  useEffect(() => {
+    if (user) {
+      initProfile().then((p) => {
+        if (p) loadAccounts();
+      });
+    }
+  }, [user, initProfile]);
+
+  // Load accounts when profile changes
+  useEffect(() => {
+    if (profile) {
+      loadAccounts();
+    }
+  }, [profile, loadAccounts]);
+
+  // Check URL params for connection result
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connected = params.get('connected');
+
+    if (connected) {
+      // Reload accounts after successful connection
+      loadAccounts();
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [loadAccounts]);
+
+  return {
+    profile,
+    accounts,
+    isLoading,
+    error,
+    connectPlatform,
+    disconnectAccount,
+    refreshAccounts: loadAccounts,
+  };
+}
