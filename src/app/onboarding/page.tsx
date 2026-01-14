@@ -364,18 +364,21 @@ export default function OnboardingPage() {
       {/* Main Content */}
       <main className="flex flex-col items-center px-6 pb-12">
         {/* Oracle Sphere - floating at top */}
-        <div className="relative flex items-center justify-center">
+        <div className="relative flex items-center justify-center !border-0" style={{ border: 'none' }}>
           {/* Glow effect behind sphere */}
           <div className="absolute w-[200px] h-[200px] md:w-[250px] md:h-[250px] rounded-full opacity-30 blur-3xl" style={{ background: colorPalette === 0 ? 'radial-gradient(circle, rgba(129,140,248,0.4), rgba(45,212,191,0.2), transparent)' : colorPalette === 1 ? 'radial-gradient(circle, rgba(244,114,182,0.4), rgba(96,165,250,0.2), transparent)' : 'radial-gradient(circle, rgba(251,146,60,0.4), rgba(225,29,72,0.2), transparent)' }} />
 
           {/* Canvas container - NO borders, transparent */}
           <div
             ref={canvasRef}
-            className="relative z-10"
+            className="relative z-10 !border-0"
             style={{
               width: 'auto',
               height: 'auto',
               overflow: 'visible',
+              border: 'none',
+              outline: 'none',
+              boxShadow: 'none',
             }}
           />
         </div>

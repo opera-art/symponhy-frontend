@@ -9,10 +9,14 @@
     @apply border-border;
   }
 
-  /* Remove border from canvas elements */
-  canvas {
+  /* Remove border from canvas elements and their containers */
+  canvas,
+  canvas *,
+  [class*="canvas"],
+  div:has(> canvas) {
     border: none !important;
     outline: none !important;
+    box-shadow: none !important;
   }
 
   body {
