@@ -38,7 +38,8 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
   const monthNames = monthNamesList.long;
   const weekDays = weekDayNames.short;
 
-  const timeSlots = ['8h', '10h', '12h', '14h', '16h', '18h'];
+  // Full day time slots (6am to midnight)
+  const timeSlots = ['6h', '7h', '8h', '9h', '10h', '11h', '12h', '13h', '14h', '15h', '16h', '17h', '18h', '19h', '20h', '21h', '22h', '23h'];
 
   const previousMonth = () => {
     if (month === 0) {
@@ -170,9 +171,9 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
 
   const getTimePosition = (time: string) => {
     const [hours] = time.split(':').map(Number);
-    const startHour = 8;
+    const startHour = 6;
     if (hours < startHour) return 0;
-    return ((hours - startHour) / 2) * 60;
+    return (hours - startHour) * 60; // 60px per hour
   };
 
   const weekDaysData = getWeekDays();
@@ -314,7 +315,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
                     // Check if there's a post in this time slot
                     const hasPostInSlot = dayPosts.some(post => {
                       const postHour = parseInt(post.scheduledTime.split(':')[0]);
-                      return postHour >= timeHour && postHour < timeHour + 2;
+                      return postHour === timeHour;
                     });
 
                     if (hasPostInSlot) return null;
@@ -347,7 +348,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
                   {/* Posts */}
                   {dayPosts.map((post, postIdx) => {
                     const topPosition = getTimePosition(post.scheduledTime);
-                    const height = 80;
+                    const height = 56; // Slightly less than 60px slot height
 
                     return (
                       <div

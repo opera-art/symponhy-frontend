@@ -9,84 +9,8 @@ export interface CalendarPost {
   caption?: string;
 }
 
-export const calendarPosts: CalendarPost[] = [
-  {
-    id: '1',
-    date: '2024-01-05',
-    title: 'Dicas de Marketing Digital',
-    type: 'post',
-    status: 'approved',
-    scheduledTime: '14:00',
-    thumbnail: 'https://i.pravatar.cc/400?img=20',
-    caption: 'Confira 5 dicas essenciais de marketing digital...',
-  },
-  {
-    id: '2',
-    date: '2024-01-08',
-    title: 'Como criar conteúdo que engaja',
-    type: 'carousel',
-    status: 'pending',
-    scheduledTime: '10:00',
-    thumbnail: 'https://i.pravatar.cc/400?img=21',
-    caption: 'Aprenda os segredos do engajamento...',
-  },
-  {
-    id: '3',
-    date: '2024-01-10',
-    title: 'Tendências 2024',
-    type: 'reel',
-    status: 'approved',
-    scheduledTime: '18:00',
-    thumbnail: 'https://i.pravatar.cc/400?img=22',
-    caption: 'As principais tendências de redes sociais...',
-  },
-  {
-    id: '4',
-    date: '2024-01-12',
-    title: 'Stories: melhores práticas',
-    type: 'story',
-    status: 'pending',
-    scheduledTime: '09:00',
-    thumbnail: 'https://i.pravatar.cc/400?img=23',
-  },
-  {
-    id: '5',
-    date: '2024-01-15',
-    title: 'Métricas que importam',
-    type: 'post',
-    status: 'draft',
-    scheduledTime: '15:00',
-    thumbnail: 'https://i.pravatar.cc/400?img=24',
-    caption: 'Entenda quais métricas realmente fazem diferença...',
-  },
-  {
-    id: '6',
-    date: '2024-01-18',
-    title: 'Estratégias de crescimento',
-    type: 'carousel',
-    status: 'approved',
-    scheduledTime: '11:00',
-    thumbnail: 'https://i.pravatar.cc/400?img=25',
-  },
-  {
-    id: '7',
-    date: '2024-01-20',
-    title: 'Ferramentas essenciais',
-    type: 'reel',
-    status: 'pending',
-    scheduledTime: '17:00',
-    thumbnail: 'https://i.pravatar.cc/400?img=26',
-  },
-  {
-    id: '8',
-    date: '2024-01-22',
-    title: 'Branding pessoal',
-    type: 'post',
-    status: 'approved',
-    scheduledTime: '14:00',
-    thumbnail: 'https://i.pravatar.cc/400?img=27',
-  },
-];
+// Calendar posts will come from database - empty by default
+export const calendarPosts: CalendarPost[] = [];
 
 export interface Content {
   id: string;
