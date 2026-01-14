@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase/client';
+import { getSupabase } from '@/lib/supabase/client';
 
 interface UploadResult {
   url: string;
@@ -15,20 +15,35 @@ interface UseFileUploadReturn {
   uploadFile: (file: File, folder?: string) => Promise<UploadResult | null>;
   uploadFiles: (files: File[], folder?: string) => Promise<UploadResult[]>;
   deleteFile: (path: string) => Promise<boolean>;
+  isConfigured: boolean;
 }
 
 const BUCKET_NAME = 'calendar-media';
+
+// Check if Supabase is configured
+function isSupabaseConfigured(): boolean {
+  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
 
 export function useFileUpload(): UseFileUploadReturn {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
+  const isConfigured = isSupabaseConfigured();
+
   const uploadFile = useCallback(async (file: File, folder = 'uploads'): Promise<UploadResult | null> => {
+    if (!isSupabaseConfigured()) {
+      setError('File upload is not configured. Please contact support.');
+      return null;
+    }
+
     try {
       setUploading(true);
       setError(null);
       setProgress(0);
+
+      const supabase = getSupabase();
 
       // Generate unique filename
       const timestamp = Date.now();
@@ -86,7 +101,13 @@ export function useFileUpload(): UseFileUploadReturn {
   }, [uploadFile]);
 
   const deleteFile = useCallback(async (path: string): Promise<boolean> => {
+    if (!isSupabaseConfigured()) {
+      setError('File delete is not configured. Please contact support.');
+      return false;
+    }
+
     try {
+      const supabase = getSupabase();
       const { error: deleteError } = await supabase.storage
         .from(BUCKET_NAME)
         .remove([path]);
@@ -110,5 +131,6 @@ export function useFileUpload(): UseFileUploadReturn {
     uploadFile,
     uploadFiles,
     deleteFile,
+    isConfigured,
   };
 }
