@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MoreHorizontal, FileText } from 'lucide-react';
 import { CalendarPost } from '@/data/calendarData';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { useChatContent } from '@/context/ChatContentContext';
+import { useDate } from '@/hooks/useDate';
 import { AddContentModal } from './AddContentModal';
 
 interface CalendarProps {
@@ -27,19 +28,15 @@ interface SelectedSlot {
 const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }) => {
   const { t } = useLanguage();
   const { setIsAddingContent, setCallbacks, setIsPlanningDay, setPlanningDate } = useChatContent();
+  const { weekDays: weekDayNames, monthNames: monthNamesList, format } = useDate();
   const [selectedPost, setSelectedPost] = useState<CalendarPost | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
   const [view, setView] = useState<CalendarView>('week');
   const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
 
-  const monthNames = useMemo(() => [
-    t('january'), t('february'), t('march'), t('april'), t('may'), t('june'),
-    t('july'), t('august'), t('september'), t('october'), t('november'), t('december')
-  ], [t]);
-
-  const weekDays = useMemo(() => [
-    t('sun'), t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat')
-  ], [t]);
+  // Use Intl-based month and weekday names (auto-localized)
+  const monthNames = monthNamesList.long;
+  const weekDays = weekDayNames.short;
 
   const timeSlots = ['8h', '10h', '12h', '14h', '16h', '18h'];
 
@@ -67,11 +64,8 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
 
   const handleDayHeaderClick = (dayData: { day: number; weekDay: string; isCurrentMonth: boolean; isToday: boolean }) => {
     const date = new Date(year, month, dayData.day);
-    const formattedDate = date.toLocaleDateString('pt-BR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    // Use Intl-based formatting (respects user's language)
+    const formattedDate = format.full(date);
 
     setPlanningDate({
       day: dayData.day,
@@ -383,7 +377,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
               <div className="flex items-center gap-2.5 bg-slate-50 p-2.5 rounded-xl hover:bg-slate-100 transition-colors">
                 <CalendarIcon className="w-4 h-4 text-slate-400" />
                 <span className="text-xs font-medium text-slate-700">
-                  {new Date(selectedPost.date).toLocaleDateString('pt-BR', {
+                  {format.date(new Date(selectedPost.date), {
                     weekday: 'long',
                     day: 'numeric',
                     month: 'long',
