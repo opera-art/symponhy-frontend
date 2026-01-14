@@ -248,39 +248,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     systemsGroup.add(particles);
     sceneRef.current.particles = particles;
 
-    // Sound Wave Rings - expanding circles
-    const soundWaves: THREE.Line[] = [];
-    const maxWaves = 4;
-    const waveColor = new THREE.Color(color);
-
-    for (let i = 0; i < maxWaves; i++) {
-      const ringGeometry = new THREE.BufferGeometry();
-      const ringPoints = 64;
-      const positions = new Float32Array(ringPoints * 3);
-
-      for (let j = 0; j < ringPoints; j++) {
-        const angle = (j / ringPoints) * Math.PI * 2;
-        positions[j * 3] = Math.cos(angle);
-        positions[j * 3 + 1] = Math.sin(angle);
-        positions[j * 3 + 2] = 0;
-      }
-
-      ringGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-      const ringMaterial = new THREE.LineBasicMaterial({
-        color: waveColor,
-        transparent: true,
-        opacity: 0,
-      });
-
-      const ring = new THREE.LineLoop(ringGeometry, ringMaterial);
-      ring.scale.set(5, 5, 5);
-      (ring as any).wavePhase = i * (1 / maxWaves); // Stagger the waves
-      (ring as any).waveSpeed = 0.008;
-      scene.add(ring);
-      soundWaves.push(ring);
-    }
-
     // Create atom orbits with electrons
     const electrons: THREE.Mesh[] = [];
     sceneRef.current.electrons = electrons;
@@ -446,31 +413,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
         });
       }
 
-      // Animate sound waves - expanding rings
-      soundWaves.forEach((ring) => {
-        const wavePhase = (ring as any).wavePhase;
-        const waveSpeed = (ring as any).waveSpeed * (1 + currentIntensity * 0.5);
-
-        // Update phase
-        (ring as any).wavePhase = (wavePhase + waveSpeed) % 1;
-        const phase = (ring as any).wavePhase;
-
-        // Scale from 5 to 12 based on phase
-        const minScale = 5;
-        const maxScale = 10 + currentIntensity * 4;
-        const scale = minScale + phase * (maxScale - minScale);
-        ring.scale.set(scale, scale, scale);
-
-        // Opacity: fade in then out
-        const opacity = phase < 0.3
-          ? phase / 0.3 * 0.4
-          : (1 - phase) / 0.7 * 0.4;
-        (ring.material as THREE.LineBasicMaterial).opacity = opacity * (0.5 + currentIntensity * 0.5);
-
-        // Gentle rotation
-        ring.rotation.z += 0.002;
-      });
-
       // Camera sway
       camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
       camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
@@ -491,12 +433,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       if (sceneRef.current.animationId) {
         cancelAnimationFrame(sceneRef.current.animationId);
       }
-
-      // Cleanup sound waves
-      soundWaves.forEach(ring => {
-        ring.geometry.dispose();
-        (ring.material as THREE.Material).dispose();
-      });
 
       if (sceneRef.current.renderer) {
         sceneRef.current.renderer.dispose();

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Badge } from '@/components/ui';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MoreHorizontal, FileText, Plus, Layers, Image } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MoreHorizontal, FileText, Plus, Layers, Image, Edit3, Trash2 } from 'lucide-react';
 import { CalendarPost } from '@/data/calendarData';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
