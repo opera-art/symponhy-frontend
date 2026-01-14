@@ -99,7 +99,9 @@
       "Bash(powershell -Command \"gh repo create opera-art/symponhy-social --public --description ''Social Media Integration Backend - Late API'' --source=''c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy-social'' --remote=origin --push\")",
       "Bash(git remote add:*)",
       "Bash(powershell -Command \"cd ''c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy-social''; gh auth status\")",
-      "Bash(powershell -Command \"$env:Path = [System.Environment]::GetEnvironmentVariable\\(''Path'',''Machine''\\) + '';'' + [System.Environment]::GetEnvironmentVariable\\(''Path'',''User''\\); gh auth status\")"
+      "Bash(powershell -Command \"$env:Path = [System.Environment]::GetEnvironmentVariable\\(''Path'',''Machine''\\) + '';'' + [System.Environment]::GetEnvironmentVariable\\(''Path'',''User''\\); gh auth status\")",
+      "WebFetch(domain:docs.getlate.dev)",
+      "mcp__railway__deployment_status"
     ]
   },
   "enabledMcpjsonServers": [

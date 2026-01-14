@@ -7,6 +7,8 @@ import { useUser } from '@clerk/nextjs';
 import { lateService, LateProfile, LateAccount, Platform } from '@/services/lateService';
 
 const PROFILE_STORAGE_KEY = 'late_profile_id';
+// TEMP: Fixed profile ID for testing Late API
+const FIXED_PROFILE_ID = '6967eae047f68a52114b8bb3';
 
 export function useLateProfile() {
   const { user } = useUser();
