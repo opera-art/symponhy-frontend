@@ -38,14 +38,20 @@ export function useLateProfile() {
         }
       }
 
-      // Get all profiles and find one matching our user
+      // Get all profiles - Late uses one account per API key
+      // We use the default profile or first available
       const profiles = await lateService.getProfiles();
-      const userProfileName = `user_${user.id}`;
-      let userProfile = profiles.find((p) => p.name === userProfileName);
+
+      // Find default profile or use first one
+      let userProfile = profiles.find((p) => p.name === 'Default Profile') || profiles[0];
+
+      if (!userProfile && profiles.length === 0) {
+        // Only create if no profiles exist at all
+        userProfile = await lateService.createProfile('Default Profile');
+      }
 
       if (!userProfile) {
-        // Create a new profile for this user
-        userProfile = await lateService.createProfile(userProfileName);
+        throw new Error('No profile available');
       }
 
       // Save profile ID (Late uses _id)
