@@ -631,17 +631,23 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             {children}
           </div>
 
-          {/* Navigation - fixo no fundo */}
-          <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-4 py-3 bg-gradient-to-t from-white via-white to-transparent">
-            <button onClick={onBack} className="px-4 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors text-sm">Anterior</button>
-            <span className="text-[10px] text-slate-400">Enter ↵</span>
+          {/* Navigation - minimalista */}
+          <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-6 py-4 bg-gradient-to-t from-white via-white to-transparent">
+            <button
+              onClick={onBack}
+              className="p-3 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+              title="Anterior"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
             <button
               onClick={handleNext}
               disabled={saving}
-              className={`px-4 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all text-sm ${buttonPulse ? 'scale-110 ring-4 ring-opacity-50' : ''}`}
-              style={{ backgroundColor: oracleColor, color: progressPercent > 60 ? '#1e293b' : '#fff', '--tw-ring-color': oracleColor } as React.CSSProperties}
+              className={`p-3 rounded-full transition-all ${buttonPulse ? 'scale-110 ring-4 ring-opacity-50' : ''} ${isLastQuestion ? 'px-5' : ''}`}
+              style={{ backgroundColor: oracleColor, color: '#fff', '--tw-ring-color': oracleColor } as React.CSSProperties}
+              title={isLastQuestion ? 'Finalizar' : 'Próxima'}
             >
-              {isLastQuestion ? <><Check className="w-3.5 h-3.5" /> Finalizar</> : <>Próxima <ArrowRight className="w-3.5 h-3.5" /></>}
+              {isLastQuestion ? <><Check className="w-5 h-5" /></> : <ArrowRight className="w-5 h-5" />}
             </button>
           </div>
         </div>

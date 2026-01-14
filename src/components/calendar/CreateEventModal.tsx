@@ -12,6 +12,12 @@ interface CreateEventModalProps {
   onSubmit: (data: CreateEventData) => Promise<void>;
   initialDate?: string;
   initialTime?: string;
+  initialTitle?: string;
+  initialType?: 'post' | 'carousel' | 'reel' | 'story';
+  initialCaption?: string;
+  initialPlatform?: string;
+  initialThumbnail?: string;
+  isEditing?: boolean;
 }
 
 const CONTENT_TYPES = [
@@ -36,26 +42,51 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
   onSubmit,
   initialDate,
   initialTime,
+  initialTitle,
+  initialType,
+  initialCaption,
+  initialPlatform,
+  initialThumbnail,
+  isEditing = false,
 }) => {
   const { uploadFile, uploading, progress } = useFileUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<CreateEventData>({
-    title: '',
-    content_type: 'post',
+    title: initialTitle || '',
+    content_type: initialType || 'post',
     event_date: initialDate || new Date().toISOString().split('T')[0],
     event_time: initialTime || '09:00',
     description: '',
     status: 'draft',
-    platform: 'instagram',
-    caption: '',
+    platform: initialPlatform || 'instagram',
+    caption: initialCaption || '',
     hashtags: [],
-    thumbnail_url: '',
+    thumbnail_url: initialThumbnail || '',
   });
 
   const [hashtagInput, setHashtagInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialThumbnail || null);
+
+  // Reset form when opening with new initial values
+  React.useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        title: initialTitle || '',
+        content_type: initialType || 'post',
+        event_date: initialDate || new Date().toISOString().split('T')[0],
+        event_time: initialTime || '09:00',
+        description: '',
+        status: 'draft',
+        platform: initialPlatform || 'instagram',
+        caption: initialCaption || '',
+        hashtags: [],
+        thumbnail_url: initialThumbnail || '',
+      });
+      setPreviewUrl(initialThumbnail || null);
+    }
+  }, [isOpen, initialTitle, initialType, initialDate, initialTime, initialCaption, initialPlatform, initialThumbnail]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -129,7 +160,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="text-xl font-semibold text-slate-900">
-            Novo Conteúdo
+            {isEditing ? 'Editar Conteúdo' : 'Novo Conteúdo'}
           </h2>
           <button
             onClick={onClose}
@@ -361,10 +392,10 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Salvando...
+                  {isEditing ? 'Atualizando...' : 'Salvando...'}
                 </>
               ) : (
-                'Salvar'
+                isEditing ? 'Atualizar' : 'Salvar'
               )}
             </button>
           </div>

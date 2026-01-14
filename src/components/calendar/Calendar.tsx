@@ -26,6 +26,14 @@ interface CalendarProps {
   month: number;
   onMonthChange: (year: number, month: number) => void;
   onSlotClick?: (date: string, time: string) => void;
+  onEditPost?: (post: CalendarPost) => void;
+  onDeletePost?: (post: CalendarPost) => void;
+}
+
+interface ContextMenu {
+  post: CalendarPost;
+  x: number;
+  y: number;
 }
 
 type CalendarView = 'month' | 'week' | 'day';
@@ -36,7 +44,7 @@ interface SelectedSlot {
   date: string;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, onSlotClick }) => {
+const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, onSlotClick, onEditPost, onDeletePost }) => {
   const { t } = useLanguage();
   const { setIsAddingContent, setCallbacks, setIsPlanningDay, setPlanningDate } = useChatContent();
   const { weekDays: weekDayNames, monthNames: monthNamesList, format } = useDate();
@@ -48,6 +56,57 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
   const [hoveredPost, setHoveredPost] = useState<{ post: CalendarPost; x: number; y: number } | null>(null);
   const [hoveredGroup, setHoveredGroup] = useState<{ posts: CalendarPost[]; x: number; y: number } | null>(null);
   const [expandedGroupKey, setExpandedGroupKey] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
+        setContextMenu(null);
+      }
+    };
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setContextMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  // Handle right-click context menu
+  const handleContextMenu = (e: React.MouseEvent, post: CalendarPost) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      post,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+
+  // Handle edit from context menu
+  const handleEdit = () => {
+    if (contextMenu && onEditPost) {
+      onEditPost(contextMenu.post);
+    }
+    setContextMenu(null);
+  };
+
+  // Handle delete from context menu
+  const handleDelete = () => {
+    if (contextMenu && onDeletePost) {
+      onDeletePost(contextMenu.post);
+    }
+    setContextMenu(null);
+  };
 
   // Use Intl-based month and weekday names (auto-localized)
   const monthNames = monthNamesList.long;
@@ -422,6 +481,10 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                             e.stopPropagation();
                             setSelectedPost(post);
                           }}
+                          onContextMenu={(e) => {
+                            e.stopPropagation();
+                            handleContextMenu(e, post);
+                          }}
                           onMouseEnter={(e) => {
                             e.stopPropagation();
                             const rect = e.currentTarget.getBoundingClientRect();
@@ -541,14 +604,17 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                           return postHour === timeHour;
                         });
 
-                        // If slot has posts, show a small "+" button instead of full slot
+                        // If slot has posts, show a small "+" button that's always visible
                         if (hasPostInSlot) {
                           return (
                             <button
                               key={slotKey}
-                              className="absolute right-0 w-5 h-5 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center text-xs z-20 opacity-0 hover:opacity-100 transition-opacity shadow-md"
+                              className="absolute right-1 w-6 h-6 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-bold z-30 shadow-lg hover:scale-110 transition-all border-2 border-white"
                               style={{ top: `${timeIdx * 60 + 2}px` }}
-                              onClick={() => handleSlotClick(dayData.day, time)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSlotClick(dayData.day, time);
+                              }}
                               title="Adicionar mais conteúdo neste horário"
                             >
                               +
@@ -599,7 +665,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                               <div
                                 key={post.id}
                                 className={cn(
-                                  'absolute left-0 right-0 rounded-xl p-2 flex flex-col justify-between group hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer z-10',
+                                  'absolute left-0 right-8 rounded-xl p-2 flex flex-col justify-between group hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer z-10',
                                   getPostColor(0)
                                 )}
                                 style={{
@@ -607,6 +673,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                                   height: '56px',
                                 }}
                                 onClick={() => setSelectedPost(post)}
+                                onContextMenu={(e) => handleContextMenu(e, post)}
                                 onMouseEnter={(e) => {
                                   const rect = e.currentTarget.getBoundingClientRect();
                                   setHoveredPost({ post, x: rect.right + 10, y: rect.top });
@@ -728,6 +795,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                                       )}
                                       style={{ marginTop: idx === 0 ? 0 : '4px' }}
                                       onClick={() => setSelectedPost(post)}
+                                      onContextMenu={(e) => handleContextMenu(e, post)}
                                       onMouseEnter={(e) => {
                                         const rect = e.currentTarget.getBoundingClientRect();
                                         setHoveredPost({ post, x: rect.right + 10, y: rect.top });
@@ -867,14 +935,17 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                           return postHour === timeHour;
                         });
 
-                        // If slot has posts, show a small "+" button instead of full slot
+                        // If slot has posts, show a small "+" button that's always visible
                         if (hasPostInSlot) {
                           return (
                             <button
                               key={slotKey}
-                              className="absolute right-2 w-7 h-7 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center text-sm z-20 opacity-60 hover:opacity-100 transition-opacity shadow-md"
+                              className="absolute right-2 w-8 h-8 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center text-lg font-bold z-30 shadow-lg hover:scale-110 transition-all border-2 border-white"
                               style={{ top: `${timeIdx * 80 + 4}px` }}
-                              onClick={() => handleSlotClick(selectedDay, time)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSlotClick(selectedDay, time);
+                              }}
                               title="Adicionar mais conteúdo neste horário"
                             >
                               +
@@ -925,7 +996,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                               <div
                                 key={post.id}
                                 className={cn(
-                                  'absolute left-0 right-0 rounded-xl p-3 flex flex-col justify-between group hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer z-10',
+                                  'absolute left-0 right-12 rounded-xl p-3 flex flex-col justify-between group hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer z-10',
                                   getPostColor(0)
                                 )}
                                 style={{
@@ -933,6 +1004,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                                   height: '76px',
                                 }}
                                 onClick={() => setSelectedPost(post)}
+                                onContextMenu={(e) => handleContextMenu(e, post)}
                                 onMouseEnter={(e) => {
                                   const rect = e.currentTarget.getBoundingClientRect();
                                   setHoveredPost({ post, x: rect.right + 10, y: rect.top });
@@ -1082,6 +1154,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                                       )}
                                       style={{ marginTop: idx === 0 ? 0 : '6px' }}
                                       onClick={() => setSelectedPost(post)}
+                                      onContextMenu={(e) => handleContextMenu(e, post)}
                                       onMouseEnter={(e) => {
                                         const rect = e.currentTarget.getBoundingClientRect();
                                         setHoveredPost({ post, x: rect.right + 10, y: rect.top });
@@ -1384,6 +1457,43 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
               Clique para expandir
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Context Menu - Right click menu for edit/delete */}
+      {contextMenu && (
+        <div
+          ref={contextMenuRef}
+          className="fixed bg-white rounded-xl shadow-2xl shadow-slate-300/50 border border-slate-200 py-2 z-[100] animate-fade-in min-w-[160px]"
+          style={{
+            left: `${Math.min(contextMenu.x, window.innerWidth - 180)}px`,
+            top: `${Math.min(contextMenu.y, window.innerHeight - 120)}px`,
+          }}
+        >
+          <div className="px-3 py-1.5 border-b border-slate-100 mb-1">
+            <p className="text-xs font-semibold text-slate-800 truncate max-w-[140px]">
+              {contextMenu.post.title}
+            </p>
+            <p className="text-[10px] text-slate-500">
+              {contextMenu.post.scheduledTime} • {contextMenu.post.type}
+            </p>
+          </div>
+
+          <button
+            onClick={handleEdit}
+            className="w-full px-3 py-2 flex items-center gap-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+          >
+            <Edit3 className="w-4 h-4" />
+            <span>Editar</span>
+          </button>
+
+          <button
+            onClick={handleDelete}
+            className="w-full px-3 py-2 flex items-center gap-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Excluir</span>
+          </button>
         </div>
       )}
 

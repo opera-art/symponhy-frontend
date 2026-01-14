@@ -91,7 +91,8 @@
       "Bash(powershell -Command \"ls -Exclude node_modules,.next,tsconfig.tsbuildinfo | Format-Table -Property Name, @{Name=''Type''; Expression={if\\($_PSIsContainer\\) {''Folder''} else {''File''}}} -AutoSize\")",
       "mcp__railway-mcp-server__list-services",
       "mcp__railway-mcp-server__link-service",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "mcp__railway-mcp-server__list-variables"
     ]
   },
   "enabledMcpjsonServers": [
