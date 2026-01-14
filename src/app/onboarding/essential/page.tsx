@@ -707,17 +707,25 @@ export default function EssentialBriefingPage() {
   const currentValue = formData[question.id as keyof FormData];
   const currentValueString = Array.isArray(currentValue) ? currentValue.join(' ') : (currentValue || '');
 
-  // Calcular seções com perguntas puladas (seções anteriores com campos vazios)
-  const skippedSections = sections.slice(0, currentSection).reduce<number[]>((acc, sec, idx) => {
-    const hasEmptyField = sec.questions.some(q => {
+  // Calcular índice global da pergunta atual
+  const completedQuestions = sections.slice(0, currentSection).reduce((acc, s) => acc + s.questions.length, 0) + currentQuestion;
+
+  // Calcular perguntas puladas individualmente (índices globais de perguntas vazias já passadas)
+  const skippedQuestions: number[] = [];
+  let globalIdx = 0;
+  for (let secIdx = 0; secIdx < sections.length; secIdx++) {
+    for (let qIdx = 0; qIdx < sections[secIdx].questions.length; qIdx++) {
+      const q = sections[secIdx].questions[qIdx];
       const value = formData[q.id as keyof FormData];
-      if (!value) return true;
-      if (Array.isArray(value)) return value.length === 0;
-      return String(value).trim().length === 0;
-    });
-    if (hasEmptyField) acc.push(idx);
-    return acc;
-  }, []);
+      const isEmpty = !value || (Array.isArray(value) ? value.length === 0 : String(value).trim().length === 0);
+
+      // Só marca como pulada se já passou dessa pergunta e está vazia
+      if (globalIdx < completedQuestions && isEmpty) {
+        skippedQuestions.push(globalIdx);
+      }
+      globalIdx++;
+    }
+  }
 
   return (
     <>
@@ -739,7 +747,7 @@ export default function EssentialBriefingPage() {
         onStopRecording={stopListening}
         sections={layoutSections}
         currentValue={currentValueString}
-        skippedSections={skippedSections}
+        skippedQuestions={skippedQuestions}
       >
         {/* Input com botão de comentários */}
         <div className="relative">

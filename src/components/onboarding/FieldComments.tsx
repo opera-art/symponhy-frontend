@@ -63,12 +63,29 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
     }
   }, [isOpen, fieldName, briefingUserId]);
 
-  // Criar comentário
+  // Criar comentário - com update otimista
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || sending) return;
 
+    const commentText = newComment.trim();
+
+    // Update otimista - adiciona imediatamente na UI
+    const optimisticComment: Comment = {
+      id: `temp-${Date.now()}`,
+      clerk_user_id: briefingUserId,
+      author_clerk_user_id: userId || '',
+      author_name: 'Você',
+      field_name: fieldName,
+      comment: commentText,
+      resolved: false,
+      created_at: new Date().toISOString(),
+    };
+
+    setComments(prev => [...prev, optimisticComment]);
+    setNewComment('');
     setSending(true);
+
     try {
       const response = await fetch(`${API_BASE}/comments`, {
         method: 'POST',
@@ -79,16 +96,23 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
           clerkUserId: briefingUserId,
           onboardingType,
           fieldName,
-          comment: newComment.trim(),
+          comment: commentText,
         }),
       });
 
       if (response.ok) {
-        setNewComment('');
-        setIsOpen(false); // Fechar ao salvar
+        // Buscar comentários atualizados em background
+        fetchComments();
+        // Fechar após um breve delay para o usuário ver
+        setTimeout(() => setIsOpen(false), 500);
+      } else {
+        // Se falhar, remove o comentário otimista
+        setComments(prev => prev.filter(c => c.id !== optimisticComment.id));
       }
     } catch (error) {
       console.error('Error creating comment:', error);
+      // Remove comentário otimista em caso de erro
+      setComments(prev => prev.filter(c => c.id !== optimisticComment.id));
     } finally {
       setSending(false);
     }

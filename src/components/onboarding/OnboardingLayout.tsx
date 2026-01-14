@@ -28,23 +28,6 @@ const getOracleIntensity = (progressPercent: number): number => {
   return Math.min(progressPercent / 100, 1) * 0.8;
 };
 
-// Dicas contextuais
-const getSectionTips = (sectionTitle: string): string[] => {
-  const tips: Record<string, string[]> = {
-    'Dados Básicos': ['Informações precisas criam conteúdo relevante.', 'Seu segmento define a comunicação.'],
-    'Redes Sociais': ['Cada plataforma tem sua linguagem.', 'Links corretos facilitam a análise.'],
-    'Identidade': ['Sua história conecta com o público.', 'Missão clara guia o conteúdo.'],
-    'Oferta Principal': ['Foco em um produto maximiza resultados.', 'Provas sociais aceleram decisões.'],
-    'Cliente Ideal': ['Quanto mais específico, melhor.', 'Frases do cliente viram headlines.'],
-    'Funil de Vendas': ['Conhecer seus números é poder.', 'FAQ vira conteúdo de impacto.'],
-    'Comunicação': ['Tom de voz é personalidade da marca.', 'Opiniões fortes geram engajamento.'],
-    'Conteúdo': ['Menos plataformas, mais profundidade.', 'CTAs claros convertem mais.'],
-    'Concorrência': ['Referências aceleram a criação.', 'Diferenciais viram argumentos de venda.'],
-    'Final': ['Detalhes extras fazem diferença.', 'Quase lá!'],
-  };
-  return tips[sectionTitle] || ['Cada resposta fortalece sua estratégia.'];
-};
-
 const getMotivationalMessage = (progressPercent: number): string => {
   if (progressPercent < 10) return 'Vamos construir algo extraordinário.';
   if (progressPercent < 25) return 'Cada detalhe importa.';
@@ -97,37 +80,6 @@ const TypingText: React.FC<{ text: string; speed?: number }> = ({ text, speed = 
   }, [text, speed]);
 
   return <span className="transition-all">{displayedText}{!isComplete && <span className="animate-pulse text-amber-500">|</span>}</span>;
-};
-
-// Tip Bubble com typing effect
-const TipBubble: React.FC<{ tip: string; color: string; visible: boolean }> = ({ tip, color, visible }) => {
-  const [displayedTip, setDisplayedTip] = useState('');
-
-  useEffect(() => {
-    if (visible) {
-      setDisplayedTip('');
-      let index = 0;
-      const timer = setInterval(() => {
-        if (index < tip.length) {
-          setDisplayedTip(tip.slice(0, index + 1));
-          index++;
-        } else {
-          clearInterval(timer);
-        }
-      }, 20);
-      return () => clearInterval(timer);
-    }
-  }, [tip, visible]);
-
-  if (!visible) return null;
-  return (
-    <div className="absolute -top-16 left-1/2 -translate-x-1/2 animate-fade-in z-10">
-      <div className="px-4 py-2 rounded-2xl text-sm font-medium text-white shadow-lg max-w-xs text-center" style={{ backgroundColor: color }}>
-        {displayedTip}<span className="animate-pulse">|</span>
-      </div>
-      <div className="w-3 h-3 rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2" style={{ backgroundColor: color }} />
-    </div>
-  );
 };
 
 // Parallax Background Layer
@@ -191,14 +143,14 @@ interface OnboardingLayoutProps {
   isRecording?: boolean;
   onStopRecording?: () => void;
   sectionsWithComments?: number[]; // Índices das seções com comentários
-  skippedSections?: number[]; // Índices das seções com perguntas puladas
+  skippedQuestions?: number[]; // Índices globais das perguntas puladas
 }
 
 export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   type, currentSection, currentQuestion, totalSections, totalQuestions, sectionTitle, questionText,
   children, onNext, onBack, saving = false, loading = false, error = null, isLastQuestion = false,
   sections = [], currentValue = '', isRecording = false, onStopRecording,
-  sectionsWithComments = [], skippedSections = [],
+  sectionsWithComments = [], skippedQuestions = [],
 }) => {
   const [previousSection, setPreviousSection] = useState(currentSection);
   const [previousQuestion, setPreviousQuestion] = useState(currentQuestion);
@@ -206,8 +158,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   const [motivationText, setMotivationText] = useState('');
   const [buttonPulse, setButtonPulse] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [showTip, setShowTip] = useState(false);
-  const [currentTip, setCurrentTip] = useState('');
   const [questionKey, setQuestionKey] = useState(0);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [isOverSphere, setIsOverSphere] = useState(false);
@@ -274,21 +224,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   useEffect(() => {
     setIsTyping(false);
   }, [currentSection, currentQuestion]);
-
-  // Dicas
-  useEffect(() => {
-    const tips = getSectionTips(sectionTitle);
-    let tipIndex = 0;
-    const showNextTip = () => {
-      setCurrentTip(tips[tipIndex % tips.length]);
-      setShowTip(true);
-      setTimeout(() => setShowTip(false), 4000);
-      tipIndex++;
-    };
-    const initialTimeout = setTimeout(showNextTip, 3000);
-    const interval = setInterval(showNextTip, 18000);
-    return () => { clearTimeout(initialTimeout); clearInterval(interval); };
-  }, [sectionTitle]);
 
   // Mudança de seção
   useEffect(() => {
@@ -442,86 +377,95 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         </div>
       </header>
 
-      {/* Progress Bar - Creative dots design */}
-      <div className="px-4 flex-shrink-0 relative z-10">
-        <div className="max-w-3xl mx-auto">
-          {/* Dots progress - each dot is a question */}
-          <div className="flex items-center justify-center gap-1 flex-wrap mb-2">
-            {sections.map((section, sectionIdx) => {
-              const sectionStart = sections.slice(0, sectionIdx).reduce((acc, s) => acc + s.questionCount, 0);
-              const hasComments = sectionsWithComments.includes(sectionIdx);
-              const isCurrentSection = currentSection === sectionIdx;
+      {/* Progress Bar - Elegant minimal design */}
+      <div className="px-6 flex-shrink-0 relative z-10 py-3">
+        <div className="max-w-2xl mx-auto">
+          {/* Main progress track */}
+          <div className="relative">
+            {/* Background track */}
+            <div className="h-1 bg-slate-100 rounded-full" />
 
-              return (
-                <div key={sectionIdx} className="flex items-center">
-                  {/* Section dots */}
-                  <div className="flex items-center gap-0.5 px-1.5 py-1 rounded-full relative"
-                    style={{
-                      backgroundColor: isCurrentSection ? `${oracleColor}15` : 'transparent',
-                      border: isCurrentSection ? `1px solid ${oracleColor}30` : '1px solid transparent'
-                    }}
-                    title={section.title}
-                  >
+            {/* Progress fill */}
+            <div
+              className="absolute top-0 left-0 h-1 rounded-full transition-all duration-500 ease-out"
+              style={{
+                width: `${progressPercent}%`,
+                background: `linear-gradient(90deg, ${oracleColor}, ${oracleColor}dd)`
+              }}
+            />
+
+            {/* Question dots on the track */}
+            <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex justify-between px-0.5">
+              {sections.map((section, sectionIdx) => {
+                const sectionStart = sections.slice(0, sectionIdx).reduce((acc, s) => acc + s.questionCount, 0);
+                const hasComments = sectionsWithComments.includes(sectionIdx);
+
+                return (
+                  <div key={sectionIdx} className="flex items-center gap-px">
                     {Array.from({ length: section.questionCount }).map((_, questionIdx) => {
-                      const globalQuestionIdx = sectionStart + questionIdx;
-                      const isAnswered = globalQuestionIdx < completedQuestions;
+                      const globalIdx = sectionStart + questionIdx;
                       const isCurrent = sectionIdx === currentSection && questionIdx === currentQuestion;
-                      const isPast = globalQuestionIdx < completedQuestions;
-                      const isSkippedQuestion = skippedSections.includes(sectionIdx) && isPast;
+                      const isPast = globalIdx < completedQuestions;
+                      const isSkipped = skippedQuestions.includes(globalIdx);
 
-                      let dotColor = '#e2e8f0'; // slate-200
-                      let dotSize = 'w-1.5 h-1.5';
-                      let extraClass = '';
+                      // Determine dot appearance
+                      let size = 'w-2 h-2';
+                      let bgColor = '#e2e8f0';
+                      let ring = '';
+                      let glow = '';
 
                       if (isCurrent) {
-                        dotColor = oracleColor;
-                        dotSize = 'w-2.5 h-2.5';
-                        extraClass = 'ring-2 ring-offset-1';
-                      } else if (isSkippedQuestion && !isAnswered) {
-                        dotColor = '#f87171'; // red-400
-                        dotSize = 'w-1.5 h-1.5';
+                        size = 'w-3 h-3';
+                        bgColor = oracleColor;
+                        ring = 'ring-4 ring-offset-2';
+                        glow = 'shadow-lg';
+                      } else if (isSkipped) {
+                        bgColor = '#ef4444'; // red-500
+                        size = 'w-2.5 h-2.5';
                       } else if (isPast) {
-                        dotColor = '#1e293b'; // slate-900
+                        bgColor = '#1e293b';
                       }
 
                       return (
                         <div
                           key={questionIdx}
-                          className={`${dotSize} rounded-full transition-all duration-300 ${extraClass}`}
+                          className={`${size} rounded-full transition-all duration-300 ${ring} ${glow}`}
                           style={{
-                            backgroundColor: dotColor,
-                            '--tw-ring-color': `${oracleColor}40`
+                            backgroundColor: bgColor,
+                            '--tw-ring-color': `${oracleColor}30`,
+                            '--tw-ring-offset-color': 'white'
                           } as React.CSSProperties}
+                          title={`${section.title} - Pergunta ${questionIdx + 1}${isSkipped ? ' (pulada)' : ''}`}
                         />
                       );
                     })}
-                    {/* Comment indicator */}
+                    {/* Section comment indicator */}
                     {hasComments && (
                       <div
-                        className="absolute -top-1 -right-1 w-2 h-2 rounded-full border border-white animate-pulse"
+                        className="w-1.5 h-1.5 rounded-full animate-pulse ml-0.5"
                         style={{ backgroundColor: oracleColor }}
-                        title="Tem comentários"
                       />
                     )}
                   </div>
-                  {/* Separator between sections */}
-                  {sectionIdx < sections.length - 1 && (
-                    <div className="w-3 h-px mx-0.5" style={{
-                      backgroundColor: sectionIdx < currentSection ? '#1e293b' : '#e2e8f0'
-                    }} />
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-          {/* Progress info */}
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-slate-400">{sectionTitle}</span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">{completedQuestions + 1}/{totalQuestions}</span>
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: `${oracleColor}20`, color: oracleColor }}>
+
+          {/* Labels */}
+          <div className="flex justify-between items-center mt-3">
+            <span className="text-xs font-medium text-slate-600">{sectionTitle}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-400">{completedQuestions + 1} de {totalQuestions}</span>
+              <div
+                className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                style={{
+                  backgroundColor: `${oracleColor}15`,
+                  color: oracleColor
+                }}
+              >
                 {Math.round(progressPercent)}%
-              </span>
+              </div>
             </div>
           </div>
         </div>
@@ -537,7 +481,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           onDragLeave={handleSphereDragLeave}
           onDrop={handleSphereDrop}
         >
-          <TipBubble tip={currentTip} color={oracleColor} visible={showTip} />
           {draggedItem && <div className={`absolute inset-0 rounded-full border-4 border-dashed transition-all ${isOverSphere ? 'border-amber-400 bg-amber-50/30' : 'border-slate-300'}`} />}
           <div className="absolute inset-0 rounded-full blur-3xl transition-all duration-1000" style={{ backgroundColor: `${oracleColor}15`, transform: `scale(${1.2 + oracleIntensity * 0.2})` }} />
           {/* Sphere with breathing + scale */}
