@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Calendar } from '@/components/calendar/Calendar';
 import { KanbanBoard } from '@/components/kanban';
-import { calendarPosts } from '@/data/calendarData';
 import { kanbanTasksData } from '@/data/newFeaturesData';
 import { cn } from '@/lib/utils';
-import { LayoutGrid, Calendar as CalendarIcon } from 'lucide-react';
+import { LayoutGrid, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 
 type ViewType = 'calendar' | 'kanban';
 
@@ -19,6 +19,9 @@ export const CalendarViewContainer: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>(viewParam || 'calendar');
   const [currentYear, setCurrentYear] = useState(() => new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(() => new Date().getMonth());
+
+  // Fetch calendar events from backend
+  const { posts, loading, error } = useCalendarEvents(currentYear, currentMonth);
 
   const handleMonthChange = (year: number, month: number) => {
     setCurrentYear(year);
@@ -70,12 +73,22 @@ export const CalendarViewContainer: React.FC = () => {
       {/* Content */}
       <div className="animate-fade-in">
         {currentView === 'calendar' ? (
-          <Calendar
-            posts={calendarPosts}
-            year={currentYear}
-            month={currentMonth}
-            onMonthChange={handleMonthChange}
-          />
+          loading ? (
+            <div className="flex items-center justify-center h-[500px]">
+              <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center h-[500px] text-red-500">
+              {error}
+            </div>
+          ) : (
+            <Calendar
+              posts={posts}
+              year={currentYear}
+              month={currentMonth}
+              onMonthChange={handleMonthChange}
+            />
+          )
         ) : (
           <div className="h-[calc(100vh-220px)]">
             <KanbanBoard tasks={kanbanTasksData} />

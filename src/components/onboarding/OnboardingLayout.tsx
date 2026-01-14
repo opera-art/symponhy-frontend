@@ -2,17 +2,102 @@
 
 import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { FloatingOracle } from '@/components/chat/FloatingOracle';
-import { ArrowLeft, ArrowRight, Check, Sparkles, Crown, Loader2, Square } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Sparkles, Crown, Loader2, Square, Building2, Share2, Heart, Package, Users, TrendingUp, MessageSquare, Video, Target, Flag } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-// Cores para progresso - sempre tons dourados (sem cinza)
-const getOracleColor = (progressPercent: number): string => {
-  if (progressPercent < 20) return '#D4AF37';  // Dourado clássico
-  if (progressPercent < 40) return '#DAA520';  // Goldenrod
-  if (progressPercent < 60) return '#F4C430';  // Safron gold
-  if (progressPercent < 80) return '#FFD700';  // Gold puro
-  if (progressPercent < 100) return '#FFDF00'; // Golden yellow
-  return '#FFE55C';                             // Light gold
+// Temas por seção - cada seção tem sua própria identidade visual
+const sectionThemes = [
+  { // 0 - Dados Básicos
+    primaryColor: '#3B82F6', // Azul corporativo
+    secondaryColor: '#60A5FA',
+    icon: Building2,
+    gradient: 'from-blue-50 to-slate-50',
+    sphereGlow: '#3B82F6',
+    vibe: 'corporate',
+  },
+  { // 1 - Redes Sociais
+    primaryColor: '#EC4899', // Rosa vibrante
+    secondaryColor: '#F472B6',
+    icon: Share2,
+    gradient: 'from-pink-50 to-purple-50',
+    sphereGlow: '#EC4899',
+    vibe: 'social',
+  },
+  { // 2 - Identidade
+    primaryColor: '#8B5CF6', // Roxo profundo
+    secondaryColor: '#A78BFA',
+    icon: Heart,
+    gradient: 'from-purple-50 to-indigo-50',
+    sphereGlow: '#8B5CF6',
+    vibe: 'introspective',
+  },
+  { // 3 - Oferta Principal
+    primaryColor: '#F59E0B', // Âmbar/Dourado
+    secondaryColor: '#FBBF24',
+    icon: Package,
+    gradient: 'from-amber-50 to-yellow-50',
+    sphereGlow: '#F59E0B',
+    vibe: 'premium',
+  },
+  { // 4 - Cliente Ideal
+    primaryColor: '#10B981', // Verde esmeralda
+    secondaryColor: '#34D399',
+    icon: Users,
+    gradient: 'from-emerald-50 to-teal-50',
+    sphereGlow: '#10B981',
+    vibe: 'human',
+  },
+  { // 5 - Funil de Vendas
+    primaryColor: '#EF4444', // Vermelho energia
+    secondaryColor: '#F87171',
+    icon: TrendingUp,
+    gradient: 'from-red-50 to-orange-50',
+    sphereGlow: '#EF4444',
+    vibe: 'dynamic',
+  },
+  { // 6 - Comunicação
+    primaryColor: '#06B6D4', // Ciano
+    secondaryColor: '#22D3EE',
+    icon: MessageSquare,
+    gradient: 'from-cyan-50 to-sky-50',
+    sphereGlow: '#06B6D4',
+    vibe: 'communicative',
+  },
+  { // 7 - Conteúdo
+    primaryColor: '#F97316', // Laranja criativo
+    secondaryColor: '#FB923C',
+    icon: Video,
+    gradient: 'from-orange-50 to-amber-50',
+    sphereGlow: '#F97316',
+    vibe: 'creative',
+  },
+  { // 8 - Concorrência
+    primaryColor: '#64748B', // Slate estratégico
+    secondaryColor: '#94A3B8',
+    icon: Target,
+    gradient: 'from-slate-100 to-gray-50',
+    sphereGlow: '#64748B',
+    vibe: 'strategic',
+  },
+  { // 9 - Final
+    primaryColor: '#D4AF37', // Dourado final
+    secondaryColor: '#FFD700',
+    icon: Flag,
+    gradient: 'from-amber-50 to-yellow-50',
+    sphereGlow: '#D4AF37',
+    vibe: 'celebration',
+  },
+];
+
+// Obter tema da seção atual
+const getSectionTheme = (sectionIndex: number) => {
+  return sectionThemes[Math.min(sectionIndex, sectionThemes.length - 1)];
+};
+
+// Cores para progresso baseadas no tema da seção
+const getOracleColor = (sectionIndex: number): string => {
+  const theme = getSectionTheme(sectionIndex);
+  return theme.primaryColor;
 };
 
 // Escala visual da esfera
@@ -172,8 +257,12 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   const completedQuestions = sections.slice(0, currentSection).reduce((acc, s) => acc + s.questionCount, 0) + currentQuestion;
   const progressPercent = ((completedQuestions + 1) / totalQuestions) * 100;
 
-  // Esfera dinâmica
-  const oracleColor = getOracleColor(progressPercent);
+  // Tema da seção atual
+  const currentTheme = getSectionTheme(currentSection);
+  const SectionIcon = currentTheme.icon;
+
+  // Esfera dinâmica - usa cor do tema da seção
+  const oracleColor = currentTheme.primaryColor;
   const oracleScale = getOracleScale(progressPercent);
   const oracleIntensity = getOracleIntensity(progressPercent);
 
@@ -340,18 +429,17 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
 
   return (
     <div
-      className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden relative max-w-full"
+      className={`h-screen bg-gradient-to-b ${currentTheme.gradient} flex flex-col overflow-hidden relative max-w-full transition-colors duration-700`}
     >
       {/* Animated Gradient Mesh Background */}
       <GradientMesh color={oracleColor} />
 
-      {/* Parallax Layers */}
+      {/* Parallax Layers - usando cores do tema */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <ParallaxLayer depth={0.2} color={oracleColor} mouseX={mousePos.x} mouseY={mousePos.y} />
-        <ParallaxLayer depth={0.5} color="#D4AF37" mouseX={mousePos.x} mouseY={mousePos.y} />
-        <ParallaxLayer depth={0.8} color="#C0C0C0" mouseX={mousePos.x} mouseY={mousePos.y} />
+        <ParallaxLayer depth={0.5} color={currentTheme.secondaryColor} mouseX={mousePos.x} mouseY={mousePos.y} />
+        <ParallaxLayer depth={0.8} color={`${oracleColor}40`} mouseX={mousePos.x} mouseY={mousePos.y} />
       </div>
-
 
       {/* Error */}
       {error && <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm z-50 animate-fade-in">{error}</div>}
@@ -359,21 +447,33 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       {/* Motivation */}
       {showMotivation && (
         <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-fade-in-up">
-          <div className="bg-slate-900/90 backdrop-blur-sm text-white px-8 py-4 rounded-2xl shadow-2xl">
+          <div
+            className="backdrop-blur-sm text-white px-8 py-4 rounded-2xl shadow-2xl"
+            style={{ backgroundColor: `${oracleColor}ee` }}
+          >
             <p className="text-lg font-medium text-center">{motivationText}</p>
           </div>
         </div>
       )}
 
-      {/* Header - apenas logo */}
+      {/* Header com indicador de seção */}
       <header className="p-3 flex-shrink-0 relative z-10">
-        <div className="flex items-center justify-center max-w-3xl mx-auto">
+        <div className="flex items-center justify-between max-w-3xl mx-auto">
+          {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 bg-slate-900 rounded-lg flex items-center justify-center">
               {type === 'complete' ? <Crown className="w-3.5 h-3.5 text-amber-400" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
             </div>
             <span className="font-semibold text-slate-800 text-sm">Symponhy</span>
-            {type === 'complete' && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">Master</span>}
+          </div>
+
+          {/* Indicador da seção atual */}
+          <div
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full transition-all duration-500"
+            style={{ backgroundColor: `${oracleColor}15` }}
+          >
+            <SectionIcon className="w-3.5 h-3.5" style={{ color: oracleColor }} />
+            <span className="text-xs font-medium" style={{ color: oracleColor }}>{sectionTitle}</span>
           </div>
         </div>
       </header>
