@@ -818,9 +818,9 @@ export default function EssentialBriefingPage() {
         <div className="relative">
           {renderInput()}
 
-          {/* Botão de comentários do campo */}
+          {/* Botão de comentários do campo - posicionado no canto superior direito */}
           {userId && (
-            <div className="absolute -right-10 top-0">
+            <div className="absolute right-2 -top-8 z-20">
               <FieldComments
                 key={`comments-${question.id}`}
                 fieldName={question.id}
