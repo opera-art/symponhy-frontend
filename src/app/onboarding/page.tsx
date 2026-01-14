@@ -19,10 +19,10 @@ export default function OnboardingPage() {
     const THREE = await import('three');
 
     const isMobile = window.innerWidth < 768;
-    const pCount = isMobile ? 25000 : 45000;
+    const pCount = isMobile ? 40000 : 80000;
 
-    // Canvas very large to prevent any clipping
-    const canvasSize = isMobile ? 600 : 800;
+    // Canvas size
+    const canvasSize = isMobile ? 350 : 450;
 
     // State
     const STATE = {
@@ -57,9 +57,9 @@ export default function OnboardingPage() {
     const scene = new THREE.Scene();
     sceneRef.current.scene = scene;
 
-    // Camera - far back so sphere is small within large canvas
-    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-    camera.position.z = isMobile ? 55 : 50;
+    // Camera - close for bright visible particles
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
+    camera.position.z = isMobile ? 22 : 20;
     sceneRef.current.camera = camera;
 
     // Particle Shaders
@@ -120,7 +120,7 @@ export default function OnboardingPage() {
       vec3 getPosSphere(float idx) {
         float phi = acos(-1.0 + (2.0 * idx) / ${pCount}.0);
         float theta = sqrt(${pCount}.0 * 3.1415926) * phi;
-        float r = 12.0 + aRandom.x * 2.0;
+        float r = 8.0 + aRandom.x * 1.5;
         return vec3(r * sin(phi) * cos(theta), r * sin(phi) * sin(theta), r * cos(phi));
       }
 
@@ -183,11 +183,11 @@ export default function OnboardingPage() {
         pos += normalize(pos - mousePos) * influence * 5.0;
 
         vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-        gl_PointSize = (1.5 + aRandom.y * 2.0) * (30.0 / -mvPosition.z);
+        gl_PointSize = (2.5 + aRandom.y * 3.0) * (35.0 / -mvPosition.z);
         gl_Position = projectionMatrix * mvPosition;
 
-        float depthFade = smoothstep(60.0, 10.0, -mvPosition.z);
-        vAlpha = depthFade * (0.2 + aRandom.z * 0.6);
+        float depthFade = smoothstep(50.0, 5.0, -mvPosition.z);
+        vAlpha = depthFade * (0.5 + aRandom.z * 0.5);
         vColor = pos;
       }
     `;
@@ -264,7 +264,7 @@ export default function OnboardingPage() {
     // Resize - keep canvas size consistent
     const handleResize = () => {
       const newIsMobile = window.innerWidth < 768;
-      const newSize = newIsMobile ? 600 : 800;
+      const newSize = newIsMobile ? 350 : 450;
       renderer.setSize(newSize, newSize);
     };
     window.addEventListener('resize', handleResize);
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
       material.uniforms.uColor2.value.lerp(targetC2, 0.05);
 
       // Gentle breathing motion
-      const zTarget = (isMobile ? 55 : 50) + Math.sin(STATE.time * 0.5) * 1.5;
+      const zTarget = (isMobile ? 22 : 20) + Math.sin(STATE.time * 0.5) * 0.8;
       camera.position.z += (zTarget - camera.position.z) * 0.02;
       camera.position.x = Math.sin(STATE.time * 0.2) * 1.5;
       camera.position.y = Math.cos(STATE.time * 0.15) * 1.5;
@@ -357,21 +357,14 @@ export default function OnboardingPage() {
       {/* Main Content */}
       <main className="flex flex-col items-center px-6 pb-12">
         {/* Oracle Sphere - floating at top */}
-        <div className="relative flex items-center justify-center !border-0" style={{ border: 'none', height: '280px', marginTop: '-60px' }}>
+        <div className="relative flex items-center justify-center">
           {/* Glow effect behind sphere */}
-          <div className="absolute w-[180px] h-[180px] rounded-full opacity-40 blur-3xl" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.5), rgba(45,212,191,0.3), transparent)' }} />
+          <div className="absolute w-[250px] h-[250px] rounded-full opacity-50 blur-3xl" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.6), rgba(45,212,191,0.4), transparent)' }} />
 
-          {/* Canvas container - scaled down visually */}
+          {/* Canvas container */}
           <div
             ref={canvasRef}
-            className="relative z-10 !border-0"
-            style={{
-              transform: 'scale(0.4)',
-              transformOrigin: 'center center',
-              border: 'none',
-              outline: 'none',
-              boxShadow: 'none',
-            }}
+            className="relative z-10"
           />
         </div>
 

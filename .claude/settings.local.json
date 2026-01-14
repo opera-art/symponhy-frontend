@@ -94,7 +94,10 @@
       "Bash(git config:*)",
       "mcp__railway-mcp-server__list-variables",
       "mcp__railway-mcp-server__list-projects",
-      "Bash(gh repo create:*)"
+      "Bash(gh repo create:*)",
+      "Bash(git init:*)",
+      "Bash(powershell -Command \"gh repo create opera-art/symponhy-social --public --description ''Social Media Integration Backend - Late API'' --source=''c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy-social'' --remote=origin --push\")",
+      "Bash(git remote add:*)"
     ]
   },
   "enabledMcpjsonServers": [
