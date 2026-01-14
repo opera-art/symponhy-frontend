@@ -26,14 +26,15 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
   briefingUserId,
   onboardingType,
 }) => {
-  const { userId, getToken } = useAuth();
+  const { userId } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.viol1n.com';
+  // Usar proxy do Next.js que adiciona headers do Clerk automaticamente
+  const API_BASE = '/api/proxy';
 
   // Buscar comentários do campo
   const fetchComments = async () => {
@@ -41,14 +42,8 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
 
     setLoading(true);
     try {
-      const token = await getToken();
       const response = await fetch(
-        `${API_URL}/api/comments/${onboardingType}/${briefingUserId}/${fieldName}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
+        `${API_BASE}/comments/${onboardingType}/${briefingUserId}/${fieldName}`
       );
 
       if (response.ok) {
@@ -75,12 +70,10 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
 
     setSending(true);
     try {
-      const token = await getToken();
-      const response = await fetch(`${API_URL}/api/comments`, {
+      const response = await fetch(`${API_BASE}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           clerkUserId: briefingUserId,
@@ -104,12 +97,8 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
   // Resolver comentário
   const handleResolve = async (commentId: string) => {
     try {
-      const token = await getToken();
-      await fetch(`${API_URL}/api/comments/${onboardingType}/${commentId}/resolve`, {
+      await fetch(`${API_BASE}/comments/${onboardingType}/${commentId}/resolve`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       fetchComments();
     } catch (error) {
@@ -120,12 +109,8 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
   // Deletar comentário
   const handleDelete = async (commentId: string) => {
     try {
-      const token = await getToken();
-      await fetch(`${API_URL}/api/comments/${onboardingType}/${commentId}`, {
+      await fetch(`${API_BASE}/comments/${onboardingType}/${commentId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       fetchComments();
     } catch (error) {
