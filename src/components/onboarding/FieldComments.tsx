@@ -253,6 +253,12 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey && newComment.trim()) {
+                    e.preventDefault();
+                    handleSubmit(e as unknown as React.FormEvent);
+                  }
+                }}
                 placeholder="Comentário..."
                 className="flex-1 px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-amber-400"
               />

@@ -424,7 +424,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                         // Usa maxProgress para manter dots escuros mesmo quando volta
                         const isPast = globalIdx < Math.max(completedQuestions, maxProgress);
                         const isSkipped = skippedQuestions.includes(globalIdx);
-                        const canNavigate = isSkipped && onNavigateToQuestion;
+                        // Permite navegar para qualquer pergunta já passada (não só puladas)
+                        const canNavigate = (isPast || isSkipped) && !isCurrent && onNavigateToQuestion;
 
                         // Minimal dot styling
                         let dotSize = isCurrent ? 'w-2.5 h-2.5' : 'w-1.5 h-1.5';
@@ -454,7 +455,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                               backgroundColor: dotBg,
                               boxShadow: dotShadow,
                             }}
-                            title={isSkipped ? `${section.title} - Pergunta ${questionIdx + 1} (clique para voltar)` : undefined}
+                            title={canNavigate ? `${section.title} - Pergunta ${questionIdx + 1} (clique para voltar)` : undefined}
                           />
                         );
                       })}
