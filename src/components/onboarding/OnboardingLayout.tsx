@@ -75,8 +75,6 @@ const triggerAbsorbEffect = (color: string) => {
   confetti({ particleCount: 20, spread: 360, startVelocity: 10, colors: [color, '#fff'], origin: { x: 0.5, y: 0.35 }, gravity: 0.3, scalar: 0.6, ticks: 80 });
 };
 
-interface FloatingWord { id: number; text: string; x: number; y: number; opacity: number; scale: number; }
-
 // Typing Effect com cursor
 const TypingText: React.FC<{ text: string; speed?: number }> = ({ text, speed = 25 }) => {
   const [displayedText, setDisplayedText] = useState('');
@@ -192,12 +190,15 @@ interface OnboardingLayoutProps {
   currentValue?: string;
   isRecording?: boolean;
   onStopRecording?: () => void;
+  sectionsWithComments?: number[]; // Índices das seções com comentários
+  skippedSections?: number[]; // Índices das seções com perguntas puladas
 }
 
 export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   type, currentSection, currentQuestion, totalSections, totalQuestions, sectionTitle, questionText,
   children, onNext, onBack, saving = false, loading = false, error = null, isLastQuestion = false,
   sections = [], currentValue = '', isRecording = false, onStopRecording,
+  sectionsWithComments = [], skippedSections = [],
 }) => {
   const [previousSection, setPreviousSection] = useState(currentSection);
   const [previousQuestion, setPreviousQuestion] = useState(currentQuestion);
@@ -207,7 +208,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const [showTip, setShowTip] = useState(false);
   const [currentTip, setCurrentTip] = useState('');
-  const [floatingWords, setFloatingWords] = useState<FloatingWord[]>([]);
   const [questionKey, setQuestionKey] = useState(0);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [isOverSphere, setIsOverSphere] = useState(false);
@@ -215,8 +215,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   const [questionTransition, setQuestionTransition] = useState<'enter' | 'exit' | 'idle'>('idle');
   const [breatheScale, setBreatheScale] = useState(1);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const wordIdRef = useRef(0);
-  const lastValueRef = useRef('');
 
   // Progresso
   const completedQuestions = sections.slice(0, currentSection).reduce((acc, s) => acc + s.questionCount, 0) + currentQuestion;
@@ -265,39 +263,15 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
 
   // Detectar digitação
   useEffect(() => {
-    if (currentValue !== lastValueRef.current) {
-      const newText = currentValue.slice(lastValueRef.current.length);
-      if (newText.length > 0 && !newText.includes(' ')) {
-        setIsTyping(true);
-        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-        typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 500);
-      }
-      if (newText.includes(' ') || newText.includes('\n')) {
-        const words = lastValueRef.current.split(/\s+/);
-        const lastWord = words[words.length - 1];
-        if (lastWord && lastWord.length > 2) {
-          setFloatingWords(prev => [...prev.slice(-6), {
-            id: wordIdRef.current++, text: lastWord, x: 50 + (Math.random() - 0.5) * 40, y: 55, opacity: 1, scale: 1,
-          }]);
-        }
-      }
-      lastValueRef.current = currentValue;
+    if (currentValue) {
+      setIsTyping(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 500);
     }
   }, [currentValue]);
 
-  // Animar partículas
+  // Resetar estado ao mudar de pergunta
   useEffect(() => {
-    if (floatingWords.length === 0) return;
-    const interval = setInterval(() => {
-      setFloatingWords(prev => prev.map(w => ({ ...w, y: w.y - 1.2, opacity: w.opacity - 0.012, scale: w.scale * 0.997 })).filter(w => w.opacity > 0));
-    }, 50);
-    return () => clearInterval(interval);
-  }, [floatingWords.length]);
-
-  // Resetar
-  useEffect(() => {
-    lastValueRef.current = '';
-    setFloatingWords([]);
     setIsTyping(false);
   }, [currentSection, currentQuestion]);
 
@@ -428,7 +402,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   return (
     <div
       className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden relative"
-      style={{ cursor: 'url("data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 32 32\'><text y=\'24\' font-size=\'24\' fill=\'%23D4AF37\'>♪</text></svg>") 16 16, auto' }}
     >
       {/* Animated Gradient Mesh Background */}
       <GradientMesh color={oracleColor} />
@@ -440,14 +413,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         <ParallaxLayer depth={0.8} color="#C0C0C0" mouseX={mousePos.x} mouseY={mousePos.y} />
       </div>
 
-      {/* Floating Words */}
-      <div className="fixed inset-0 pointer-events-none z-20 overflow-hidden">
-        {floatingWords.map(word => (
-          <div key={word.id} className="absolute text-sm font-medium" style={{ left: `${word.x}%`, top: `${word.y}%`, opacity: word.opacity, transform: `scale(${word.scale})`, color: oracleColor }}>
-            {word.text}
-          </div>
-        ))}
-      </div>
 
       {/* Error */}
       {error && <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm z-50 animate-fade-in">{error}</div>}
@@ -487,10 +452,34 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                 const sectionEnd = sectionStart + section.questionCount;
                 const isCompleted = completedQuestions >= sectionEnd;
                 const isCurrent = currentSection === idx;
+                const hasComments = sectionsWithComments.includes(idx);
+                const isSkipped = skippedSections.includes(idx);
+
+                // Determinar cor do dot
+                let dotClass = 'bg-slate-200 scale-75';
+                if (isSkipped && isCompleted) {
+                  dotClass = 'bg-red-400'; // Pulada (vermelho)
+                } else if (isCompleted) {
+                  dotClass = 'bg-slate-900';
+                } else if (isCurrent) {
+                  dotClass = 'bg-amber-500 scale-125 ring-4 ring-amber-100';
+                }
+
                 return (
-                  <div key={idx} className={`flex flex-col items-center transition-all duration-300 ${sections.length > 6 ? 'w-4' : 'w-8'}`} title={section.title}>
-                    <div className={`w-3 h-3 rounded-full transition-all duration-500 ${isCompleted ? 'bg-slate-900' : isCurrent ? 'bg-amber-500 scale-125 ring-4 ring-amber-100' : 'bg-slate-200 scale-75'}`} />
-                    {sections.length <= 6 && <span className={`text-[9px] mt-1 text-center leading-tight ${isCurrent ? 'text-amber-600 font-medium' : 'text-slate-400'}`}>{section.title.slice(0, 10)}</span>}
+                  <div key={idx} className={`flex flex-col items-center transition-all duration-300 relative ${sections.length > 6 ? 'w-4' : 'w-8'}`} title={section.title}>
+                    <div className={`w-3 h-3 rounded-full transition-all duration-500 ${dotClass}`} />
+                    {/* Indicador de comentário */}
+                    {hasComments && (
+                      <div className="absolute -top-1 -right-0.5 w-2 h-2 bg-amber-400 rounded-full border border-white" title="Tem comentários" />
+                    )}
+                    {sections.length <= 6 && (
+                      <span className={`text-[9px] mt-1 text-center leading-tight ${
+                        isSkipped && isCompleted ? 'text-red-500 font-medium' :
+                        isCurrent ? 'text-amber-600 font-medium' : 'text-slate-400'
+                      }`}>
+                        {section.title.slice(0, 10)}
+                      </span>
+                    )}
                   </div>
                 );
               })}
@@ -509,11 +498,11 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center px-4 py-2 min-h-0 overflow-hidden relative z-10">
+      <main className="flex-1 flex flex-col items-center px-4 py-2 min-h-0 overflow-y-auto relative z-10">
         {/* Sphere Container with breathing */}
         <div
           className={`relative flex-shrink-0 mb-2 transition-all duration-300 ${isOverSphere ? 'scale-110' : ''}`}
-          style={{ width: 200, height: 200 }}
+          style={{ width: 240, height: 240 }}
           onDragOver={handleSphereDragOver}
           onDragLeave={handleSphereDragLeave}
           onDrop={handleSphereDrop}
@@ -523,7 +512,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           <div className="absolute inset-0 rounded-full blur-3xl transition-all duration-1000" style={{ backgroundColor: `${oracleColor}15`, transform: `scale(${1.2 + oracleIntensity * 0.2})` }} />
           {/* Sphere with breathing + scale */}
           <div className="absolute inset-0 flex items-center justify-center transition-transform duration-700" style={{ transform: `scale(${oracleScale * breatheScale})` }}>
-            <FloatingOracle size={180} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
+            <FloatingOracle size={200} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
           </div>
         </div>
 
@@ -543,7 +532,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             </h2>
           </div>
 
-          <div className="mb-3">
+          <div className="mb-4">
             {React.Children.map(children, child => {
               if (React.isValidElement(child)) {
                 return React.cloneElement(child as React.ReactElement<any>, { onDragStart: handleDragStart, onDragEnd: handleDragEnd, draggable: true });
@@ -552,8 +541,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             })}
           </div>
 
-          {/* Navigation */}
-          <div className="flex justify-between items-center">
+          {/* Navigation - sticky at bottom */}
+          <div className="flex justify-between items-center sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent pt-4 pb-2">
             <button onClick={onBack} className="px-5 py-2 rounded-xl text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors text-sm">Anterior</button>
             <span className="text-xs text-slate-400">Enter para continuar</span>
             <button

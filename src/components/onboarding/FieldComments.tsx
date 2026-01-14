@@ -85,7 +85,7 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
 
       if (response.ok) {
         setNewComment('');
-        fetchComments();
+        setIsOpen(false); // Fechar ao salvar
       }
     } catch (error) {
       console.error('Error creating comment:', error);

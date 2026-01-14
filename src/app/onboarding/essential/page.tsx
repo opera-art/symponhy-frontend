@@ -707,6 +707,18 @@ export default function EssentialBriefingPage() {
   const currentValue = formData[question.id as keyof FormData];
   const currentValueString = Array.isArray(currentValue) ? currentValue.join(' ') : (currentValue || '');
 
+  // Calcular seções com perguntas puladas (seções anteriores com campos vazios)
+  const skippedSections = sections.slice(0, currentSection).reduce<number[]>((acc, sec, idx) => {
+    const hasEmptyField = sec.questions.some(q => {
+      const value = formData[q.id as keyof FormData];
+      if (!value) return true;
+      if (Array.isArray(value)) return value.length === 0;
+      return String(value).trim().length === 0;
+    });
+    if (hasEmptyField) acc.push(idx);
+    return acc;
+  }, []);
+
   return (
     <>
       <OnboardingLayout
@@ -727,6 +739,7 @@ export default function EssentialBriefingPage() {
         onStopRecording={stopListening}
         sections={layoutSections}
         currentValue={currentValueString}
+        skippedSections={skippedSections}
       >
         {/* Input com botão de comentários */}
         <div className="relative">
@@ -748,11 +761,11 @@ export default function EssentialBriefingPage() {
       {/* Botão flutuante para preview */}
       <button
         onClick={() => setShowPreview(true)}
-        className="fixed bottom-6 right-6 flex items-center gap-2 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all z-40"
+        className="fixed bottom-4 right-4 flex items-center gap-1.5 px-3 py-2 bg-amber-500/90 hover:bg-amber-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all z-40 text-xs"
         title="Ver preview do briefing"
       >
-        <Eye className="w-5 h-5" />
-        <span className="text-sm font-medium">Preview</span>
+        <Eye className="w-3.5 h-3.5" />
+        Preview
       </button>
 
       {/* Modal de preview */}
