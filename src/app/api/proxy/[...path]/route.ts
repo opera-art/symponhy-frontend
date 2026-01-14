@@ -49,7 +49,7 @@ async function handleRequest(
 
     if (!userId) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Você precisa estar logado para acessar esta funcionalidade' },
         { status: 401 }
       )
     }
@@ -60,6 +60,18 @@ async function handleRequest(
     // Construir URL do backend
     const { path } = await paramsPromise
     const backendPath = path.join('/')
+
+    // Rotas que requerem organização
+    const routesRequiringOrg = ['calendar', 'posts', 'briefings']
+    const firstSegment = path[0]
+
+    if (routesRequiringOrg.includes(firstSegment) && !orgId) {
+      return NextResponse.json(
+        { error: 'Você precisa selecionar uma organização para acessar esta funcionalidade. Clique no seletor de organização no topo da página.' },
+        { status: 403 }
+      )
+    }
+
     const url = new URL(`/api/${backendPath}`, BACKEND_URL)
 
     // Copiar query params

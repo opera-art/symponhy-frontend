@@ -22,22 +22,21 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor de RESPONSE - Trata erros 401 (não autenticado)
+// Interceptor de RESPONSE - Trata erros
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
-
-    // Se erro 401 e não foi uma tentativa de retry
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      // Redirecionar para sign-in do Clerk
-      if (typeof window !== 'undefined') {
-        window.location.href = '/sign-in';
-      }
+    // Log de erro para debug (apenas em desenvolvimento)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Error:', {
+        status: error.response?.status,
+        url: error.config?.url,
+        data: error.response?.data,
+      });
     }
 
+    // Não redireciona automaticamente - deixa o componente tratar o erro
+    // Isso evita que erros de API causem redirecionamentos inesperados
     return Promise.reject(error);
   }
 );
