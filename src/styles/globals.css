@@ -28,6 +28,15 @@
     @apply bg-slate-300 rounded-full;
   }
 
+  /* Esconder scrollbar mas manter funcionalidade */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-slate-400;
   }

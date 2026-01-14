@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MoreHorizontal, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MoreHorizontal, FileText, Plus } from 'lucide-react';
 import { CalendarPost } from '@/data/calendarData';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
@@ -33,13 +33,62 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
   const [view, setView] = useState<CalendarView>('week');
   const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
+  const [hoveredMonthDay, setHoveredMonthDay] = useState<number | null>(null);
 
   // Use Intl-based month and weekday names (auto-localized)
   const monthNames = monthNamesList.long;
   const weekDays = weekDayNames.short;
+  const weekDaysLong = weekDayNames.long;
 
   // Full day time slots (6am to midnight)
   const timeSlots = ['6h', '7h', '8h', '9h', '10h', '11h', '12h', '13h', '14h', '15h', '16h', '17h', '18h', '19h', '20h', '21h', '22h', '23h'];
+
+  // Get all days for month view calendar grid
+  const getMonthDays = useMemo(() => {
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const daysInMonth = lastDayOfMonth.getDate();
+    const startingDayOfWeek = firstDayOfMonth.getDay();
+
+    // Get days from previous month to fill the first week
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    const prevMonthDays = Array.from({ length: startingDayOfWeek }, (_, i) => ({
+      day: prevMonthLastDay - startingDayOfWeek + i + 1,
+      isCurrentMonth: false,
+      isPrevMonth: true,
+      isNextMonth: false,
+    }));
+
+    // Current month days
+    const currentMonthDays = Array.from({ length: daysInMonth }, (_, i) => ({
+      day: i + 1,
+      isCurrentMonth: true,
+      isPrevMonth: false,
+      isNextMonth: false,
+    }));
+
+    // Get days from next month to fill the last week
+    const totalDays = prevMonthDays.length + currentMonthDays.length;
+    const remainingDays = totalDays % 7 === 0 ? 0 : 7 - (totalDays % 7);
+    const nextMonthDays = Array.from({ length: remainingDays }, (_, i) => ({
+      day: i + 1,
+      isCurrentMonth: false,
+      isPrevMonth: false,
+      isNextMonth: true,
+    }));
+
+    return [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
+  }, [year, month]);
+
+  // Get the selected day data for day view
+  const getSelectedDayData = () => {
+    const date = new Date(year, month, selectedDay);
+    return {
+      day: selectedDay,
+      weekDay: weekDaysLong[date.getDay()],
+      isToday: date.toDateString() === new Date().toDateString(),
+    };
+  };
 
   const previousMonth = () => {
     if (month === 0) {
@@ -246,147 +295,437 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
         </div>
       </header>
 
-      {/* Days Header */}
-      <div className="grid grid-cols-[50px_1fr] gap-3 mb-3">
-        <div className="flex items-center justify-center">
-          <button className="text-slate-400 hover:text-slate-600">
-            <CalendarIcon className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="grid grid-cols-7 gap-2">
-          {weekDaysData.map((dayData, idx) => (
-            <div
-              key={idx}
-              className={cn(
-                'flex flex-col items-center justify-center py-2 rounded-xl transition-all cursor-pointer hover:ring-2 hover:ring-amber-300 hover:ring-offset-1',
-                dayData.isToday
-                  ? 'bg-slate-900 text-white shadow-md hover:bg-slate-800'
-                  : 'bg-slate-50 text-slate-800 hover:bg-amber-50'
-              )}
-              onClick={() => handleDayHeaderClick(dayData)}
-            >
-              <span className={cn(
-                'text-[10px] font-medium mb-0.5',
-                dayData.isToday ? 'text-slate-400' : 'text-slate-500'
-              )}>
-                {dayData.weekDay}
-              </span>
-              <span className="text-lg font-semibold tracking-tight">
-                {dayData.day}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Calendar Grid Area */}
-      <div className="flex-1 overflow-y-auto relative">
-        <div className="grid grid-cols-[50px_1fr] gap-3">
-          {/* Time Column */}
-          <div className="flex flex-col text-xs text-slate-400 font-medium">
-            {timeSlots.map((time, idx) => (
-              <div key={idx} className="h-[60px] flex items-start">
-                {time}
+      {/* ===== MONTH VIEW ===== */}
+      {view === 'month' && (
+        <>
+          {/* Week Days Header */}
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {weekDays.map((day, idx) => (
+              <div
+                key={idx}
+                className="text-center text-xs font-medium text-slate-500 py-2"
+              >
+                {day}
               </div>
             ))}
           </div>
 
-          {/* Events Grid */}
-          <div className="relative grid grid-cols-7 gap-2">
-            {/* Horizontal Lines */}
-            <div className="absolute inset-0 flex flex-col w-full pointer-events-none">
-              {timeSlots.map((_, idx) => (
-                <div key={idx} className="h-[60px] border-b border-slate-100 w-full" />
+          {/* Month Grid */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid grid-cols-7 gap-1">
+              {getMonthDays.map((dayData, idx) => {
+                const isToday =
+                  dayData.isCurrentMonth &&
+                  dayData.day === new Date().getDate() &&
+                  month === new Date().getMonth() &&
+                  year === new Date().getFullYear();
+
+                const dayPosts = dayData.isCurrentMonth
+                  ? getPostsForDate(dayData.day)
+                  : [];
+
+                const isHovered = hoveredMonthDay === idx;
+
+                return (
+                  <div
+                    key={idx}
+                    className={cn(
+                      'min-h-[100px] p-2 rounded-xl border transition-all duration-200 cursor-pointer relative group',
+                      dayData.isCurrentMonth
+                        ? 'bg-white border-slate-100 hover:border-amber-300 hover:shadow-sm'
+                        : 'bg-slate-50/50 border-transparent',
+                      isToday && 'ring-2 ring-amber-400 ring-offset-1'
+                    )}
+                    onMouseEnter={() => setHoveredMonthDay(idx)}
+                    onMouseLeave={() => setHoveredMonthDay(null)}
+                    onClick={() => {
+                      if (dayData.isCurrentMonth) {
+                        setSelectedDay(dayData.day);
+                        setView('day');
+                      }
+                    }}
+                  >
+                    {/* Day Number */}
+                    <div
+                      className={cn(
+                        'text-sm font-semibold mb-1',
+                        dayData.isCurrentMonth
+                          ? isToday
+                            ? 'text-amber-600'
+                            : 'text-slate-800'
+                          : 'text-slate-300'
+                      )}
+                    >
+                      {dayData.day}
+                    </div>
+
+                    {/* Events for this day */}
+                    <div className="space-y-1">
+                      {dayPosts.slice(0, 3).map((post, postIdx) => (
+                        <div
+                          key={post.id}
+                          className={cn(
+                            'text-[10px] px-1.5 py-0.5 rounded truncate',
+                            getPostColor(postIdx)
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPost(post);
+                          }}
+                        >
+                          {post.scheduledTime} {post.title}
+                        </div>
+                      ))}
+                      {dayPosts.length > 3 && (
+                        <div className="text-[10px] text-slate-500 px-1.5">
+                          +{dayPosts.length - 3} mais
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Add button on hover */}
+                    {dayData.isCurrentMonth && isHovered && (
+                      <button
+                        className="absolute top-1 right-1 w-6 h-6 bg-amber-100 hover:bg-amber-200 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSlotClick(dayData.day, '9h');
+                        }}
+                      >
+                        <Plus className="w-3.5 h-3.5 text-amber-700" />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ===== WEEK VIEW ===== */}
+      {view === 'week' && (
+        <>
+          {/* Days Header */}
+          <div className="grid grid-cols-[50px_1fr] gap-3 mb-3">
+            <div className="flex items-center justify-center">
+              <button className="text-slate-400 hover:text-slate-600">
+                <CalendarIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-7 gap-2">
+              {weekDaysData.map((dayData, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    'flex flex-col items-center justify-center py-2 rounded-xl transition-all cursor-pointer hover:ring-2 hover:ring-amber-300 hover:ring-offset-1',
+                    dayData.isToday
+                      ? 'bg-slate-900 text-white shadow-md hover:bg-slate-800'
+                      : 'bg-slate-50 text-slate-800 hover:bg-amber-50'
+                  )}
+                  onClick={() => handleDayHeaderClick(dayData)}
+                >
+                  <span className={cn(
+                    'text-[10px] font-medium mb-0.5',
+                    dayData.isToday ? 'text-slate-400' : 'text-slate-500'
+                  )}>
+                    {dayData.weekDay}
+                  </span>
+                  <span className="text-lg font-semibold tracking-tight">
+                    {dayData.day}
+                  </span>
+                </div>
               ))}
             </div>
-
-            {/* Columns for each day */}
-            {weekDaysData.map((dayData, dayIdx) => {
-              const dayPosts = getPostsForDate(dayData.day);
-
-              return (
-                <div key={dayIdx} className="relative h-full">
-                  {/* Clickable time slots */}
-                  {timeSlots.map((time, timeIdx) => {
-                    const slotKey = getSlotKey(dayIdx, timeIdx);
-                    const isHovered = hoveredSlot === slotKey;
-                    const timeHour = parseInt(time.replace('h', ''));
-
-                    // Check if there's a post in this time slot
-                    const hasPostInSlot = dayPosts.some(post => {
-                      const postHour = parseInt(post.scheduledTime.split(':')[0]);
-                      return postHour === timeHour;
-                    });
-
-                    if (hasPostInSlot) return null;
-
-                    return (
-                      <div
-                        key={slotKey}
-                        className={cn(
-                          'absolute left-0 right-0 h-[60px] rounded-xl cursor-pointer transition-all duration-200',
-                          isHovered
-                            ? 'bg-amber-50/80 border-2 border-dashed border-amber-300'
-                            : 'hover:bg-slate-50/50'
-                        )}
-                        style={{ top: `${timeIdx * 60}px` }}
-                        onMouseEnter={() => setHoveredSlot(slotKey)}
-                        onMouseLeave={() => setHoveredSlot(null)}
-                        onClick={() => handleSlotClick(dayData.day, time)}
-                      >
-                        {isHovered && (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-xs font-medium text-amber-600">
-                              {time} - Criar conteúdo
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {/* Posts */}
-                  {dayPosts.map((post, postIdx) => {
-                    const topPosition = getTimePosition(post.scheduledTime);
-                    const height = 56; // Slightly less than 60px slot height
-
-                    return (
-                      <div
-                        key={post.id}
-                        className={cn(
-                          'absolute left-0 right-0 rounded-xl p-2 flex flex-col justify-between group hover:shadow-md transition-all cursor-pointer z-10',
-                          getPostColor(postIdx)
-                        )}
-                        style={{
-                          top: `${topPosition}px`,
-                          height: `${height}px`,
-                        }}
-                        onClick={() => setSelectedPost(post)}
-                      >
-                        <div>
-                          <div className="text-xs font-semibold text-slate-800 line-clamp-1">
-                            {post.title}
-                          </div>
-                          <div className="text-[10px] text-slate-600 mt-0.5">
-                            {post.scheduledTime}
-                          </div>
-                        </div>
-
-                        {post.type && (
-                          <div className="flex gap-1">
-                            <Badge variant="default" size="sm" className="text-[9px] px-1.5 py-0.5 bg-white/60">
-                              {post.type}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
           </div>
-        </div>
+
+          {/* Calendar Grid Area */}
+          <div className="flex-1 overflow-y-auto relative">
+            <div className="grid grid-cols-[50px_1fr] gap-3">
+              {/* Time Column */}
+              <div className="flex flex-col text-xs text-slate-400 font-medium">
+                {timeSlots.map((time, idx) => (
+                  <div key={idx} className="h-[60px] flex items-start">
+                    {time}
+                  </div>
+                ))}
+              </div>
+
+              {/* Events Grid */}
+              <div className="relative grid grid-cols-7 gap-2">
+                {/* Horizontal Lines */}
+                <div className="absolute inset-0 flex flex-col w-full pointer-events-none">
+                  {timeSlots.map((_, idx) => (
+                    <div key={idx} className="h-[60px] border-b border-slate-100 w-full" />
+                  ))}
+                </div>
+
+                {/* Columns for each day */}
+                {weekDaysData.map((dayData, dayIdx) => {
+                  const dayPosts = getPostsForDate(dayData.day);
+
+                  return (
+                    <div key={dayIdx} className="relative h-full">
+                      {/* Clickable time slots */}
+                      {timeSlots.map((time, timeIdx) => {
+                        const slotKey = getSlotKey(dayIdx, timeIdx);
+                        const isHovered = hoveredSlot === slotKey;
+                        const timeHour = parseInt(time.replace('h', ''));
+
+                        // Check if there's a post in this time slot
+                        const hasPostInSlot = dayPosts.some(post => {
+                          const postHour = parseInt(post.scheduledTime.split(':')[0]);
+                          return postHour === timeHour;
+                        });
+
+                        if (hasPostInSlot) return null;
+
+                        return (
+                          <div
+                            key={slotKey}
+                            className={cn(
+                              'absolute left-0 right-0 h-[60px] rounded-xl cursor-pointer transition-all duration-200',
+                              isHovered
+                                ? 'bg-amber-50/80 border-2 border-dashed border-amber-300'
+                                : 'hover:bg-slate-50/50'
+                            )}
+                            style={{ top: `${timeIdx * 60}px` }}
+                            onMouseEnter={() => setHoveredSlot(slotKey)}
+                            onMouseLeave={() => setHoveredSlot(null)}
+                            onClick={() => handleSlotClick(dayData.day, time)}
+                          >
+                            {isHovered && (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-xs font-medium text-amber-600">
+                                  {time} - Criar conteúdo
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* Posts */}
+                      {dayPosts.map((post, postIdx) => {
+                        const topPosition = getTimePosition(post.scheduledTime);
+                        const height = 56; // Slightly less than 60px slot height
+
+                        return (
+                          <div
+                            key={post.id}
+                            className={cn(
+                              'absolute left-0 right-0 rounded-xl p-2 flex flex-col justify-between group hover:shadow-md transition-all cursor-pointer z-10',
+                              getPostColor(postIdx)
+                            )}
+                            style={{
+                              top: `${topPosition}px`,
+                              height: `${height}px`,
+                            }}
+                            onClick={() => setSelectedPost(post)}
+                          >
+                            <div>
+                              <div className="text-xs font-semibold text-slate-800 line-clamp-1">
+                                {post.title}
+                              </div>
+                              <div className="text-[10px] text-slate-600 mt-0.5">
+                                {post.scheduledTime}
+                              </div>
+                            </div>
+
+                            {post.type && (
+                              <div className="flex gap-1">
+                                <Badge variant="default" size="sm" className="text-[9px] px-1.5 py-0.5 bg-white/60">
+                                  {post.type}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ===== DAY VIEW ===== */}
+      {view === 'day' && (
+        <>
+          {/* Day Header */}
+          <div className="grid grid-cols-[80px_1fr] gap-3 mb-3">
+            <div className="flex items-center justify-center">
+              <button className="text-slate-400 hover:text-slate-600">
+                <CalendarIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div>
+              {(() => {
+                const dayData = getSelectedDayData();
+                return (
+                  <div
+                    className={cn(
+                      'flex items-center gap-4 py-3 px-4 rounded-xl transition-all cursor-pointer hover:ring-2 hover:ring-amber-300 hover:ring-offset-1',
+                      dayData.isToday
+                        ? 'bg-slate-900 text-white shadow-md hover:bg-slate-800'
+                        : 'bg-slate-50 text-slate-800 hover:bg-amber-50'
+                    )}
+                    onClick={() => handleDayHeaderClick({ ...dayData, isCurrentMonth: true })}
+                  >
+                    <span className="text-3xl font-bold tracking-tight">
+                      {dayData.day}
+                    </span>
+                    <div className="flex flex-col">
+                      <span className={cn(
+                        'text-sm font-medium',
+                        dayData.isToday ? 'text-slate-300' : 'text-slate-500'
+                      )}>
+                        {dayData.weekDay}
+                      </span>
+                      <span className={cn(
+                        'text-xs',
+                        dayData.isToday ? 'text-slate-400' : 'text-slate-400'
+                      )}>
+                        {monthNames[month]} {year}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* Day Grid Area */}
+          <div className="flex-1 overflow-y-auto relative">
+            <div className="grid grid-cols-[80px_1fr] gap-3">
+              {/* Time Column */}
+              <div className="flex flex-col text-sm text-slate-400 font-medium">
+                {timeSlots.map((time, idx) => (
+                  <div key={idx} className="h-[80px] flex items-start pt-1">
+                    {time}
+                  </div>
+                ))}
+              </div>
+
+              {/* Events Area */}
+              <div className="relative">
+                {/* Horizontal Lines */}
+                <div className="absolute inset-0 flex flex-col w-full pointer-events-none">
+                  {timeSlots.map((_, idx) => (
+                    <div key={idx} className="h-[80px] border-b border-slate-100 w-full" />
+                  ))}
+                </div>
+
+                {/* Clickable time slots */}
+                {(() => {
+                  const dayPosts = getPostsForDate(selectedDay);
+
+                  return (
+                    <>
+                      {timeSlots.map((time, timeIdx) => {
+                        const slotKey = `day-${timeIdx}`;
+                        const isHovered = hoveredSlot === slotKey;
+                        const timeHour = parseInt(time.replace('h', ''));
+
+                        // Check if there's a post in this time slot
+                        const hasPostInSlot = dayPosts.some(post => {
+                          const postHour = parseInt(post.scheduledTime.split(':')[0]);
+                          return postHour === timeHour;
+                        });
+
+                        if (hasPostInSlot) return null;
+
+                        return (
+                          <div
+                            key={slotKey}
+                            className={cn(
+                              'absolute left-0 right-0 h-[80px] rounded-xl cursor-pointer transition-all duration-200',
+                              isHovered
+                                ? 'bg-amber-50/80 border-2 border-dashed border-amber-300'
+                                : 'hover:bg-slate-50/50'
+                            )}
+                            style={{ top: `${timeIdx * 80}px` }}
+                            onMouseEnter={() => setHoveredSlot(slotKey)}
+                            onMouseLeave={() => setHoveredSlot(null)}
+                            onClick={() => handleSlotClick(selectedDay, time)}
+                          >
+                            {isHovered && (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-sm font-medium text-amber-600">
+                                  {time} - {t('createContent') || 'Criar conteúdo'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* Posts */}
+                      {dayPosts.map((post, postIdx) => {
+                        const [hours] = post.scheduledTime.split(':').map(Number);
+                        const startHour = 6;
+                        const topPosition = hours < startHour ? 0 : (hours - startHour) * 80;
+                        const height = 76; // Slightly less than 80px slot height
+
+                        return (
+                          <div
+                            key={post.id}
+                            className={cn(
+                              'absolute left-0 right-0 rounded-xl p-3 flex flex-col justify-between group hover:shadow-md transition-all cursor-pointer z-10',
+                              getPostColor(postIdx)
+                            )}
+                            style={{
+                              top: `${topPosition}px`,
+                              height: `${height}px`,
+                            }}
+                            onClick={() => setSelectedPost(post)}
+                          >
+                            <div>
+                              <div className="text-sm font-semibold text-slate-800 line-clamp-1">
+                                {post.title}
+                              </div>
+                              <div className="text-xs text-slate-600 mt-0.5">
+                                {post.scheduledTime}
+                              </div>
+                            </div>
+
+                            <div className="flex gap-1.5">
+                              {post.type && (
+                                <Badge variant="default" size="sm" className="text-[10px] px-2 py-0.5 bg-white/60">
+                                  {post.type}
+                                </Badge>
+                              )}
+                              {post.status && (
+                                <Badge
+                                  variant="default"
+                                  size="sm"
+                                  className={cn(
+                                    'text-[10px] px-2 py-0.5',
+                                    post.status === 'approved' && 'bg-green-100 text-green-700',
+                                    post.status === 'pending' && 'bg-amber-100 text-amber-700',
+                                    post.status === 'draft' && 'bg-slate-100 text-slate-600'
+                                  )}
+                                >
+                                  {t(post.status) || post.status}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Calendar Grid Area - Shared floating elements */}
+      <div className="relative">
 
         {/* Floating Modal - Event Detail */}
         {selectedPost && (

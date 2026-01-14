@@ -501,11 +501,11 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center px-4 py-2 min-h-0 relative z-10">
-        {/* Sphere Container */}
+      <main className="flex-1 flex flex-col items-center px-4 py-2 min-h-0 relative z-10 overflow-hidden">
+        {/* Sphere Container - Maior */}
         <div
-          className={`relative flex-shrink-0 mb-3 transition-all duration-300 ${isOverSphere ? 'scale-105' : ''}`}
-          style={{ width: 260, height: 260 }}
+          className={`relative flex-shrink-0 mb-2 transition-all duration-300 ${isOverSphere ? 'scale-105' : ''}`}
+          style={{ width: 300, height: 300 }}
           onDragOver={handleSphereDragOver}
           onDragLeave={handleSphereDragLeave}
           onDrop={handleSphereDrop}
@@ -514,12 +514,12 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           <div className="absolute inset-0 rounded-full blur-3xl transition-all duration-1000" style={{ backgroundColor: `${oracleColor}15`, transform: `scale(${1.2 + oracleIntensity * 0.2})` }} />
           {/* Sphere with breathing + scale */}
           <div className="absolute inset-0 flex items-center justify-center transition-transform duration-700" style={{ transform: `scale(${oracleScale * breatheScale})` }}>
-            <FloatingOracle size={240} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
+            <FloatingOracle size={280} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
           </div>
         </div>
 
         {/* Question with 3D Transition */}
-        <div className="w-full max-w-2xl flex-1 flex flex-col min-h-0" style={{ perspective: '1000px' }}>
+        <div className="w-full max-w-2xl flex-1 flex flex-col min-h-0 overflow-hidden" style={{ perspective: '1000px' }}>
           <div
             className="transition-all duration-300 ease-out flex-shrink-0"
             style={{ transform: getQuestionTransform(), transformStyle: 'preserve-3d', opacity: questionTransition === 'exit' ? 0 : 1 }}
@@ -529,12 +529,13 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             </h2>
           </div>
 
-          <div className="flex-1 min-h-0">
+          {/* Área de conteúdo com scroll */}
+          <div className="flex-1 min-h-0 overflow-y-auto pb-16 scrollbar-hide">
             {children}
           </div>
 
-          {/* Navigation - fixed at bottom */}
-          <div className="flex justify-between items-center pt-3 pb-1 flex-shrink-0 bg-gradient-to-t from-white to-transparent">
+          {/* Navigation - fixo no fundo */}
+          <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-4 py-3 bg-gradient-to-t from-white via-white to-transparent">
             <button onClick={onBack} className="px-4 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors text-sm">Anterior</button>
             <span className="text-[10px] text-slate-400">Enter ↵</span>
             <button
