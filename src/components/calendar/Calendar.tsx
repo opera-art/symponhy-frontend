@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Plus, MoreHorizontal, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MoreHorizontal, FileText } from 'lucide-react';
 import { CalendarPost } from '@/data/calendarData';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
@@ -18,12 +18,19 @@ interface CalendarProps {
 
 type CalendarView = 'month' | 'week' | 'day';
 
+interface SelectedSlot {
+  day: number;
+  time: string;
+  date: string;
+}
+
 const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }) => {
   const { t } = useLanguage();
   const { setIsAddingContent, setCallbacks } = useChatContent();
   const [selectedPost, setSelectedPost] = useState<CalendarPost | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
   const [view, setView] = useState<CalendarView>('week');
+  const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
 
   const monthNames = useMemo(() => [
     t('january'), t('february'), t('march'), t('april'), t('may'), t('june'),
@@ -58,18 +65,24 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
     setSelectedDay(today.getDate());
   };
 
-  const handleAddButtonClick = () => {
+  const handleSlotClick = (day: number, timeSlot: string) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const timeHour = parseInt(timeSlot.replace('h', ''));
+    const formattedTime = `${String(timeHour).padStart(2, '0')}:00`;
+
     const handleManualUpload = () => {
-      console.log('Manual upload selected');
+      console.log(`Manual upload for ${dateStr} at ${formattedTime}`);
     };
 
     const handleCreateWithAgents = () => {
-      console.log('Create with agents selected');
+      console.log(`Create with agents for ${dateStr} at ${formattedTime}`);
     };
 
     setCallbacks(handleManualUpload, handleCreateWithAgents);
     setIsAddingContent(true);
   };
+
+  const getSlotKey = (dayIdx: number, timeIdx: number) => `${dayIdx}-${timeIdx}`;
 
   const getWeekDays = () => {
     const startOfWeek = selectedDay - new Date(year, month, selectedDay).getDay();
@@ -240,17 +253,46 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
 
               return (
                 <div key={dayIdx} className="relative h-full">
-                  {dayPosts.length === 0 && dayIdx === 2 && (
-                    <button
-                      onClick={handleAddButtonClick}
-                      className="absolute top-0 left-0 right-0 h-[60px] border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center hover:bg-slate-50 cursor-pointer transition-colors group w-full"
-                    >
-                      <div className="w-6 h-6 rounded-full border border-slate-300 flex items-center justify-center text-slate-400 group-hover:border-slate-400 group-hover:text-slate-600">
-                        <Plus className="w-3.5 h-3.5" />
-                      </div>
-                    </button>
-                  )}
+                  {/* Clickable time slots */}
+                  {timeSlots.map((time, timeIdx) => {
+                    const slotKey = getSlotKey(dayIdx, timeIdx);
+                    const isHovered = hoveredSlot === slotKey;
+                    const timeHour = parseInt(time.replace('h', ''));
 
+                    // Check if there's a post in this time slot
+                    const hasPostInSlot = dayPosts.some(post => {
+                      const postHour = parseInt(post.scheduledTime.split(':')[0]);
+                      return postHour >= timeHour && postHour < timeHour + 2;
+                    });
+
+                    if (hasPostInSlot) return null;
+
+                    return (
+                      <div
+                        key={slotKey}
+                        className={cn(
+                          'absolute left-0 right-0 h-[60px] rounded-xl cursor-pointer transition-all duration-200',
+                          isHovered
+                            ? 'bg-amber-50/80 border-2 border-dashed border-amber-300'
+                            : 'hover:bg-slate-50/50'
+                        )}
+                        style={{ top: `${timeIdx * 60}px` }}
+                        onMouseEnter={() => setHoveredSlot(slotKey)}
+                        onMouseLeave={() => setHoveredSlot(null)}
+                        onClick={() => handleSlotClick(dayData.day, time)}
+                      >
+                        {isHovered && (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-xs font-medium text-amber-600">
+                              {time} - Criar conteúdo
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Posts */}
                   {dayPosts.map((post, postIdx) => {
                     const topPosition = getTimePosition(post.scheduledTime);
                     const height = 80;
@@ -259,7 +301,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
                       <div
                         key={post.id}
                         className={cn(
-                          'absolute left-0 right-0 rounded-xl p-2 flex flex-col justify-between group hover:shadow-md transition-all cursor-pointer',
+                          'absolute left-0 right-0 rounded-xl p-2 flex flex-col justify-between group hover:shadow-md transition-all cursor-pointer z-10',
                           getPostColor(postIdx)
                         )}
                         style={{
