@@ -26,7 +26,7 @@ interface SelectedSlot {
 
 const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }) => {
   const { t } = useLanguage();
-  const { setIsAddingContent, setCallbacks } = useChatContent();
+  const { setIsAddingContent, setCallbacks, setIsPlanningDay, setPlanningDate } = useChatContent();
   const [selectedPost, setSelectedPost] = useState<CalendarPost | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
   const [view, setView] = useState<CalendarView>('week');
@@ -63,6 +63,24 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
     const today = new Date();
     onMonthChange(today.getFullYear(), today.getMonth());
     setSelectedDay(today.getDate());
+  };
+
+  const handleDayHeaderClick = (dayData: { day: number; weekDay: string; isCurrentMonth: boolean; isToday: boolean }) => {
+    const date = new Date(year, month, dayData.day);
+    const formattedDate = date.toLocaleDateString('pt-BR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    setPlanningDate({
+      day: dayData.day,
+      month: month,
+      year: year,
+      weekDay: dayData.weekDay,
+      formattedDate: formattedDate,
+    });
+    setIsPlanningDay(true);
   };
 
   const handleSlotClick = (day: number, timeSlot: string) => {
@@ -205,12 +223,12 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
             <div
               key={idx}
               className={cn(
-                'flex flex-col items-center justify-center py-2 rounded-xl transition-all cursor-pointer',
+                'flex flex-col items-center justify-center py-2 rounded-xl transition-all cursor-pointer hover:ring-2 hover:ring-amber-300 hover:ring-offset-1',
                 dayData.isToday
-                  ? 'bg-slate-900 text-white shadow-md'
-                  : 'bg-slate-50 text-slate-800 hover:bg-slate-100'
+                  ? 'bg-slate-900 text-white shadow-md hover:bg-slate-800'
+                  : 'bg-slate-50 text-slate-800 hover:bg-amber-50'
               )}
-              onClick={() => setSelectedDay(dayData.day)}
+              onClick={() => handleDayHeaderClick(dayData)}
             >
               <span className={cn(
                 'text-[10px] font-medium mb-0.5',

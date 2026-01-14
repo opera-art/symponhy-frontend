@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Upload, Wand2, ArrowRight } from 'lucide-react';
+import { X, Send, Upload, Wand2, ArrowRight, Calendar, Sparkles } from 'lucide-react';
 import { FloatingOracle } from './FloatingOracle';
 import { useChatContent } from '@/context/ChatContentContext';
 
@@ -13,7 +13,16 @@ interface Message {
 }
 
 export const FloatingChat: React.FC = () => {
-  const { isAddingContent, setIsAddingContent, onManualUpload, onCreateWithAgents } = useChatContent();
+  const {
+    isAddingContent,
+    setIsAddingContent,
+    onManualUpload,
+    onCreateWithAgents,
+    isPlanningDay,
+    setIsPlanningDay,
+    planningDate,
+    setPlanningDate
+  } = useChatContent();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -26,8 +35,14 @@ export const FloatingChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showPlanningModal, setShowPlanningModal] = useState(false);
+  const [planningInput, setPlanningInput] = useState('');
+  const [planningMessages, setPlanningMessages] = useState<Message[]>([]);
+  const [isPlanningTyping, setIsPlanningTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const planningMessagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const planningInputRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -55,6 +70,39 @@ export const FloatingChat: React.FC = () => {
     }
   }, [isAddingContent]);
 
+  // Trigger planning modal after sphere animation completes
+  useEffect(() => {
+    if (isPlanningDay && planningDate) {
+      const timer = setTimeout(() => {
+        setShowPlanningModal(true);
+        // Initialize with welcome message for the day
+        setPlanningMessages([{
+          id: '1',
+          role: 'assistant',
+          content: `Olá! Vamos planejar o conteúdo para ${planningDate.weekDay}, ${planningDate.formattedDate}. O que você gostaria de criar para este dia?`,
+          timestamp: new Date(),
+        }]);
+      }, 700);
+      return () => clearTimeout(timer);
+    } else {
+      setShowPlanningModal(false);
+      setPlanningMessages([]);
+      setPlanningInput('');
+    }
+  }, [isPlanningDay, planningDate]);
+
+  // Scroll planning messages
+  useEffect(() => {
+    planningMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [planningMessages]);
+
+  // Focus planning input when modal shows
+  useEffect(() => {
+    if (showPlanningModal && planningInputRef.current) {
+      planningInputRef.current.focus();
+    }
+  }, [showPlanningModal]);
+
   const handleManualUploadClick = () => {
     if (onManualUpload) {
       onManualUpload();
@@ -74,6 +122,66 @@ export const FloatingChat: React.FC = () => {
   const handleCloseContentModal = () => {
     setShowModal(false);
     setIsAddingContent(false);
+  };
+
+  const handleClosePlanningModal = () => {
+    setShowPlanningModal(false);
+    setIsPlanningDay(false);
+    setPlanningDate(null);
+  };
+
+  const handlePlanningKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handlePlanningMessageSend();
+    }
+  };
+
+  const handlePlanningMessageSend = async () => {
+    if (!planningInput.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: planningInput.trim(),
+      timestamp: new Date(),
+    };
+
+    setPlanningMessages((prev) => [...prev, userMessage]);
+    setPlanningInput('');
+    setIsPlanningTyping(true);
+
+    // Simulated AI response for planning
+    setTimeout(() => {
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: getPlanningResponse(userMessage.content),
+        timestamp: new Date(),
+      };
+      setPlanningMessages((prev) => [...prev, assistantMessage]);
+      setIsPlanningTyping(false);
+    }, 1000 + Math.random() * 1000);
+  };
+
+  const getPlanningResponse = (userInput: string): string => {
+    const lower = userInput.toLowerCase();
+    const dateInfo = planningDate ? `${planningDate.weekDay}, ${planningDate.formattedDate}` : 'este dia';
+
+    if (lower.includes('instagram') || lower.includes('insta')) {
+      return `Ótima escolha! Para ${dateInfo}, posso sugerir um post de carrossel no Instagram. Qual seria o tema principal do conteúdo?`;
+    }
+    if (lower.includes('vídeo') || lower.includes('video') || lower.includes('reels')) {
+      return `Perfeito! Vídeos têm ótimo engajamento. Para ${dateInfo}, qual formato você prefere: Reels curto (15-30s) ou vídeo mais longo?`;
+    }
+    if (lower.includes('story') || lower.includes('stories')) {
+      return `Stories são ótimos para engajamento! Posso criar uma sequência de stories interativos para ${dateInfo}. Qual o objetivo: educar, vender ou entreter?`;
+    }
+    if (lower.includes('promoção') || lower.includes('promocao') || lower.includes('venda')) {
+      return `Entendi! Para uma campanha de vendas em ${dateInfo}, sugiro criar urgência. Quer fazer um post único ou uma sequência de conteúdos?`;
+    }
+
+    return `Entendi! Vou ajudar você a planejar o conteúdo para ${dateInfo}. Pode me contar mais sobre o tipo de post (imagem, vídeo, carrossel) e o objetivo (engajamento, vendas, branding)?`;
   };
 
   const handleSend = async () => {
@@ -210,7 +318,7 @@ export const FloatingChat: React.FC = () => {
       </button>
 
       {/* Animated Moving Sphere for Content Mode - Hide when modal shows */}
-      {isAddingContent && !showModal && (
+      {(isAddingContent || isPlanningDay) && !showModal && !showPlanningModal && (
         <div
           className="fixed z-[60] rounded-full pointer-events-none flex items-center justify-center animate-sphere-to-center"
           style={{
@@ -303,6 +411,138 @@ export const FloatingChat: React.FC = () => {
                 >
                   Cancelar
                 </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Planning Day Chat Modal - EchoAI Style */}
+      {isPlanningDay && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={handleClosePlanningModal}
+        >
+          {/* Backdrop */}
+          <div
+            className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${showPlanningModal ? 'opacity-100' : 'opacity-0'}`}
+          />
+
+          {/* Modal Container - EchoAI Chat Style */}
+          {showPlanningModal && (
+            <div
+              className="relative z-50 w-full max-w-2xl h-[600px] bg-white rounded-[28px] shadow-[0_2px_40px_-12px_rgba(0,0,0,0.15)] border border-gray-100 animate-modal-in flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Background Glow */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-amber-100/40 via-amber-50/20 to-transparent pointer-events-none rounded-tr-[28px]" />
+
+              {/* Header */}
+              <div className="relative px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-10 h-10 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-amber-200 blur-xl opacity-30 rounded-full" />
+                    <FloatingOracle size={40} />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-medium text-slate-900">Planejar Conteúdo</h2>
+                    {planningDate && (
+                      <p className="text-sm text-slate-500 flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {planningDate.weekDay}, {planningDate.formattedDate}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={handleClosePlanningModal}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                >
+                  <X className="w-4 h-4 text-slate-600" />
+                </button>
+              </div>
+
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {planningMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                        message.role === 'user'
+                          ? 'bg-slate-900 text-white rounded-br-md'
+                          : 'bg-gray-50 text-slate-800 border border-gray-100 rounded-bl-md'
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                      <span
+                        className={`text-[10px] mt-1.5 block ${
+                          message.role === 'user' ? 'text-slate-400' : 'text-slate-400'
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString('pt-BR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+
+                {isPlanningTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-50 px-4 py-3 rounded-2xl rounded-bl-md border border-gray-100">
+                      <div className="flex space-x-1.5">
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={planningMessagesEndRef} />
+              </div>
+
+              {/* Input Area - EchoAI Style */}
+              <div className="p-4 border-t border-gray-100 shrink-0">
+                <div className="bg-gray-50 rounded-2xl p-3">
+                  <div className="flex items-start gap-2 mb-3">
+                    <Sparkles className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" strokeWidth={2} />
+                    <textarea
+                      ref={planningInputRef}
+                      value={planningInput}
+                      onChange={(e) => setPlanningInput(e.target.value)}
+                      onKeyPress={handlePlanningKeyPress}
+                      placeholder="Descreva o que você quer criar para este dia..."
+                      className="w-full bg-transparent border-none outline-none resize-none text-slate-700 placeholder-slate-400 text-sm min-h-[40px] max-h-[100px]"
+                      rows={1}
+                    />
+                  </div>
+
+                  {/* Input Toolbar */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-gray-100 rounded-full transition-colors">
+                        <Upload className="w-4 h-4" strokeWidth={1.5} />
+                      </button>
+                      <button className="flex items-center gap-1.5 bg-white hover:bg-gray-100 px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 transition-colors border border-gray-200">
+                        <Wand2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                        Sugestões IA
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={handlePlanningMessageSend}
+                      disabled={!planningInput.trim()}
+                      className="w-9 h-9 bg-amber-500 rounded-full flex items-center justify-center text-white shadow-md hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Send className="w-4 h-4 ml-0.5" strokeWidth={1.5} />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
