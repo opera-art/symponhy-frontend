@@ -34,14 +34,14 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
   onboardingType,
 }) => {
   const { userId } = useAuth();
-  const { organization, memberships } = useOrganization({
-    memberships: {
-      infinite: true,
-    },
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Só carrega membros da organização quando o painel está aberto
+  const { memberships } = useOrganization({
+    memberships: isOpen ? { infinite: true } : undefined,
   });
 
   const [comments, setComments] = useState<Comment[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
