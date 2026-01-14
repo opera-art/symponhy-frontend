@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS meta_connected_accounts (
 
     -- Instagram Account Info
     ig_user_id TEXT NOT NULL,
-    username TEXT NOT NULL,
+    username TEXT NOT NULL,con
     profile_picture_url TEXT,
     followers_count INTEGER,
     account_type TEXT NOT NULL CHECK (account_type IN ('BUSINESS', 'CREATOR')),

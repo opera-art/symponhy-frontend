@@ -104,15 +104,14 @@ export default function OnboardingPage() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
         {/* Holographic Sphere */}
-        <div className="relative mb-8">
-          <HolographicSphere
-            size={380}
-            particleCount={particleCount}
-            mode={currentMode}
-            colorPalette={colorPalette}
-            enableMouseInteraction={true}
-          />
-        </div>
+        <HolographicSphere
+          size={380}
+          particleCount={particleCount}
+          mode={currentMode}
+          colorPalette={colorPalette}
+          enableMouseInteraction={true}
+          className="mb-8"
+        />
 
         {/* Greeting */}
         <p className="text-white/50 text-center max-w-md mb-10 text-[15px] leading-relaxed">
