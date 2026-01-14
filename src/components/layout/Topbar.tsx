@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import { OrganizationSwitcher } from '@clerk/nextjs';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
-import { ChevronDown, Menu, Grid2X2, Bell, User } from 'lucide-react';
+import { ChevronDown, Menu, Bell, User } from 'lucide-react';
 import type { TranslationKey } from '@/lib/translations';
 
 interface TopbarProps {
@@ -52,7 +53,23 @@ const Topbar: React.FC<TopbarProps> = ({
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        {/* Organization Switcher */}
+        <OrganizationSwitcher
+          appearance={{
+            elements: {
+              rootBox: 'flex items-center',
+              organizationSwitcherTrigger:
+                'flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-amber-400 hover:bg-amber-50/50 transition-all text-sm font-medium text-slate-700',
+              organizationPreviewMainIdentifier: 'text-sm font-medium text-slate-700',
+              organizationSwitcherTriggerIcon: 'text-slate-400',
+            },
+          }}
+          afterCreateOrganizationUrl="/dashboard"
+          afterLeaveOrganizationUrl="/dashboard"
+          afterSelectOrganizationUrl="/dashboard"
+        />
+
         {/* Period Selector */}
         {showPeriodSelector && (
           <button
