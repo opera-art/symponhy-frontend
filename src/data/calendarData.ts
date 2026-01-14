@@ -7,6 +7,7 @@ export interface CalendarPost {
   scheduledTime: string;
   thumbnail?: string;
   caption?: string;
+  platform?: 'instagram' | 'tiktok' | 'youtube' | 'facebook' | 'linkedin' | 'twitter';
 }
 
 // Calendar posts will come from database - empty by default

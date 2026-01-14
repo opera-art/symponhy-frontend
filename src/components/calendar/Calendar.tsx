@@ -10,6 +10,16 @@ import { useChatContent } from '@/context/ChatContentContext';
 import { useDate } from '@/hooks/useDate';
 import { AddContentModal } from './AddContentModal';
 
+// Platform logos mapping
+const PLATFORM_LOGOS: Record<string, string> = {
+  instagram: 'https://png.pngtree.com/png-clipart/20180626/ourmid/pngtree-instagram-icon-instagram-logo-png-image_3584853.png',
+  tiktok: 'https://static.vecteezy.com/system/resources/thumbnails/018/930/574/small/tiktok-logo-tikok-icon-transparent-tikok-app-logo-free-png.png',
+  youtube: 'https://waryhub.com/files/preview/960x960/11767610313jrhof02aap4tz9sc5zd4jruev8rjau7kuv4wouxfagagliudlz5b2bh6gvqmrz29amwaflw2mumipqcbul5xibtd7dxyo7jr4pip.png',
+  facebook: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1200px-Facebook_Logo_%282019%29.png',
+  linkedin: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/800px-LinkedIn_logo_initials.png',
+  twitter: 'https://about.x.com/content/dam/about-twitter/x/brand-toolkit/logo-black.png.twimg.1920.png',
+};
+
 interface CalendarProps {
   posts: CalendarPost[];
   year: number;
@@ -35,6 +45,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
   const [view, setView] = useState<CalendarView>('week');
   const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
   const [hoveredMonthDay, setHoveredMonthDay] = useState<number | null>(null);
+  const [hoveredPost, setHoveredPost] = useState<{ post: CalendarPost; x: number; y: number } | null>(null);
 
   // Use Intl-based month and weekday names (auto-localized)
   const monthNames = monthNamesList.long;
@@ -373,15 +384,28 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                         <div
                           key={post.id}
                           className={cn(
-                            'text-[10px] px-1.5 py-0.5 rounded truncate',
+                            'text-[10px] px-1.5 py-0.5 rounded truncate flex items-center gap-1 hover:ring-1 hover:ring-amber-300 transition-all',
                             getPostColor(postIdx)
                           )}
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedPost(post);
                           }}
+                          onMouseEnter={(e) => {
+                            e.stopPropagation();
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setHoveredPost({ post, x: rect.right + 10, y: rect.top });
+                          }}
+                          onMouseLeave={() => setHoveredPost(null)}
                         >
-                          {post.scheduledTime} {post.title}
+                          {post.platform && PLATFORM_LOGOS[post.platform] && (
+                            <img
+                              src={PLATFORM_LOGOS[post.platform]}
+                              alt={post.platform}
+                              className="w-3 h-3 rounded-sm object-contain flex-shrink-0"
+                            />
+                          )}
+                          <span className="truncate">{post.scheduledTime} {post.title}</span>
                         </div>
                       ))}
                       {dayPosts.length > 3 && (
@@ -522,7 +546,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                           <div
                             key={post.id}
                             className={cn(
-                              'absolute left-0 right-0 rounded-xl p-2 flex flex-col justify-between group hover:shadow-md transition-all cursor-pointer z-10',
+                              'absolute left-0 right-0 rounded-xl p-2 flex flex-col justify-between group hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer z-10',
                               getPostColor(postIdx)
                             )}
                             style={{
@@ -530,14 +554,29 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                               height: `${height}px`,
                             }}
                             onClick={() => setSelectedPost(post)}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHoveredPost({ post, x: rect.right + 10, y: rect.top });
+                            }}
+                            onMouseLeave={() => setHoveredPost(null)}
                           >
-                            <div>
-                              <div className="text-xs font-semibold text-slate-800 line-clamp-1">
-                                {post.title}
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <div className="text-xs font-semibold text-slate-800 line-clamp-1">
+                                  {post.title}
+                                </div>
+                                <div className="text-[10px] text-slate-600 mt-0.5">
+                                  {post.scheduledTime}
+                                </div>
                               </div>
-                              <div className="text-[10px] text-slate-600 mt-0.5">
-                                {post.scheduledTime}
-                              </div>
+                              {/* Platform Logo */}
+                              {post.platform && PLATFORM_LOGOS[post.platform] && (
+                                <img
+                                  src={PLATFORM_LOGOS[post.platform]}
+                                  alt={post.platform}
+                                  className="w-4 h-4 rounded object-contain flex-shrink-0"
+                                />
+                              )}
                             </div>
 
                             {post.type && (
@@ -681,7 +720,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                           <div
                             key={post.id}
                             className={cn(
-                              'absolute left-0 right-0 rounded-xl p-3 flex flex-col justify-between group hover:shadow-md transition-all cursor-pointer z-10',
+                              'absolute left-0 right-0 rounded-xl p-3 flex flex-col justify-between group hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer z-10',
                               getPostColor(postIdx)
                             )}
                             style={{
@@ -689,14 +728,29 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
                               height: `${height}px`,
                             }}
                             onClick={() => setSelectedPost(post)}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHoveredPost({ post, x: rect.right + 10, y: rect.top });
+                            }}
+                            onMouseLeave={() => setHoveredPost(null)}
                           >
-                            <div>
-                              <div className="text-sm font-semibold text-slate-800 line-clamp-1">
-                                {post.title}
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-slate-800 line-clamp-1">
+                                  {post.title}
+                                </div>
+                                <div className="text-xs text-slate-600 mt-0.5">
+                                  {post.scheduledTime}
+                                </div>
                               </div>
-                              <div className="text-xs text-slate-600 mt-0.5">
-                                {post.scheduledTime}
-                              </div>
+                              {/* Platform Logo */}
+                              {post.platform && PLATFORM_LOGOS[post.platform] && (
+                                <img
+                                  src={PLATFORM_LOGOS[post.platform]}
+                                  alt={post.platform}
+                                  className="w-5 h-5 rounded object-contain flex-shrink-0 ml-2"
+                                />
+                              )}
                             </div>
 
                             <div className="flex gap-1.5">
@@ -827,6 +881,59 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange, 
           </div>
         )}
       </div>
+
+      {/* Hover Preview - Floating thumbnail card */}
+      {hoveredPost && (
+        <div
+          className="fixed bg-white rounded-xl shadow-2xl shadow-slate-300/50 border border-slate-100 p-3 z-[60] pointer-events-none animate-fade-in"
+          style={{
+            left: `${Math.min(hoveredPost.x, window.innerWidth - 220)}px`,
+            top: `${Math.max(10, Math.min(hoveredPost.y, window.innerHeight - 200))}px`,
+            width: '200px',
+          }}
+        >
+          {/* Thumbnail */}
+          {hoveredPost.post.thumbnail ? (
+            <div className="w-full h-28 bg-slate-100 rounded-lg overflow-hidden mb-2">
+              <img
+                src={hoveredPost.post.thumbnail}
+                alt={hoveredPost.post.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-full h-28 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg mb-2 flex items-center justify-center">
+              <FileText className="w-8 h-8 text-slate-400" />
+            </div>
+          )}
+
+          {/* Title and Platform */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-semibold text-slate-800 line-clamp-2">
+                {hoveredPost.post.title}
+              </div>
+              <div className="text-[10px] text-slate-500 mt-1">
+                {hoveredPost.post.scheduledTime} • {hoveredPost.post.type}
+              </div>
+            </div>
+            {hoveredPost.post.platform && PLATFORM_LOGOS[hoveredPost.post.platform] && (
+              <img
+                src={PLATFORM_LOGOS[hoveredPost.post.platform]}
+                alt={hoveredPost.post.platform}
+                className="w-6 h-6 rounded object-contain flex-shrink-0"
+              />
+            )}
+          </div>
+
+          {/* Caption preview */}
+          {hoveredPost.post.caption && (
+            <div className="text-[10px] text-slate-500 mt-2 line-clamp-2 border-t border-slate-100 pt-2">
+              {hoveredPost.post.caption}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* AddContentModal is now just for managing state */}
       <AddContentModal

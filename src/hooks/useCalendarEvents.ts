@@ -73,6 +73,7 @@ function eventToPost(event: CalendarEvent): CalendarPost {
     scheduledTime: event.event_time?.substring(0, 5) || '09:00',
     thumbnail: event.thumbnail_url,
     caption: event.caption,
+    platform: event.platform as CalendarPost['platform'],
   };
 }
 

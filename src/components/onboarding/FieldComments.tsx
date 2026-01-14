@@ -152,12 +152,12 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
   const unresolvedCount = comments.filter(c => !c.resolved).length;
 
   return (
-    <div className="relative">
+    <div className="relative p-1">
       {/* Botão de comentários */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-1.5 rounded-lg transition-all ${
+        className={`relative p-1.5 rounded-lg transition-all ${
           unresolvedCount > 0
             ? 'bg-amber-100 text-amber-600 hover:bg-amber-200'
             : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600'
@@ -166,7 +166,7 @@ export const FieldComments: React.FC<FieldCommentsProps> = ({
       >
         <MessageCircle className="w-4 h-4" />
         {unresolvedCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-white text-[10px] rounded-full flex items-center justify-center font-medium">
+          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-amber-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-sm">
             {unresolvedCount}
           </span>
         )}
