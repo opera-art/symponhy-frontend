@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Plus, MoreH
 import { CalendarPost } from '@/data/calendarData';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
+import { AddContentModal } from './AddContentModal';
 
 interface CalendarProps {
   posts: CalendarPost[];
@@ -21,6 +22,7 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
   const [selectedPost, setSelectedPost] = useState<CalendarPost | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
   const [view, setView] = useState<CalendarView>('week');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const monthNames = useMemo(() => [
     t('january'), t('february'), t('march'), t('april'), t('may'), t('june'),
@@ -53,6 +55,16 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
     const today = new Date();
     onMonthChange(today.getFullYear(), today.getMonth());
     setSelectedDay(today.getDate());
+  };
+
+  const handleManualUpload = () => {
+    // TODO: Implement manual upload functionality
+    console.log('Manual upload selected');
+  };
+
+  const handleCreateWithAgents = () => {
+    // TODO: Implement create with agents functionality
+    console.log('Create with agents selected');
   };
 
   const getWeekDays = () => {
@@ -225,11 +237,14 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
               return (
                 <div key={dayIdx} className="relative h-full">
                   {dayPosts.length === 0 && dayIdx === 2 && (
-                    <div className="absolute top-0 left-0 right-0 h-[60px] border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center hover:bg-slate-50 cursor-pointer transition-colors group">
+                    <button
+                      onClick={() => setIsAddModalOpen(true)}
+                      className="absolute top-0 left-0 right-0 h-[60px] border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center hover:bg-slate-50 cursor-pointer transition-colors group w-full"
+                    >
                       <div className="w-6 h-6 rounded-full border border-slate-300 flex items-center justify-center text-slate-400 group-hover:border-slate-400 group-hover:text-slate-600">
                         <Plus className="w-3.5 h-3.5" />
                       </div>
-                    </div>
+                    </button>
                   )}
 
                   {dayPosts.map((post, postIdx) => {
@@ -365,6 +380,14 @@ const Calendar: React.FC<CalendarProps> = ({ posts, year, month, onMonthChange }
             </div>
           </div>
         )}
+
+        {/* Add Content Modal */}
+        <AddContentModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onManualUpload={handleManualUpload}
+          onCreateWithAgents={handleCreateWithAgents}
+        />
       </div>
     </div>
   );

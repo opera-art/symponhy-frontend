@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import { KanbanTask } from '@/data/newFeaturesData';
 import { KanbanCard } from './KanbanCard';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AddContentModal } from '@/components/calendar/AddContentModal';
 
 interface KanbanColumnProps {
   columnId: string;
@@ -16,6 +17,16 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   columnTitle,
   tasks,
 }) => {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const handleManualUpload = () => {
+    console.log(`Manual upload for column: ${columnId}`);
+  };
+
+  const handleCreateWithAgents = () => {
+    console.log(`Create with agents for column: ${columnId}`);
+  };
+
   return (
     <div className="flex flex-col gap-3">
       {/* Column Header */}
@@ -24,7 +35,10 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
           {columnTitle}{' '}
           <span className="text-slate-300 ml-1.5 font-normal text-sm">{tasks.length}</span>
         </h2>
-        <button className="text-slate-400 hover:text-slate-600 transition-colors">
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="text-slate-400 hover:text-slate-600 transition-colors"
+        >
           <Plus className="w-5 h-5" />
         </button>
       </div>
@@ -62,6 +76,14 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
           </div>
         )}
       </Droppable>
+
+      {/* Add Content Modal */}
+      <AddContentModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onManualUpload={handleManualUpload}
+        onCreateWithAgents={handleCreateWithAgents}
+      />
     </div>
   );
 };

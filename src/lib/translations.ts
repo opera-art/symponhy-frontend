@@ -184,6 +184,13 @@ export const translations = {
     day: 'Day',
     today: 'Today',
     close: 'Close',
+    addNewContent: 'Add New Content',
+    chooseYourMethod: 'Choose how you want to create your content',
+    manualUpload: 'Manual Upload',
+    uploadContentDirectly: 'Upload your content directly',
+    createWithAgents: 'Create with Agents',
+    useAIAgents: 'Use our AI agents to create strategies',
+    youCanChangeAnytime: 'You can change your preferences at any time',
 
     // Months
     january: 'January',
@@ -441,6 +448,13 @@ export const translations = {
     day: 'Dia',
     today: 'Hoje',
     close: 'Fechar',
+    addNewContent: 'Adicionar novo conteúdo',
+    chooseYourMethod: 'Escolha como deseja criar seu conteúdo',
+    manualUpload: 'Upload Manual',
+    uploadContentDirectly: 'Faça upload do seu conteúdo diretamente',
+    createWithAgents: 'Criar com Agentes',
+    useAIAgents: 'Use nossos agentes de IA para criar estratégias',
+    youCanChangeAnytime: 'Você pode mudar suas preferências a qualquer momento',
 
     // Months
     january: 'Janeiro',
@@ -698,6 +712,13 @@ export const translations = {
     day: 'Día',
     today: 'Hoy',
     close: 'Cerrar',
+    addNewContent: 'Agregar nuevo contenido',
+    chooseYourMethod: 'Elige cómo deseas crear tu contenido',
+    manualUpload: 'Carga Manual',
+    uploadContentDirectly: 'Sube tu contenido directamente',
+    createWithAgents: 'Crear con Agentes',
+    useAIAgents: 'Usa nuestros agentes de IA para crear estrategias',
+    youCanChangeAnytime: 'Puedes cambiar tus preferencias en cualquier momento',
 
     // Months
     january: 'Enero',
