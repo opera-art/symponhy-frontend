@@ -442,56 +442,86 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         </div>
       </header>
 
-      {/* Progress Bar */}
+      {/* Progress Bar - Creative dots design */}
       <div className="px-4 flex-shrink-0 relative z-10">
         <div className="max-w-3xl mx-auto">
-          <div className="relative mb-2">
-            <div className="flex justify-between">
-              {sections.map((section, idx) => {
-                const sectionStart = sections.slice(0, idx).reduce((acc, s) => acc + s.questionCount, 0);
-                const sectionEnd = sectionStart + section.questionCount;
-                const isCompleted = completedQuestions >= sectionEnd;
-                const isCurrent = currentSection === idx;
-                const hasComments = sectionsWithComments.includes(idx);
-                const isSkipped = skippedSections.includes(idx);
+          {/* Dots progress - each dot is a question */}
+          <div className="flex items-center justify-center gap-1 flex-wrap mb-2">
+            {sections.map((section, sectionIdx) => {
+              const sectionStart = sections.slice(0, sectionIdx).reduce((acc, s) => acc + s.questionCount, 0);
+              const hasComments = sectionsWithComments.includes(sectionIdx);
+              const isCurrentSection = currentSection === sectionIdx;
 
-                // Determinar cor do dot
-                let dotClass = 'bg-slate-200 scale-75';
-                if (isSkipped && isCompleted) {
-                  dotClass = 'bg-red-400'; // Pulada (vermelho)
-                } else if (isCompleted) {
-                  dotClass = 'bg-slate-900';
-                } else if (isCurrent) {
-                  dotClass = 'bg-amber-500 scale-125 ring-4 ring-amber-100';
-                }
+              return (
+                <div key={sectionIdx} className="flex items-center">
+                  {/* Section dots */}
+                  <div className="flex items-center gap-0.5 px-1.5 py-1 rounded-full relative"
+                    style={{
+                      backgroundColor: isCurrentSection ? `${oracleColor}15` : 'transparent',
+                      border: isCurrentSection ? `1px solid ${oracleColor}30` : '1px solid transparent'
+                    }}
+                    title={section.title}
+                  >
+                    {Array.from({ length: section.questionCount }).map((_, questionIdx) => {
+                      const globalQuestionIdx = sectionStart + questionIdx;
+                      const isAnswered = globalQuestionIdx < completedQuestions;
+                      const isCurrent = sectionIdx === currentSection && questionIdx === currentQuestion;
+                      const isPast = globalQuestionIdx < completedQuestions;
+                      const isSkippedQuestion = skippedSections.includes(sectionIdx) && isPast;
 
-                return (
-                  <div key={idx} className={`flex flex-col items-center transition-all duration-300 relative ${sections.length > 6 ? 'w-4' : 'w-8'}`} title={section.title}>
-                    <div className={`w-3 h-3 rounded-full transition-all duration-500 ${dotClass}`} />
-                    {/* Indicador de comentário */}
+                      let dotColor = '#e2e8f0'; // slate-200
+                      let dotSize = 'w-1.5 h-1.5';
+                      let extraClass = '';
+
+                      if (isCurrent) {
+                        dotColor = oracleColor;
+                        dotSize = 'w-2.5 h-2.5';
+                        extraClass = 'ring-2 ring-offset-1';
+                      } else if (isSkippedQuestion && !isAnswered) {
+                        dotColor = '#f87171'; // red-400
+                        dotSize = 'w-1.5 h-1.5';
+                      } else if (isPast) {
+                        dotColor = '#1e293b'; // slate-900
+                      }
+
+                      return (
+                        <div
+                          key={questionIdx}
+                          className={`${dotSize} rounded-full transition-all duration-300 ${extraClass}`}
+                          style={{
+                            backgroundColor: dotColor,
+                            '--tw-ring-color': `${oracleColor}40`
+                          } as React.CSSProperties}
+                        />
+                      );
+                    })}
+                    {/* Comment indicator */}
                     {hasComments && (
-                      <div className="absolute -top-1 -right-0.5 w-2 h-2 bg-amber-400 rounded-full border border-white" title="Tem comentários" />
-                    )}
-                    {sections.length <= 6 && (
-                      <span className={`text-[9px] mt-1 text-center leading-tight ${
-                        isSkipped && isCompleted ? 'text-red-500 font-medium' :
-                        isCurrent ? 'text-amber-600 font-medium' : 'text-slate-400'
-                      }`}>
-                        {section.title.slice(0, 10)}
-                      </span>
+                      <div
+                        className="absolute -top-1 -right-1 w-2 h-2 rounded-full border border-white animate-pulse"
+                        style={{ backgroundColor: oracleColor }}
+                        title="Tem comentários"
+                      />
                     )}
                   </div>
-                );
-              })}
-            </div>
+                  {/* Separator between sections */}
+                  {sectionIdx < sections.length - 1 && (
+                    <div className="w-3 h-px mx-0.5" style={{
+                      backgroundColor: sectionIdx < currentSection ? '#1e293b' : '#e2e8f0'
+                    }} />
+                  )}
+                </div>
+              );
+            })}
           </div>
-          <div className="relative">
-            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full rounded-full transition-all duration-700" style={{ width: `${progressPercent}%`, background: `linear-gradient(90deg, ${oracleColor}, ${getOracleColor(progressPercent + 20)})` }} />
-            </div>
-            <div className="flex justify-between mt-1.5">
-              <span className="text-xs text-slate-400">{completedQuestions + 1} de {totalQuestions}</span>
-              <span className="text-xs font-medium" style={{ color: oracleColor }}>{Math.round(progressPercent)}% XP</span>
+          {/* Progress info */}
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-slate-400">{sectionTitle}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">{completedQuestions + 1}/{totalQuestions}</span>
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: `${oracleColor}20`, color: oracleColor }}>
+                {Math.round(progressPercent)}%
+              </span>
             </div>
           </div>
         </div>
@@ -501,8 +531,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       <main className="flex-1 flex flex-col items-center px-4 py-2 min-h-0 overflow-y-auto relative z-10">
         {/* Sphere Container with breathing */}
         <div
-          className={`relative flex-shrink-0 mb-2 transition-all duration-300 ${isOverSphere ? 'scale-110' : ''}`}
-          style={{ width: 240, height: 240 }}
+          className={`relative flex-shrink-0 mb-4 transition-all duration-300 ${isOverSphere ? 'scale-105' : ''}`}
+          style={{ width: 320, height: 320 }}
           onDragOver={handleSphereDragOver}
           onDragLeave={handleSphereDragLeave}
           onDrop={handleSphereDrop}
@@ -512,7 +542,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           <div className="absolute inset-0 rounded-full blur-3xl transition-all duration-1000" style={{ backgroundColor: `${oracleColor}15`, transform: `scale(${1.2 + oracleIntensity * 0.2})` }} />
           {/* Sphere with breathing + scale */}
           <div className="absolute inset-0 flex items-center justify-center transition-transform duration-700" style={{ transform: `scale(${oracleScale * breatheScale})` }}>
-            <FloatingOracle size={200} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
+            <FloatingOracle size={280} color={oracleColor} intensity={oracleIntensity} isListening={isTyping || isOverSphere} />
           </div>
         </div>
 

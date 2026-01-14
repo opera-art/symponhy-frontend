@@ -30,7 +30,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     animationId?: number;
     systemsGroup?: THREE.Group;
     atomGroup?: THREE.Group;
-    musicNotes?: THREE.Group;
     mousePos?: THREE.Vector2;
     worldMousePos?: THREE.Vector3;
     isHovering?: boolean;
@@ -87,10 +86,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
     scene.add(atomGroup);
     sceneRef.current.atomGroup = atomGroup;
 
-    // Music Notes Group
-    const musicNotes = new THREE.Group();
-    scene.add(musicNotes);
-    sceneRef.current.musicNotes = musicNotes;
     sceneRef.current.mousePos = new THREE.Vector2(0, 0);
     sceneRef.current.worldMousePos = new THREE.Vector3(0, 0, 0);
     sceneRef.current.isHovering = false;
@@ -346,87 +341,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       });
     }
 
-    // Music Note class with mouse attraction
-    class MusicNote {
-      mesh: THREE.Sprite;
-      velocity: THREE.Vector3;
-      life: number;
-      maxLife: number;
-      basePosition: THREE.Vector3;
-
-      constructor(x: number, y: number) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 64;
-        canvas.height = 64;
-        const ctx = canvas.getContext('2d')!;
-
-        ctx.font = '48px serif';
-        ctx.fillStyle = '#D4AF37';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        const notes = ['♪', '♫', '♩', '♬', '♭', '♯'];
-        ctx.fillText(notes[Math.floor(Math.random() * notes.length)], 32, 32);
-
-        const texture = new THREE.CanvasTexture(canvas);
-        const spriteMaterial = new THREE.SpriteMaterial({
-          map: texture,
-          transparent: true,
-          opacity: 1,
-        });
-
-        this.mesh = new THREE.Sprite(spriteMaterial);
-        this.mesh.position.set(x, y, 0);
-        this.basePosition = new THREE.Vector3(x, y, 0);
-        this.mesh.scale.set(1.2, 1.2, 1);
-
-        this.velocity = new THREE.Vector3(
-          (Math.random() - 0.5) * 0.12,
-          0.06 + Math.random() * 0.06,
-          0
-        );
-
-        this.life = 0;
-        this.maxLife = 80 + Math.random() * 40;
-      }
-
-      update(mousePos: THREE.Vector3, intensityValue: number) {
-        this.life++;
-
-        // Base movement
-        this.mesh.position.add(this.velocity);
-
-        // Mouse attraction - notes gently float toward mouse
-        const toMouse = new THREE.Vector3().subVectors(mousePos, this.mesh.position);
-        const distToMouse = toMouse.length();
-        if (distToMouse < 8 && distToMouse > 0.5) {
-          toMouse.normalize();
-          const attractionStrength = 0.02 * (1 - distToMouse / 8) * (1 + intensityValue);
-          this.mesh.position.add(toMouse.multiplyScalar(attractionStrength));
-        }
-
-        const progress = this.life / this.maxLife;
-        this.mesh.material.opacity = 1 - progress;
-
-        // Gentle wave motion
-        this.mesh.position.x += Math.sin(this.life * 0.08) * 0.015;
-
-        // Rotation based on intensity
-        this.mesh.material.rotation += 0.02 * (1 + intensityValue);
-
-        const scale = (1.2 + intensityValue * 0.3) * (1 - progress * 0.3);
-        this.mesh.scale.set(scale, scale, 1);
-
-        return this.life < this.maxLife;
-      }
-
-      dispose() {
-        this.mesh.material.map?.dispose();
-        this.mesh.material.dispose();
-      }
-    }
-
-    const activeNotes: MusicNote[] = [];
-    let noteSpawnTimer = 0;
 
     // Animation variables
     let time = 0;
@@ -557,34 +471,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
         ring.rotation.z += 0.002;
       });
 
-      // Spawn music notes - more frequently with higher intensity
-      noteSpawnTimer++;
-      const baseSpawnRate = sceneRef.current.isHovering ? 4 : 18;
-      const spawnRate = Math.max(3, baseSpawnRate - currentIntensity * 8);
-
-      if (noteSpawnTimer > spawnRate) {
-        noteSpawnTimer = 0;
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 4 + Math.random() * 3;
-        const note = new MusicNote(
-          Math.cos(angle) * radius,
-          Math.sin(angle) * radius - 2
-        );
-        activeNotes.push(note);
-        musicNotes.add(note.mesh);
-      }
-
-      // Update music notes with mouse position
-      const worldMouse = sceneRef.current.worldMousePos || new THREE.Vector3(0, 0, 0);
-      for (let i = activeNotes.length - 1; i >= 0; i--) {
-        const note = activeNotes[i];
-        if (!note.update(worldMouse, currentIntensity)) {
-          musicNotes.remove(note.mesh);
-          note.dispose();
-          activeNotes.splice(i, 1);
-        }
-      }
-
       // Camera sway
       camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
       camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
@@ -605,8 +491,6 @@ export const FloatingOracle: React.FC<FloatingOracleProps> = ({
       if (sceneRef.current.animationId) {
         cancelAnimationFrame(sceneRef.current.animationId);
       }
-
-      activeNotes.forEach(note => note.dispose());
 
       // Cleanup sound waves
       soundWaves.forEach(ring => {
