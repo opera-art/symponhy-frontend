@@ -93,7 +93,8 @@
       "mcp__railway-mcp-server__link-service",
       "Bash(git config:*)",
       "mcp__railway-mcp-server__list-variables",
-      "mcp__railway-mcp-server__list-projects"
+      "mcp__railway-mcp-server__list-projects",
+      "Bash(gh repo create:*)"
     ]
   },
   "enabledMcpjsonServers": [

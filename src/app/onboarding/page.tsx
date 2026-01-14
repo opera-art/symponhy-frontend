@@ -21,8 +21,8 @@ export default function OnboardingPage() {
     const isMobile = window.innerWidth < 768;
     const pCount = isMobile ? 25000 : 45000;
 
-    // Canvas larger than visible sphere to prevent clipping
-    const canvasSize = isMobile ? 380 : 500;
+    // Canvas very large to prevent any clipping
+    const canvasSize = isMobile ? 600 : 800;
 
     // State
     const STATE = {
@@ -57,9 +57,9 @@ export default function OnboardingPage() {
     const scene = new THREE.Scene();
     sceneRef.current.scene = scene;
 
-    // Camera - balanced distance for visibility
+    // Camera - far back so sphere is small within large canvas
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-    camera.position.z = isMobile ? 38 : 32;
+    camera.position.z = isMobile ? 55 : 50;
     sceneRef.current.camera = camera;
 
     // Particle Shaders
@@ -264,7 +264,7 @@ export default function OnboardingPage() {
     // Resize - keep canvas size consistent
     const handleResize = () => {
       const newIsMobile = window.innerWidth < 768;
-      const newSize = newIsMobile ? 380 : 500;
+      const newSize = newIsMobile ? 600 : 800;
       renderer.setSize(newSize, newSize);
     };
     window.addEventListener('resize', handleResize);
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
       material.uniforms.uColor2.value.lerp(targetC2, 0.05);
 
       // Gentle breathing motion
-      const zTarget = (isMobile ? 38 : 32) + Math.sin(STATE.time * 0.5) * 1.5;
+      const zTarget = (isMobile ? 55 : 50) + Math.sin(STATE.time * 0.5) * 1.5;
       camera.position.z += (zTarget - camera.position.z) * 0.02;
       camera.position.x = Math.sin(STATE.time * 0.2) * 1.5;
       camera.position.y = Math.cos(STATE.time * 0.15) * 1.5;
@@ -357,18 +357,17 @@ export default function OnboardingPage() {
       {/* Main Content */}
       <main className="flex flex-col items-center px-6 pb-12">
         {/* Oracle Sphere - floating at top */}
-        <div className="relative flex items-center justify-center !border-0" style={{ border: 'none' }}>
+        <div className="relative flex items-center justify-center !border-0" style={{ border: 'none', height: '280px', marginTop: '-60px' }}>
           {/* Glow effect behind sphere */}
-          <div className="absolute w-[200px] h-[200px] md:w-[250px] md:h-[250px] rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.4), rgba(45,212,191,0.2), transparent)' }} />
+          <div className="absolute w-[180px] h-[180px] rounded-full opacity-40 blur-3xl" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.5), rgba(45,212,191,0.3), transparent)' }} />
 
-          {/* Canvas container - NO borders, transparent */}
+          {/* Canvas container - scaled down visually */}
           <div
             ref={canvasRef}
             className="relative z-10 !border-0"
             style={{
-              width: 'auto',
-              height: 'auto',
-              overflow: 'visible',
+              transform: 'scale(0.4)',
+              transformOrigin: 'center center',
               border: 'none',
               outline: 'none',
               boxShadow: 'none',

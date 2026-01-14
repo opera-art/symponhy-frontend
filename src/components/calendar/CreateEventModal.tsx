@@ -107,6 +107,10 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const result = await uploadFile(file, 'calendar');
     if (result) {
       setFormData(prev => ({ ...prev, thumbnail_url: result.url }));
+    } else {
+      // Upload failed - clear preview and show error
+      setPreviewUrl(null);
+      setFormData(prev => ({ ...prev, thumbnail_url: '' }));
     }
   };
 
@@ -314,6 +318,11 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
                   className="hidden"
                 />
               </div>
+              {uploadError && (
+                <p className="mt-2 text-sm text-red-600">
+                  Erro no upload: {uploadError}
+                </p>
+              )}
             </div>
 
             {/* Caption */}
