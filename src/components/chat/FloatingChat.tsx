@@ -224,136 +224,85 @@ export const FloatingChat: React.FC = () => {
         </div>
       )}
 
-      {/* Content Selection Modal - Luxurious Design */}
+      {/* Content Selection Modal - Clean Chat Style */}
       {isAddingContent && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
           onClick={handleCloseContentModal}
         >
-          {/* Backdrop with gradient */}
+          {/* Backdrop */}
           <div
-            className={`absolute inset-0 transition-all duration-500 ${showModal ? 'opacity-100' : 'opacity-0'}`}
-            style={{
-              background: 'radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%)',
-              backdropFilter: 'blur(12px)',
-            }}
+            className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${showModal ? 'opacity-100' : 'opacity-0'}`}
           />
 
-          {/* Modal */}
+          {/* Modal Container */}
           {showModal && (
             <div
-              className="relative z-50 w-[420px] overflow-hidden animate-modal-in"
+              className="relative z-50 w-full max-w-md bg-white rounded-[28px] shadow-[0_2px_40px_-12px_rgba(0,0,0,0.15)] border border-gray-100 animate-modal-in"
               onClick={(e) => e.stopPropagation()}
-              style={{
-                background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%)',
-                borderRadius: '32px',
-                boxShadow: '0 25px 80px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(212, 175, 55, 0.2), inset 0 1px 0 rgba(255,255,255,0.8)',
-              }}
             >
-              {/* Shimmer border effect */}
-              <div className="absolute inset-0 rounded-[32px] p-[1px] shimmer-border pointer-events-none" />
+              {/* Background Glow */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-amber-100/40 via-amber-50/20 to-transparent pointer-events-none rounded-tr-[28px]" />
 
-              {/* Inner content */}
-              <div className="relative p-10 flex flex-col items-center text-center">
-                {/* Close button - top right */}
-                <button
-                  onClick={handleCloseContentModal}
-                  className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-all duration-200 hover:scale-110"
-                  aria-label="Fechar"
-                >
-                  <X size={16} className="text-slate-500" />
-                </button>
+              {/* Content */}
+              <div className="relative p-8">
+                {/* Hero Section */}
+                <div className="flex flex-col items-center mb-8">
+                  {/* Sphere with subtle glow */}
+                  <div className="relative w-20 h-20 mb-5 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-amber-200 blur-2xl opacity-30 rounded-full" />
+                    <FloatingOracle size={80} />
+                  </div>
 
-                {/* Sphere container with glow */}
-                <div className="relative w-36 h-36 mb-8 flex items-center justify-center">
-                  {/* Glow effect */}
-                  <div
-                    className="absolute inset-0 rounded-full opacity-60"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, transparent 70%)',
-                      filter: 'blur(20px)',
-                    }}
-                  />
-                  <FloatingOracle size={140} />
+                  <h1 className="text-2xl font-medium tracking-tight text-slate-900 mb-2">
+                    Adicionar conteúdo
+                  </h1>
+                  <p className="text-slate-500 text-center text-sm">
+                    Escolha como deseja criar seu conteúdo
+                  </p>
                 </div>
 
-                {/* Title with gradient */}
-                <h2
-                  className="text-2xl font-bold mb-3"
-                  style={{
-                    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  Criar novo conteúdo
-                </h2>
-                <p className="text-slate-500 text-sm mb-8 max-w-[280px]">
-                  Escolha como deseja adicionar seu conteúdo ao calendário
-                </p>
-
-                {/* Options */}
-                <div className="space-y-4 w-full">
-                  {/* Manual Upload Option */}
+                {/* Feature Cards */}
+                <div className="space-y-3 mb-6">
+                  {/* Upload Manual Card */}
                   <button
                     onClick={handleManualUploadClick}
-                    className="w-full flex items-center gap-4 p-5 rounded-2xl bg-white border border-slate-200 hover:border-amber-300 hover:shadow-lg hover:shadow-amber-100/50 transition-all duration-300 group"
+                    className="w-full bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-200 cursor-pointer group text-left flex items-start gap-4"
                   >
-                    <div
-                      className="w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
-                      style={{
-                        background: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)',
-                      }}
-                    >
-                      <Upload className="w-6 h-6 text-sky-600" />
+                    <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-amber-50 transition-colors shrink-0">
+                      <Upload className="w-5 h-5 text-slate-600 group-hover:text-amber-600" strokeWidth={1.5} />
                     </div>
-                    <div className="text-left flex-1">
-                      <p className="font-semibold text-slate-800">Upload Manual</p>
-                      <p className="text-sm text-slate-500 mt-0.5">Envie seus arquivos prontos</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-slate-800 mb-0.5">Upload Manual</h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">Faça upload de imagens, vídeos ou arquivos prontos.</p>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-amber-500 group-hover:translate-x-1 transition-all duration-300" />
                   </button>
 
-                  {/* Create with Agents Option - Premium highlight */}
+                  {/* Create with Agents Card */}
                   <button
                     onClick={handleCreateWithAgentsClick}
-                    className="w-full flex items-center gap-4 p-5 rounded-2xl transition-all duration-300 group relative overflow-hidden"
-                    style={{
-                      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                      boxShadow: '0 10px 40px -10px rgba(26, 26, 46, 0.5)',
-                    }}
+                    className="w-full bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-200 cursor-pointer group text-left flex items-start gap-4"
                   >
-                    {/* Shine effect on hover */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                      style={{
-                        background: 'linear-gradient(45deg, transparent 30%, rgba(212, 175, 55, 0.1) 50%, transparent 70%)',
-                      }}
-                    />
-                    <div
-                      className="w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%)',
-                      }}
-                    >
-                      <Wand2 className="w-6 h-6 text-amber-400" />
+                    <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-amber-50 transition-colors shrink-0">
+                      <Wand2 className="w-5 h-5 text-slate-600 group-hover:text-amber-600" strokeWidth={1.5} />
                     </div>
-                    <div className="text-left flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-white">Criar com Agentes</p>
-                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-400/20 text-amber-400">
-                          AI
-                        </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="text-sm font-medium text-slate-800">Criar com Agentes</h3>
+                        <span className="px-1.5 py-0.5 text-[9px] font-semibold rounded bg-amber-100 text-amber-700">AI</span>
                       </div>
-                      <p className="text-sm text-slate-400 mt-0.5">Use IA para estratégias inteligentes</p>
+                      <p className="text-xs text-slate-500 leading-relaxed">Use nossos agentes de IA para criar estratégias.</p>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all duration-300" />
                   </button>
                 </div>
 
-                {/* Footer hint */}
-                <p className="mt-6 text-xs text-slate-400">
-                  Pressione <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-500">ESC</kbd> para fechar
-                </p>
+                {/* Close Button */}
+                <button
+                  onClick={handleCloseContentModal}
+                  className="w-full py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-gray-50 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
               </div>
             </div>
           )}
