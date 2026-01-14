@@ -95,9 +95,13 @@ export function useCalendarEvents(year: number, month: number): UseCalendarEvent
       } else {
         setError(response.data.error || 'Failed to fetch events');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching calendar events:', err);
-      setError('Failed to load calendar events');
+      // Extract error message for better debugging
+      const errorMessage = err instanceof Error
+        ? err.message
+        : (err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to load calendar events';
+      setError(errorMessage);
       setEvents([]);
     } finally {
       setLoading(false);
