@@ -8,7 +8,6 @@ interface HolographicSphereProps {
   particleCount?: number;
   colorPalette?: 0 | 1 | 2;
   mode?: 0 | 1 | 2 | 3; // 0: Nebula, 1: Torus, 2: Lattice, 3: Vortex
-  showControls?: boolean;
   enableMouseInteraction?: boolean;
 }
 
@@ -18,7 +17,6 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
   particleCount = 65000,
   colorPalette = 0,
   mode = 0,
-  showControls = false,
   enableMouseInteraction = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,7 +24,6 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
     renderer?: any;
     scene?: any;
     camera?: any;
-    composer?: any;
     material?: any;
     clock?: any;
     animationId?: number;
@@ -46,10 +43,6 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
 
     // Dynamic import Three.js
     const THREE = await import('three');
-    const { EffectComposer } = await import('three/examples/jsm/postprocessing/EffectComposer.js');
-    const { RenderPass } = await import('three/examples/jsm/postprocessing/RenderPass.js');
-    const { UnrealBloomPass } = await import('three/examples/jsm/postprocessing/UnrealBloomPass.js');
-    const { ShaderPass } = await import('three/examples/jsm/postprocessing/ShaderPass.js');
 
     // State
     const STATE = {
@@ -61,92 +54,26 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
     };
     sceneRef.current.state = STATE;
 
-    // Renderer
+    // Renderer - transparent background
     const renderer = new THREE.WebGLRenderer({
-      antialias: false,
+      antialias: true,
       alpha: true,
       powerPreference: 'high-performance',
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(size, size);
-    renderer.toneMapping = THREE.CineonToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.setClearColor(0x000000, 0); // Fully transparent
     container.appendChild(renderer.domElement);
     sceneRef.current.renderer = renderer;
 
-    // Scene
+    // Scene - no background
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x030305, 0.015);
     sceneRef.current.scene = scene;
 
     // Camera
     const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
     camera.position.z = 28;
     sceneRef.current.camera = camera;
-
-    // Post Processing
-    const renderScene = new RenderPass(scene, camera);
-
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(size, size),
-      1.5,
-      0.4,
-      0.85
-    );
-    bloomPass.threshold = 0.1;
-    bloomPass.strength = 1.0;
-    bloomPass.radius = 0.8;
-
-    // Custom output shader
-    const outputShader = {
-      uniforms: {
-        tDiffuse: { value: null },
-        uTime: { value: 0 },
-        uRGBShift: { value: 0.002 },
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D tDiffuse;
-        uniform float uTime;
-        uniform float uRGBShift;
-        varying vec2 vUv;
-
-        float random(vec2 p) {
-          return fract(sin(dot(p.xy, vec2(12.9898, 78.233))) * 43758.5453);
-        }
-
-        void main() {
-          vec2 uv = vUv;
-
-          float dist = distance(uv, vec2(0.5));
-          vec2 offset = (uv - 0.5) * dist * uRGBShift;
-
-          float r = texture2D(tDiffuse, uv + offset).r;
-          float g = texture2D(tDiffuse, uv).g;
-          float b = texture2D(tDiffuse, uv - offset).b;
-
-          vec3 color = vec3(r, g, b);
-
-          float noise = (random(uv + uTime) - 0.5) * 0.04;
-          color += noise;
-
-          gl_FragColor = vec4(color, 1.0);
-        }
-      `,
-    };
-
-    const finalPass = new ShaderPass(outputShader);
-    const composer = new EffectComposer(renderer);
-    composer.addPass(renderScene);
-    composer.addPass(bloomPass);
-    composer.addPass(finalPass);
-    sceneRef.current.composer = composer;
 
     // Particle System Shaders
     const particleVertexShader = `
@@ -159,7 +86,6 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
 
       varying vec3 vColor;
       varying float vAlpha;
-      varying float vDist;
 
       vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
       vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -286,12 +212,11 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
         pos += normalize(pos - mousePos) * influence * 5.0;
 
         vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-        gl_PointSize = (1.5 + aRandom.y * 2.0) * (30.0 / -mvPosition.z);
+        gl_PointSize = (2.0 + aRandom.y * 2.5) * (30.0 / -mvPosition.z);
         gl_Position = projectionMatrix * mvPosition;
 
-        vDist = length(pos);
         float depthFade = smoothstep(60.0, 10.0, -mvPosition.z);
-        vAlpha = depthFade * (0.2 + aRandom.z * 0.6);
+        vAlpha = depthFade * (0.3 + aRandom.z * 0.7);
         vColor = pos;
       }
     `;
@@ -301,7 +226,6 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
       uniform vec3 uColor2;
       varying vec3 vColor;
       varying float vAlpha;
-      varying float vDist;
 
       void main() {
         vec2 center = gl_PointCoord - 0.5;
@@ -312,6 +236,9 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
         glow = pow(glow, 1.5);
 
         vec3 col = mix(uColor1, uColor2, smoothstep(-20.0, 20.0, vColor.x + vColor.y));
+
+        // Add bloom-like glow
+        col *= 1.0 + glow * 0.5;
 
         gl_FragColor = vec4(col, vAlpha * glow);
       }
@@ -408,12 +335,7 @@ export const HolographicSphere: React.FC<HolographicSphereProps> = ({
       camera.position.y = Math.cos(STATE.time * 0.15) * 2;
       camera.lookAt(0, 0, 0);
 
-      // Update final pass time
-      if (finalPass.uniforms) {
-        finalPass.uniforms.uTime.value = STATE.time;
-      }
-
-      composer.render();
+      renderer.render(scene, camera);
     }
 
     animate();
