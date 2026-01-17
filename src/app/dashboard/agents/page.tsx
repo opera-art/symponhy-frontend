@@ -465,27 +465,26 @@ const OrchestraScenario: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  // Orchestra musicians data - organized like real chamber orchestra
+  // Orchestra musicians data - organized in semicircle around conductor
+  // Positions are % based, centered around the stage area (palco está em y: 56-70%)
   const orchestraMusicians = [
-    // First Violins (left side, front row)
-    { id: 'v1-1', instrument: 'violin' as const, x: 15, y: 52, hairColor: '#8B5CF6', name: 'Harmonia' },
-    { id: 'v1-2', instrument: 'violin' as const, x: 22, y: 50, hairColor: '#A78BFA', name: 'Violin 2' },
-    { id: 'v1-3', instrument: 'violin' as const, x: 29, y: 48, hairColor: '#7C3AED', name: 'Violin 3' },
-    // Second Violins (left side, back row)
-    { id: 'v2-1', instrument: 'violin' as const, x: 12, y: 42, hairColor: '#C4B5FD', name: 'Violin 4' },
-    { id: 'v2-2', instrument: 'violin' as const, x: 19, y: 40, hairColor: '#DDD6FE', name: 'Violin 5' },
-    // Violas (center-left)
-    { id: 'va-1', instrument: 'viola' as const, x: 36, y: 50, hairColor: '#F59E0B', name: 'Cadenza' },
-    { id: 'va-2', instrument: 'viola' as const, x: 43, y: 48, hairColor: '#FBBF24', name: 'Viola 2' },
-    // Cellos (center-right)
-    { id: 'vc-1', instrument: 'cello' as const, x: 57, y: 50, hairColor: '#10B981', name: 'Melody' },
-    { id: 'vc-2', instrument: 'cello' as const, x: 64, y: 48, hairColor: '#34D399', name: 'Cello 2' },
-    // Double Basses (right side, back)
-    { id: 'db-1', instrument: 'bass' as const, x: 71, y: 42, hairColor: '#EF4444', name: 'Rhythm' },
-    { id: 'db-2', instrument: 'bass' as const, x: 78, y: 44, hairColor: '#F87171', name: 'Bass 2' },
-    // More violins on right (second violin section continuation)
-    { id: 'v2-3', instrument: 'violin' as const, x: 71, y: 52, hairColor: '#6366F1', name: 'Sonata' },
-    { id: 'v2-4', instrument: 'violin' as const, x: 78, y: 50, hairColor: '#818CF8', name: 'Violin 7' },
+    // Front row (closest to conductor) - First Violins left, Cellos right
+    { id: 'v1-1', instrument: 'violin' as const, x: 22, y: 62, hairColor: '#8B5CF6', name: 'Harmonia' },
+    { id: 'v1-2', instrument: 'violin' as const, x: 30, y: 61, hairColor: '#A78BFA', name: 'Violin 2' },
+    { id: 'va-1', instrument: 'viola' as const, x: 38, y: 60, hairColor: '#F59E0B', name: 'Cadenza' },
+    { id: 'vc-1', instrument: 'cello' as const, x: 62, y: 60, hairColor: '#10B981', name: 'Melody' },
+    { id: 'v2-3', instrument: 'violin' as const, x: 70, y: 61, hairColor: '#6366F1', name: 'Sonata' },
+    { id: 'v2-4', instrument: 'violin' as const, x: 78, y: 62, hairColor: '#818CF8', name: 'Violin 6' },
+
+    // Back row (behind front row) - Second Violins left, Violas center, Basses right
+    { id: 'v1-3', instrument: 'violin' as const, x: 18, y: 54, hairColor: '#7C3AED', name: 'Violin 3' },
+    { id: 'v2-1', instrument: 'violin' as const, x: 26, y: 53, hairColor: '#C4B5FD', name: 'Violin 4' },
+    { id: 'v2-2', instrument: 'violin' as const, x: 34, y: 52, hairColor: '#DDD6FE', name: 'Violin 5' },
+    { id: 'va-2', instrument: 'viola' as const, x: 42, y: 52, hairColor: '#FBBF24', name: 'Viola 2' },
+    { id: 'vc-2', instrument: 'cello' as const, x: 58, y: 52, hairColor: '#34D399', name: 'Cello 2' },
+    { id: 'db-1', instrument: 'bass' as const, x: 66, y: 52, hairColor: '#EF4444', name: 'Rhythm' },
+    { id: 'db-2', instrument: 'bass' as const, x: 74, y: 53, hairColor: '#F87171', name: 'Bass 2' },
+    { id: 'v2-5', instrument: 'violin' as const, x: 82, y: 54, hairColor: '#94A3B8', name: 'Violin 7' },
   ];
 
   return (
@@ -557,16 +556,23 @@ const OrchestraScenario: React.FC = () => {
         <ellipse cx="400" cy="340" rx="100" ry="50" fill="#FFF8E7" opacity="0.1" />
         <ellipse cx="550" cy="350" rx="80" ry="40" fill="#FFF8E7" opacity="0.08" />
 
-        {/* Music Stands - positioned in front of each musician section */}
-        <MusicStandSimple x={110} y={320} />
-        <MusicStandSimple x={165} y={310} />
-        <MusicStandSimple x={220} y={300} />
-        <MusicStandSimple x={280} y={310} />
-        <MusicStandSimple x={335} y={310} />
-        <MusicStandSimple x={440} y={310} />
-        <MusicStandSimple x={495} y={310} />
-        <MusicStandSimple x={555} y={320} />
-        <MusicStandSimple x={610} y={320} />
+        {/* Music Stands - positioned in front of musician rows */}
+        {/* Front row stands */}
+        <MusicStandSimple x={150} y={340} />
+        <MusicStandSimple x={220} y={335} />
+        <MusicStandSimple x={285} y={330} />
+        <MusicStandSimple x={480} y={330} />
+        <MusicStandSimple x={545} y={335} />
+        <MusicStandSimple x={615} y={340} />
+        {/* Back row stands */}
+        <MusicStandSimple x={120} y={300} />
+        <MusicStandSimple x={190} y={295} />
+        <MusicStandSimple x={260} y={290} />
+        <MusicStandSimple x={330} y={290} />
+        <MusicStandSimple x={440} y={290} />
+        <MusicStandSimple x={510} y={290} />
+        <MusicStandSimple x={580} y={295} />
+        <MusicStandSimple x={650} y={300} />
 
         {/* Conductor's podium */}
         <rect x="375" y="420" width="50" height="8" fill="#5B4334" />
@@ -578,7 +584,7 @@ const OrchestraScenario: React.FC = () => {
         {/* Conductor/Maestro - front center, facing orchestra */}
         <div
           className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform"
-          style={{ left: '48%', top: '72%', transform: 'translateX(-50%)' }}
+          style={{ left: '50%', top: '68%', transform: 'translateX(-50%)' }}
         >
           <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-30" style={{ fontFamily: 'monospace' }}>
             Maestro Tempo
