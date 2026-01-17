@@ -1,4 +1,3 @@
-export { KanbanBoard } from './KanbanBoard';
-export { KanbanColumn } from './KanbanColumn';
-export { KanbanCard } from './KanbanCard';
-export { useKanban } from './hooks/useKanban';
+// Re-export from new location for backward compatibility
+// TODO: Update imports to use @features/kanban directly
+export * from '@/features/kanban/components';

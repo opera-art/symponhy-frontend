@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FloatingOracle } from '@/components/chat/FloatingOracle';
+import { FloatingOracle } from '@/features/chat/components';
 import { ArrowLeft, ArrowRight, Check, Sparkles, Crown, Plus, Trash2, Loader2 } from 'lucide-react';
-import { useOnboarding } from '@/hooks/useOnboarding';
+import { useOnboarding } from '@/features/onboarding/hooks';
 
 interface Product {
   id: string;

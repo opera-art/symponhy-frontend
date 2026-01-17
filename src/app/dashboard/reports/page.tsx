@@ -2,11 +2,18 @@
 
 import React, { useState } from 'react';
 import { Topbar } from '@/components/layout';
-import { StatsCard, Button, Badge, Card } from '@/components/ui';
-import { FollowersChart } from '@/components/reports/FollowersChart';
-import { EngagementChart } from '@/components/reports/EngagementChart';
-import { TopPostsRanking } from '@/components/reports/TopPostsRanking';
-import { PostsPerformanceChart } from '@/components/reports/PostsPerformanceChart';
+import { Button, Badge, Card } from '@/components/ui';
+import {
+  FollowersChart,
+  EngagementChart,
+  TopPostsRanking,
+  PostsPerformanceChart,
+  MetricsSection,
+  StoriesMetrics,
+  ReelsMetrics,
+  CarouselMetrics,
+  AudienceMetrics,
+} from '@/features/reports/components';
 import { reportsData } from '@/data/mockData';
 import {
   Users,
@@ -160,6 +167,15 @@ const ReportsPage: React.FC = () => {
         </div>
       </Card>
 
+      {/* Métricas de Engajamento e Impressões */}
+      <div className="mb-6 animate-fade-in">
+        <MetricsSection
+          engagementMetrics={reportsData.engagementMetrics}
+          impressionsMetrics={reportsData.impressionsMetrics}
+          isLoading={isLoading}
+        />
+      </div>
+
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 animate-fade-in">
         <FollowersChart
@@ -168,6 +184,34 @@ const ReportsPage: React.FC = () => {
         />
         <EngagementChart
           data={reportsData.engagementRate}
+          isLoading={isLoading}
+        />
+      </div>
+
+      {/* Stories e Reels */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 animate-fade-in">
+        <StoriesMetrics
+          metrics={reportsData.storiesMetrics}
+          isLoading={isLoading}
+        />
+        <ReelsMetrics
+          metrics={reportsData.reelsMetrics}
+          isLoading={isLoading}
+        />
+      </div>
+
+      {/* Carrossel */}
+      <div className="mb-6 animate-fade-in">
+        <CarouselMetrics
+          metrics={reportsData.carouselMetrics}
+          isLoading={isLoading}
+        />
+      </div>
+
+      {/* Audiência/Demografia */}
+      <div className="mb-6 animate-fade-in">
+        <AudienceMetrics
+          metrics={reportsData.audienceMetrics}
           isLoading={isLoading}
         />
       </div>

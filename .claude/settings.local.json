@@ -101,7 +101,13 @@
       "Bash(powershell -Command \"cd ''c:\\\\Users\\\\jaian\\\\Documents\\\\symponhy-social''; gh auth status\")",
       "Bash(powershell -Command \"$env:Path = [System.Environment]::GetEnvironmentVariable\\(''Path'',''Machine''\\) + '';'' + [System.Environment]::GetEnvironmentVariable\\(''Path'',''User''\\); gh auth status\")",
       "WebFetch(domain:docs.getlate.dev)",
-      "mcp__railway__deployment_status"
+      "mcp__railway__deployment_status",
+      "Bash(vercel --version:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(cd:*)",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__take_screenshot"
     ]
   },
   "enabledMcpjsonServers": [

@@ -3,12 +3,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout';
-import { FieldComments } from '@/components/onboarding/FieldComments';
-import { BriefingPreview } from '@/components/onboarding/BriefingPreview';
+import { OnboardingLayout, FieldComments, BriefingPreview } from '@/features/onboarding/components';
 import { Check, Mic, MicOff, Glasses, MessageCircle } from 'lucide-react';
-import { useOnboarding } from '@/hooks/useOnboarding';
-import { useVoiceInput } from '@/hooks/useVoiceInput';
+import { useOnboarding, useVoiceInput } from '@/features/onboarding/hooks';
 
 interface FormData {
   // Dados básicos

@@ -122,18 +122,24 @@ async function handleRequest(
       const data = await response.json()
       return NextResponse.json(data, { status: response.status })
     } else {
-      const text = await response.text()
-      console.error('Non-JSON response from backend:', text.substring(0, 500))
+      // SECURITY: Don't log response content - may contain sensitive data
+      if (process.env.NODE_ENV === 'development') {
+        const text = await response.text()
+        console.error('Non-JSON response from backend (dev only):', text.substring(0, 200))
+      }
       return NextResponse.json(
-        { error: 'Invalid response from backend', status: response.status },
+        { error: 'Invalid response from backend' },
         { status: 502 }
       )
     }
 
   } catch (error) {
-    console.error('Proxy error:', error)
+    // SECURITY: Don't expose error details in production
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Proxy error:', error)
+    }
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

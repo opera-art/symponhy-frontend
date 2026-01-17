@@ -3,9 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Topbar } from '@/components/layout';
 import { Card } from '@/components/ui';
-import { GeneralSettings } from '@/components/settings/GeneralSettings';
-import { PreferencesSettings } from '@/components/settings/PreferencesSettings';
-import { PlatformIntegrations } from '@/components/settings/PlatformIntegrations';
+import { GeneralSettings, PreferencesSettings, PlatformIntegrations } from '@/features/settings/components';
 import { Settings, Sliders, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';

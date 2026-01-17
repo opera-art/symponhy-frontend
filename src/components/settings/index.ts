@@ -1,3 +1,3 @@
-export { GeneralSettings } from './GeneralSettings';
-export { PreferencesSettings } from './PreferencesSettings';
-export { PlatformIntegrations } from './PlatformIntegrations';
+// Re-export from new location for backward compatibility
+// TODO: Update imports to use @features/settings directly
+export * from '@/features/settings/components';

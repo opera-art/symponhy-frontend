@@ -3,11 +3,8 @@
 import React, { useState } from 'react';
 import { Topbar } from '@/components/layout';
 import { StatsCard } from '@/components/ui';
-import { AudienceChart } from '@/components/charts/AudienceChart';
-import { PendingApprovals } from '@/components/dashboard/PendingApprovals';
-import { ReferencesShowcase } from '@/components/dashboard/ReferencesShowcase';
-import { RecentPostsShowcase } from '@/components/dashboard/RecentPostsShowcase';
-import { UpcomingPostsShowcase } from '@/components/dashboard/UpcomingPostsShowcase';
+import { AudienceChart } from '@/shared/components/charts';
+import { PendingApprovals, ReferencesShowcase, RecentPostsShowcase, UpcomingPostsShowcase } from '@/features/dashboard/components';
 import { dashboardStats, audienceData, pendingApprovals } from '@/data/mockData';
 import { TrendingUp, Eye, Calendar, Users } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';

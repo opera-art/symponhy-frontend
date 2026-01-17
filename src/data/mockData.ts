@@ -257,4 +257,103 @@ export const reportsData = {
     { name: 'Post 5', impressions: 16700, reach: 12300, saves: 567 },
     { name: 'Post 6', impressions: 21300, reach: 17200, saves: 734 },
   ],
+  // Métricas de Engajamento
+  engagementMetrics: {
+    likes: { current: 24567, change: 8.5, trend: 'up' as const },
+    comments: { current: 1847, change: 15.7, trend: 'up' as const },
+    shares: { current: 892, change: -4.2, trend: 'down' as const },
+  },
+  // Impressões e Alcance
+  impressionsMetrics: {
+    impressions: { current: 485200, change: 18.3, trend: 'up' as const },
+    reach: { current: 280500, change: 12.3, trend: 'up' as const },
+    clicks: { current: 3842, change: 22.1, trend: 'up' as const },
+  },
+  // Métricas de Stories
+  storiesMetrics: {
+    views: { current: 12450, change: 5.2, trend: 'up' as const },
+    replies: { current: 234, change: 12.8, trend: 'up' as const },
+    tapsForward: { current: 3421, change: -8.3, trend: 'down' as const },
+    tapsBack: { current: 892, change: 15.4, trend: 'up' as const },
+    exits: { current: 1567, change: -12.1, trend: 'down' as const },
+    storyPerformance: [
+      { name: 'Story 1', views: 2340, replies: 45, exits: 234 },
+      { name: 'Story 2', views: 2890, replies: 67, exits: 189 },
+      { name: 'Story 3', views: 1980, replies: 34, exits: 312 },
+      { name: 'Story 4', views: 3120, replies: 88, exits: 156 },
+      { name: 'Story 5', views: 2120, replies: 0, exits: 676 },
+    ],
+  },
+  // Métricas de Reels
+  reelsMetrics: {
+    views: { current: 156780, change: 45.2, trend: 'up' as const },
+    likes: { current: 12340, change: 32.1, trend: 'up' as const },
+    comments: { current: 1234, change: 28.5, trend: 'up' as const },
+    shares: { current: 2341, change: 52.3, trend: 'up' as const },
+    saves: { current: 4521, change: 38.7, trend: 'up' as const },
+    averageWatchTime: '12.4s',
+    completionRate: 68.5,
+    reelsPerformance: [
+      { name: 'Reel 1', views: 45200, likes: 3240, shares: 567 },
+      { name: 'Reel 2', views: 38900, likes: 2890, shares: 423 },
+      { name: 'Reel 3', views: 52300, likes: 4120, shares: 891 },
+      { name: 'Reel 4', views: 20380, likes: 2090, shares: 460 },
+    ],
+  },
+  // Métricas de Carrossel
+  carouselMetrics: {
+    avgSlideReach: 8234,
+    avgInteractionsPerSlide: 156,
+    bestPerformingSlide: 2,
+    dropoffRate: 23.4,
+    carouselPerformance: [
+      { slide: 1, impressions: 12500, interactions: 890 },
+      { slide: 2, impressions: 11200, interactions: 1240 },
+      { slide: 3, impressions: 9800, interactions: 567 },
+      { slide: 4, impressions: 8400, interactions: 423 },
+      { slide: 5, impressions: 7200, interactions: 312 },
+    ],
+  },
+  // Dados de Audiência (Demográficos)
+  audienceMetrics: {
+    totalAudience: 68234,
+    demographics: {
+      gender: [
+        { name: 'Feminino', value: 62, color: '#EC4899' },
+        { name: 'Masculino', value: 35, color: '#3B82F6' },
+        { name: 'Outros', value: 3, color: '#8B5CF6' },
+      ],
+      ageGroups: [
+        { range: '13-17', percentage: 5 },
+        { range: '18-24', percentage: 28 },
+        { range: '25-34', percentage: 42 },
+        { range: '35-44', percentage: 18 },
+        { range: '45-54', percentage: 5 },
+        { range: '55+', percentage: 2 },
+      ],
+      topLocations: [
+        { city: 'São Paulo', percentage: 32 },
+        { city: 'Rio de Janeiro', percentage: 18 },
+        { city: 'Belo Horizonte', percentage: 12 },
+        { city: 'Curitiba', percentage: 8 },
+        { city: 'Porto Alegre', percentage: 6 },
+      ],
+      topCountries: [
+        { country: 'Brasil', percentage: 85 },
+        { country: 'Portugal', percentage: 8 },
+        { country: 'Estados Unidos', percentage: 4 },
+        { country: 'Angola', percentage: 2 },
+        { country: 'Outros', percentage: 1 },
+      ],
+    },
+    activeHours: [
+      { hour: '06h', activity: 15 },
+      { hour: '09h', activity: 45 },
+      { hour: '12h', activity: 72 },
+      { hour: '15h', activity: 58 },
+      { hour: '18h', activity: 85 },
+      { hour: '21h', activity: 95 },
+      { hour: '00h', activity: 32 },
+    ],
+  },
 };

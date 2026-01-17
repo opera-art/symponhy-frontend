@@ -3,10 +3,7 @@
 import React, { useState } from 'react';
 import { Topbar } from '@/components/layout';
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button, Badge, Card } from '@/components/ui';
-import { BriefingSummary } from '@/components/briefing/BriefingSummary';
-import { ReferencesAnalysis } from '@/components/briefing/ReferencesAnalysis';
-import { CompetitorAnalysis } from '@/components/briefing/CompetitorAnalysis';
-import { ProfileAudit } from '@/components/briefing/ProfileAudit';
+import { BriefingSummary, ReferencesAnalysis, CompetitorAnalysis, ProfileAudit } from '@/features/briefing/components';
 import {
   briefingData,
   referencesData,

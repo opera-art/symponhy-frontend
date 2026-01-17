@@ -44,3 +44,11 @@ Thumbs.db
 
 # Claude temp files
 tmpclaude-*
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Temporary files
+*.tmp
+*.temp
+vercel.txt

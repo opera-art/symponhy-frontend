@@ -1,0 +1,206 @@
+<html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Violino Animado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Otimização de renderização */
+        svg { shape-rendering: geometricPrecision; }
+        
+        /* Animação do Arco (Movimento de tocar) */
+        /* Ajustado para ser relativo ao grupo do arco, sem deslocar o violino */
+        @keyframes bowStroke {
+            0% { transform: translate(-30px, 20px) rotate(85deg); }
+            50% { transform: translate(60px, 20px) rotate(85deg); }
+            100% { transform: translate(-30px, 20px) rotate(85deg); }
+        }
+
+        /* Animação Sutil do Corpo do Violino (Expressão) */
+        /* REMOVIDO o translate fixo daqui para evitar sair do centro. Agora só rotaciona. */
+        @keyframes violinSway {
+            0%, 100% { transform: rotate(-55deg) scale(1.1); }
+            50% { transform: rotate(-53deg) scale(1.1); }
+        }
+
+        /* Animação das Cordas (Vibração rápida) */
+        @keyframes stringVibrate {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(0.5px); }
+            75% { transform: translateX(-0.5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Animação das Notas Musicais */
+        @keyframes floatNote {
+            0% { 
+                opacity: 0; 
+                transform: translate(0, 0) scale(0.5) rotate(0deg); 
+            }
+            20% { 
+                opacity: 1; 
+                transform: translate(20px, -40px) scale(1) rotate(10deg); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(60px, -200px) scale(1.2) rotate(20deg); 
+            }
+        }
+
+        .animate-bow {
+            animation: bowStroke 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+        
+        .animate-violin {
+            animation: violinSway 4s ease-in-out infinite;
+            /* Garante que a rotação ocorra no centro do desenho do violino */
+            transform-origin: center; 
+            transform-box: fill-box;
+        }
+
+        .animate-strings {
+            animation: stringVibrate 0.1s linear infinite;
+        }
+
+        .note {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        .note-1 { animation: floatNote 3s ease-out infinite; animation-delay: 0s; }
+        .note-2 { animation: floatNote 3.5s ease-out infinite; animation-delay: 1.2s; }
+        .note-3 { animation: floatNote 4s ease-out infinite; animation-delay: 0.6s; }
+        .note-4 { animation: floatNote 3.2s ease-out infinite; animation-delay: 2.0s; }
+
+    </style>
+</head>
+<body class="bg-[#FFC233] min-h-screen flex items-center justify-center font-sans text-neutral-900 overflow-hidden">
+
+    <!-- Container Principal -->
+    <div class="relative w-full max-w-4xl aspect-[4/3] flex items-center justify-center p-4">
+        
+        <!-- SVG Ilustração -->
+        <svg viewBox="0 0 800 600" class="w-full h-full drop-shadow-xl" xmlns="http://www.w3.org/2000/svg">
+            
+            <!-- Sombra no chão centralizada -->
+            <ellipse cx="400" cy="500" rx="120" ry="30" fill="#D99E30" opacity="0.6" class="blur-md" transform="rotate(-5 400 500)"></ellipse>
+
+            <!-- GRUPO MESTRE DE POSICIONAMENTO: Move tudo para o centro (400, 300) estaticamente -->
+            <g transform="translate(400, 300)">
+                
+                <!-- GRUPO DE ANIMAÇÃO: Aplica apenas rotação/balanço -->
+                <g class="animate-violin">
+                    
+                    <!-- CORPO DO VIOLINO (Desenhado em torno de 0,0) -->
+                    <!-- Camada Lateral/Profundidade (Marrom Escuro) -->
+                    <path d="M0,-140 C45,-140 70,-110 70,-70 C70,-50 50,-20 35,0 C50,20 85,50 85,110 C85,160 50,190 0,190 C-50,190 -85,160 -85,110 C-85,50 -50,20 -35,0 C-50,-20 -70,-50 -70,-70 C-70,-110 -45,-140 0,-140 Z" fill="#6F2C1F" transform="translate(12, 12)"></path>
+
+                    <!-- Braço & Sombra da Voluta -->
+                    <rect x="-10" y="-400" width="20" height="280" fill="#6F2C1F" transform="translate(8, 8)"></rect>
+                    <circle cx="0" cy="-410" r="25" fill="#6F2C1F" transform="translate(8, 8)"></circle>
+
+                    <!-- Camada Superior (Laranja Madeira) -->
+                    <path d="M0,-140 C45,-140 70,-110 70,-70 C70,-50 50,-20 35,0 C50,20 85,50 85,110 C85,160 50,190 0,190 C-50,190 -85,160 -85,110 C-85,50 -50,20 -35,0 C-50,-20 -70,-50 -70,-70 C-70,-110 -45,-140 0,-140 Z" fill="#F58E36"></path>
+                    
+                    <!-- Linhas de contorno interno -->
+                    <path d="M0,-130 C40,-130 60,-105 60,-70 C60,-55 45,-25 30,0 C45,25 75,55 75,110 C75,150 45,180 0,180 C-45,180 -75,150 -75,110 C-75,55 -45,25 -30,0 C-45,-25 -60,-55 -60,-70 C-60,-105 -40,-130 0,-130 Z" fill="none" stroke="#D97224" stroke-width="2" opacity="0.6"></path>
+
+                    <!-- Efes (F-Holes) -->
+                    <g fill="#3E150F">
+                        <path d="M-35,-20 C-45,-20 -50,-40 -40,-55 C-38,-58 -30,-55 -35,-45 C-38,-40 -42,-30 -35,-30 C-25,-30 -30,-60 -45,-65 C-55,-70 -60,-50 -55,-40 C-50,-30 -40,-25 -35,-20 Z"></path>
+                        <circle cx="-35" cy="-20" r="3"></circle>
+                        <circle cx="-45" cy="-65" r="3"></circle>
+                        
+                        <path d="M35,-20 C45,-20 50,-40 40,-55 C38,-58 30,-55 35,-45 C38,-40 42,-30 35,-30 C25,-30 30,-60 45,-65 C55,-70 60,-50 55,-40 C50,-30 40,-25 35,-20 Z"></path>
+                        <circle cx="35" cy="-20" r="3"></circle>
+                        <circle cx="45" cy="-65" r="3"></circle>
+                    </g>
+
+                    <!-- BRAÇO & ESPELHO (Fingerboard) -->
+                    <rect x="-12" y="-400" width="24" height="270" fill="#231F20"></rect>
+                    
+                    <!-- VOLUTA (Scroll) -->
+                    <g transform="translate(0, -410)">
+                        <circle cx="0" cy="0" r="25" fill="#F58E36"></circle>
+                        <path d="M0,0 m-15,0 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0" fill="none" stroke="#6F2C1F" stroke-width="4" stroke-linecap="round"></path>
+                        <path d="M0,0 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" fill="#6F2C1F"></path>
+                        
+                        <!-- Cravelhas -->
+                        <g fill="#231F20">
+                            <rect x="-40" y="-10" width="15" height="8" rx="2" transform="rotate(-15)"></rect>
+                            <rect x="25" y="-15" width="15" height="8" rx="2" transform="rotate(15)"></rect>
+                            <rect x="-38" y="10" width="15" height="8" rx="2" transform="rotate(-15)"></rect>
+                            <rect x="23" y="5" width="15" height="8" rx="2" transform="rotate(15)"></rect>
+                        </g>
+                    </g>
+
+                    <!-- ESTANDARTE (Tailpiece) -->
+                    <path d="M-20,190 L20,190 L16,80 L-16,80 Z" fill="#231F20"></path>
+                    <circle cx="0" cy="190" r="4" fill="#111"></circle>
+
+                    <!-- QUEIXEIRA -->
+                    <ellipse cx="-40" cy="160" rx="35" ry="20" fill="#231F20" transform="rotate(-15 -40 160)"></ellipse>
+                    <ellipse cx="-40" cy="158" rx="30" ry="15" fill="#3A3230" transform="rotate(-15 -40 160)"></ellipse>
+
+                    <!-- CAVALETE (Bridge) -->
+                    <path d="M-20,40 Q0,30 20,40 L20,44 Q0,34 -20,44 Z" fill="#E8B07D" stroke="#AA7040" stroke-width="1"></path>
+
+                    <!-- CORDAS (Com vibração) -->
+                    <g stroke="#EAEAEA" stroke-width="1.5" stroke-linecap="round" class="animate-strings">
+                        <line x1="-9" y1="85" x2="-9" y2="-400"></line>
+                        <line x1="-3" y1="85" x2="-3" y2="-400"></line>
+                        <line x1="3" y1="85" x2="3" y2="-400"></line>
+                        <line x1="9" y1="85" x2="9" y2="-400"></line>
+                    </g>
+
+                    <!-- NOTAS MUSICAIS -->
+                    <g transform="translate(10, 20)">
+                        <path d="M10,0 L10,-25 L10,-25" stroke="#3E150F" stroke-width="3" fill="none" class="note note-1"></path>
+                        <ellipse cx="6" cy="0" rx="6" ry="4" transform="rotate(-20)" fill="#3E150F" class="note note-1"></ellipse>
+                        
+                        <g class="note note-2" transform="translate(10, 10)">
+                            <path d="M15,-5 L15,-30 Q25,-20 30,-10" stroke="#3E150F" stroke-width="3" fill="none"></path>
+                            <ellipse cx="11" cy="-5" rx="6" ry="4" transform="rotate(-20)" fill="#3E150F"></ellipse>
+                        </g>
+
+                        <g class="note note-3" transform="translate(-10, -10)">
+                            <path d="M10,0 L10,-25" stroke="#3E150F" stroke-width="3" fill="none"></path>
+                            <ellipse cx="6" cy="0" rx="6" ry="4" transform="rotate(-20)" fill="#3E150F"></ellipse>
+                        </g>
+                        
+                         <path d="M0,0 Q10,-10 5,-20 Q0,-10 5,0" stroke="#3E150F" stroke-width="2" fill="none" class="note note-4" transform="translate(5,5) scale(0.5)"></path>
+                    </g>
+
+                    <!-- O ARCO -->
+                    <g class="animate-bow">
+                        <!-- Crina -->
+                        <rect x="-300" y="4" width="700" height="3" fill="#FEF3D8" rx="1"></rect>
+                        
+                        <!-- Vareta -->
+                        <rect x="-310" y="-6" width="720" height="7" fill="#E86C2D" rx="3"></rect>
+                        <rect x="-310" y="-6" width="720" height="2" fill="#F09C6D" rx="1" opacity="0.5"></rect>
+                        
+                        <!-- Talão (Frog) -->
+                        <g transform="translate(360, -8)">
+                            <path d="M0,0 L50,0 L50,16 L10,16 C0,16 0,0 0,0 Z" fill="#4A1C17"></path>
+                            <circle cx="55" cy="8" r="5" fill="#D1D5DB"></circle>
+                            <circle cx="25" cy="8" r="4" fill="#D1D5DB"></circle>
+                        </g>
+                        
+                        <!-- Ponta -->
+                        <path d="M-310,-6 L-325,0 L-310,6 Z" fill="#FCEBB6"></path>
+                    </g>
+                
+                </g> <!-- Fim do Grupo Animado -->
+            </g> <!-- Fim do Grupo Centralizado -->
+        </svg>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body></html>

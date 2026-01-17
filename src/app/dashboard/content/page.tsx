@@ -14,10 +14,7 @@ import {
   Modal,
   ModalFooter,
 } from '@/components/ui';
-import { HarmoniaChat } from '@/components/content/HarmoniaChat';
-import { YouTubeShortsTab } from '@/components/content/YouTubeShortsTab';
-import { TikTokTab } from '@/components/content/TikTokTab';
-import { ContentInteractionModal } from '@/components/content/ContentInteractionModal';
+import { HarmoniaChat, YouTubeShortsTab, TikTokTab, ContentInteractionModal } from '@/features/content/components';
 import { contents, scripts } from '@/data/calendarData';
 import {
   Search,

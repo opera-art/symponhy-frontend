@@ -12,7 +12,7 @@ import {
   Crown,
 } from 'lucide-react';
 import type { TranslationKey } from '@/lib/translations';
-import type { Permissions } from '@/hooks/usePermissions';
+import type { Permissions } from '@/shared/hooks/usePermissions';
 
 export interface NavItem {
   icon: LucideIcon;

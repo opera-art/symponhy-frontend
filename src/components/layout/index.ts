@@ -1,4 +1,3 @@
-export { Sidebar } from './Sidebar';
-export { Topbar } from './Topbar';
-export { DashboardLayout } from './DashboardLayout';
-export { MobileNav } from './MobileNav';
+// Re-export from new location for backward compatibility
+// TODO: Update imports to use @shared/components/layout directly
+export * from '@/shared/components/layout';

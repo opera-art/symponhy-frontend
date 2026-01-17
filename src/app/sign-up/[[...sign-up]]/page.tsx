@@ -2,7 +2,7 @@
 
 import React, { Suspense } from 'react';
 import { SignUp } from '@clerk/nextjs';
-import { FloatingOracle } from '@/components/chat/FloatingOracle';
+import { FloatingOracle } from '@/features/chat/components';
 
 function SignUpContent() {
   return (

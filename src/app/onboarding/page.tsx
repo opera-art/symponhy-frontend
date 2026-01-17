@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { FloatingOracle } from '@/components/chat/FloatingOracle';
+import { FloatingOracle } from '@/features/chat/components';
 
 export default function OnboardingPage() {
   const router = useRouter();

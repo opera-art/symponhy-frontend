@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useApi } from '@/hooks/useApi';
+import { useApi } from '@/shared/hooks/useApi';
 import api from '@/lib/api';
 
 // ============================================================================

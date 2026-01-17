@@ -2,7 +2,7 @@
 
 import React, { Suspense } from 'react';
 import { Topbar } from '@/components/layout';
-import { CalendarViewContainer } from '@/components/calendar/CalendarViewContainer';
+import { CalendarViewContainer } from '@/features/calendar/components';
 import { useLanguage } from '@/context/LanguageContext';
 
 const CalendarPage: React.FC = () => {

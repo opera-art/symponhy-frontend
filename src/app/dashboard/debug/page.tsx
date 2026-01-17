@@ -1,9 +1,19 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/shared/hooks/usePermissions';
+import { notFound } from 'next/navigation';
 
+/**
+ * Debug Page - DEVELOPMENT ONLY
+ * SECURITY: This page is only accessible in development environment
+ */
 export default function DebugPage() {
+  // SECURITY: Block access in production
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const { user, isLoaded } = useUser();
   const { role, permissions, isAgency } = usePermissions();
 
@@ -13,6 +23,11 @@ export default function DebugPage() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
+      <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-8">
+        <p className="font-bold text-yellow-700">DEVELOPMENT ONLY</p>
+        <p className="text-yellow-600">This page is not accessible in production.</p>
+      </div>
+
       <h1 className="text-3xl font-bold mb-8">Debug - Auth & Permissions (Clerk)</h1>
 
       <div className="space-y-6">
