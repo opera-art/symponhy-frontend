@@ -53,11 +53,21 @@ export function useLateProfile() {
         setError(null);
         const redirectUrl = `${window.location.origin}/dashboard/settings?connected=${platform}`;
         // Backend handles profileId lookup automatically
-        const { authUrl } = await lateService.getConnectUrl(platform, redirectUrl);
-        window.location.href = authUrl;
+        console.log(`[useLateProfile] Connecting to ${platform}...`);
+        const response = await lateService.getConnectUrl(platform, redirectUrl);
+        console.log(`[useLateProfile] Response:`, response);
+
+        if (!response.authUrl) {
+          throw new Error('URL de autenticação não recebida. Verifique se a plataforma está configurada.');
+        }
+
+        console.log(`[useLateProfile] Redirecting to:`, response.authUrl);
+        window.location.href = response.authUrl;
       } catch (err) {
         console.error('Error connecting platform:', err);
-        setError('Erro ao conectar plataforma. Tente novamente.');
+        const message = err instanceof Error ? err.message : 'Erro ao conectar plataforma. Tente novamente.';
+        setError(message);
+        throw err; // Re-throw to let PlatformIntegrations handle the loading state
       }
     },
     []

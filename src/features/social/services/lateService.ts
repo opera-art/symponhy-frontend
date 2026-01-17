@@ -75,6 +75,7 @@ class LateService {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
+    console.log(`[LateService] ${options.method || 'GET'} ${url}`);
 
     const response = await fetch(url, {
       ...options,
@@ -84,12 +85,14 @@ class LateService {
       },
     });
 
+    const data = await response.json().catch(() => ({ error: 'Failed to parse response' }));
+    console.log(`[LateService] Response ${response.status}:`, data);
+
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Request failed' }));
-      throw new Error(error.error || 'Request failed');
+      throw new Error(data.error || data.message || `Request failed: ${response.status}`);
     }
 
-    return response.json();
+    return data as T;
   }
 
   // ==========================================
