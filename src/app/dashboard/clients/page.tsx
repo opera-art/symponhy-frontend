@@ -160,7 +160,7 @@ const ClientsPage: React.FC = () => {
                     className="flex items-center gap-2 px-4 py-2 bg-gold hover:bg-gold/90 text-white rounded-xl transition-all duration-200 shadow-sm"
                   >
                     <UserPlus className="w-4 h-4" />
-                    Criar Membro
+                    Criar Cliente
                   </button>
                 </div>
               )}
@@ -469,12 +469,12 @@ const InviteMemberModal: React.FC<{ onClose: () => void; onSuccess: () => void }
   );
 };
 
-// Create Member Modal
+// Create Client Modal - Cria cliente no Clerk + banco de dados
 const CreateMemberModal: React.FC<{ onClose: () => void; onSuccess: (member: Member) => void }> = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
-    firstName: '',
-    lastName: '',
+    companyName: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
@@ -486,12 +486,25 @@ const CreateMemberModal: React.FC<{ onClose: () => void; onSuccess: (member: Mem
     setError(null);
 
     try {
-      const response = await api.post('/members', formData);
-      onSuccess(response.data.member);
+      // Usa o endpoint /api/clients que cria no Clerk + profiles + clients
+      const response = await api.post('/clients', formData);
+
+      // Converte resposta do clients para formato de Member
+      const client = response.data.client;
+      const member: Member = {
+        id: client.id,
+        clerkUserId: client.clerk_user_id || client.id,
+        email: client.email,
+        fullName: client.name,
+        role: 'member',
+        createdAt: client.created_at,
+      };
+
+      onSuccess(member);
     } catch (err: any) {
       const errorMessage = err.response?.data?.error
         || err.response?.data?.errors?.[0]?.msg
-        || 'Erro ao criar membro';
+        || 'Erro ao criar cliente';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -504,10 +517,10 @@ const CreateMemberModal: React.FC<{ onClose: () => void; onSuccess: (member: Mem
         <div className="p-6 border-b border-slate-100">
           <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-gold" />
-            Criar Membro
+            Criar Cliente
           </h3>
           <p className="text-sm text-slate-500 mt-1">
-            Crie uma conta diretamente para o cliente
+            Crie uma conta para o cliente da sua agencia
           </p>
         </div>
 
@@ -519,31 +532,19 @@ const CreateMemberModal: React.FC<{ onClose: () => void; onSuccess: (member: Mem
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Nome
-              </label>
-              <input
-                type="text"
-                value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold"
-                placeholder="João"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Sobrenome
-              </label>
-              <input
-                type="text"
-                value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold"
-                placeholder="Silva"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Nome Completo
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold"
+              placeholder="Joao Silva"
+              minLength={2}
+            />
           </div>
 
           <div>
@@ -562,6 +563,19 @@ const CreateMemberModal: React.FC<{ onClose: () => void; onSuccess: (member: Mem
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
+              Empresa do Cliente
+            </label>
+            <input
+              type="text"
+              value={formData.companyName}
+              onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold"
+              placeholder="Nome da empresa do cliente"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               Senha
             </label>
             <input
@@ -570,11 +584,11 @@ const CreateMemberModal: React.FC<{ onClose: () => void; onSuccess: (member: Mem
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold"
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Minimo 8 caracteres"
               minLength={8}
             />
             <p className="text-xs text-slate-500 mt-1">
-              O cliente usará esta senha para fazer login
+              O cliente usara esta senha para fazer login
             </p>
           </div>
 
@@ -598,7 +612,7 @@ const CreateMemberModal: React.FC<{ onClose: () => void; onSuccess: (member: Mem
                   Criando...
                 </>
               ) : (
-                'Criar Membro'
+                'Criar Cliente'
               )}
             </button>
           </div>
