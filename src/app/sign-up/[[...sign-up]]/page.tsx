@@ -51,7 +51,7 @@ function SignUpContent() {
                   footerActionLink: 'text-slate-900 hover:text-slate-700',
                 }
               }}
-              forceRedirectUrl="/onboarding"
+              forceRedirectUrl="/setup/company"
               signInUrl="/sign-in"
             />
 
