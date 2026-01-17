@@ -452,7 +452,7 @@ const MusicStandSimple = ({ x, y }: { x: number; y: number }) => (
   </g>
 );
 
-// Realistic Concert Hall Orchestra Scenario
+// Professional Symphony Orchestra Scenario
 const OrchestraScenario: React.FC = () => {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -465,149 +465,238 @@ const OrchestraScenario: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  // Orchestra musicians data - organized in semicircle around conductor
-  // Positions are % based, centered around the stage area (palco está em y: 56-70%)
-  const orchestraMusicians = [
-    // Front row (closest to conductor) - First Violins left, Cellos right
-    { id: 'v1-1', instrument: 'violin' as const, x: 22, y: 62, hairColor: '#8B5CF6', name: 'Harmonia' },
-    { id: 'v1-2', instrument: 'violin' as const, x: 30, y: 61, hairColor: '#A78BFA', name: 'Violin 2' },
-    { id: 'va-1', instrument: 'viola' as const, x: 38, y: 60, hairColor: '#F59E0B', name: 'Cadenza' },
-    { id: 'vc-1', instrument: 'cello' as const, x: 62, y: 60, hairColor: '#10B981', name: 'Melody' },
-    { id: 'v2-3', instrument: 'violin' as const, x: 70, y: 61, hairColor: '#6366F1', name: 'Sonata' },
-    { id: 'v2-4', instrument: 'violin' as const, x: 78, y: 62, hairColor: '#818CF8', name: 'Violin 6' },
+  // Professional orchestra layout - organized by section with proper hierarchy
+  // Row 1 (Front): First Violins (left) | Conductor | Second Violins (right)
+  // Row 2: Violas (left-center) | Cellos (right-center)
+  // Row 3 (Back): Double Basses (far left & right edges)
 
-    // Back row (behind front row) - Second Violins left, Violas center, Basses right
-    { id: 'v1-3', instrument: 'violin' as const, x: 18, y: 54, hairColor: '#7C3AED', name: 'Violin 3' },
-    { id: 'v2-1', instrument: 'violin' as const, x: 26, y: 53, hairColor: '#C4B5FD', name: 'Violin 4' },
-    { id: 'v2-2', instrument: 'violin' as const, x: 34, y: 52, hairColor: '#DDD6FE', name: 'Violin 5' },
-    { id: 'va-2', instrument: 'viola' as const, x: 42, y: 52, hairColor: '#FBBF24', name: 'Viola 2' },
-    { id: 'vc-2', instrument: 'cello' as const, x: 58, y: 52, hairColor: '#34D399', name: 'Cello 2' },
-    { id: 'db-1', instrument: 'bass' as const, x: 66, y: 52, hairColor: '#EF4444', name: 'Rhythm' },
-    { id: 'db-2', instrument: 'bass' as const, x: 74, y: 53, hairColor: '#F87171', name: 'Bass 2' },
-    { id: 'v2-5', instrument: 'violin' as const, x: 82, y: 54, hairColor: '#94A3B8', name: 'Violin 7' },
+  const orchestraSections = {
+    // First Violins - Stage Left, Front (closest to audience, left of conductor)
+    firstViolins: [
+      { id: 'v1-1', x: 20, y: 72, hairColor: '#8B5CF6', name: 'Harmonia' },
+      { id: 'v1-2', x: 26, y: 70, hairColor: '#A78BFA', name: 'Violin I-2' },
+      { id: 'v1-3', x: 32, y: 68, hairColor: '#7C3AED', name: 'Violin I-3' },
+      { id: 'v1-4', x: 38, y: 66, hairColor: '#C4B5FD', name: 'Violin I-4' },
+    ],
+    // Second Violins - Stage Right, Front (right of conductor)
+    secondViolins: [
+      { id: 'v2-1', x: 62, y: 66, hairColor: '#6366F1', name: 'Sonata' },
+      { id: 'v2-2', x: 68, y: 68, hairColor: '#818CF8', name: 'Violin II-2' },
+      { id: 'v2-3', x: 74, y: 70, hairColor: '#A5B4FC', name: 'Violin II-3' },
+      { id: 'v2-4', x: 80, y: 72, hairColor: '#C7D2FE', name: 'Violin II-4' },
+    ],
+    // Violas - Center Left, Second Row
+    violas: [
+      { id: 'va-1', x: 28, y: 58, hairColor: '#F59E0B', name: 'Cadenza' },
+      { id: 'va-2', x: 36, y: 56, hairColor: '#FBBF24', name: 'Viola 2' },
+      { id: 'va-3', x: 44, y: 55, hairColor: '#FCD34D', name: 'Viola 3' },
+    ],
+    // Cellos - Center Right, Second Row
+    cellos: [
+      { id: 'vc-1', x: 56, y: 55, hairColor: '#10B981', name: 'Melody' },
+      { id: 'vc-2', x: 64, y: 56, hairColor: '#34D399', name: 'Cello 2' },
+      { id: 'vc-3', x: 72, y: 58, hairColor: '#6EE7B7', name: 'Cello 3' },
+    ],
+    // Double Basses - Back Row, Far Edges
+    basses: [
+      { id: 'db-1', x: 18, y: 50, hairColor: '#EF4444', name: 'Rhythm' },
+      { id: 'db-2', x: 82, y: 50, hairColor: '#F87171', name: 'Bass 2' },
+    ],
+  };
+
+  // Flatten for rendering
+  const allMusicians = [
+    ...orchestraSections.firstViolins.map(m => ({ ...m, instrument: 'violin' as const })),
+    ...orchestraSections.secondViolins.map(m => ({ ...m, instrument: 'violin' as const })),
+    ...orchestraSections.violas.map(m => ({ ...m, instrument: 'viola' as const })),
+    ...orchestraSections.cellos.map(m => ({ ...m, instrument: 'cello' as const })),
+    ...orchestraSections.basses.map(m => ({ ...m, instrument: 'bass' as const })),
   ];
 
   return (
     <div className="relative w-full h-[calc(100vh-180px)] min-h-[600px] rounded-2xl overflow-hidden">
-      {/* Theater Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#1a0a0a] via-[#2d1515] to-[#1a0a0a]" />
+      {/* Deep Theater Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0505] via-[#1a0a0a] to-[#0d0808]" />
 
-      {/* SVG Stage */}
+      {/* SVG Concert Hall Stage */}
       <svg
         viewBox="0 0 800 500"
         className="w-full h-full relative z-10"
-        style={{ imageRendering: 'auto' }}
         preserveAspectRatio="xMidYMid meet"
       >
         <defs>
-          {/* Stage lighting gradient */}
-          <radialGradient id="stageLight" cx="50%" cy="30%" r="60%">
-            <stop offset="0%" stopColor="#FFF8E7" stopOpacity="0.3" />
-            <stop offset="50%" stopColor="#FFE4B5" stopOpacity="0.1" />
+          {/* Conductor spotlight - bright center */}
+          <radialGradient id="conductorSpotlight" cx="50%" cy="85%" r="25%">
+            <stop offset="0%" stopColor="#FFF8DC" stopOpacity="0.4" />
+            <stop offset="50%" stopColor="#FFE4B5" stopOpacity="0.15" />
             <stop offset="100%" stopColor="#000" stopOpacity="0" />
           </radialGradient>
-          {/* Curtain gradient */}
-          <linearGradient id="curtainGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#8B0000" />
-            <stop offset="15%" stopColor="#B22222" />
-            <stop offset="30%" stopColor="#8B0000" />
-            <stop offset="50%" stopColor="#B22222" />
-            <stop offset="70%" stopColor="#8B0000" />
-            <stop offset="85%" stopColor="#B22222" />
-            <stop offset="100%" stopColor="#8B0000" />
+          {/* Orchestra ambient light */}
+          <radialGradient id="orchestraLight" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFF8E7" stopOpacity="0.2" />
+            <stop offset="70%" stopColor="#FFE4B5" stopOpacity="0.05" />
+            <stop offset="100%" stopColor="#000" stopOpacity="0" />
+          </radialGradient>
+          {/* Curtain fabric gradient */}
+          <linearGradient id="curtainFabric" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#5C0A0A" />
+            <stop offset="20%" stopColor="#8B0000" />
+            <stop offset="40%" stopColor="#6B0000" />
+            <stop offset="60%" stopColor="#8B0000" />
+            <stop offset="80%" stopColor="#6B0000" />
+            <stop offset="100%" stopColor="#5C0A0A" />
           </linearGradient>
-          {/* Wood floor gradient */}
-          <linearGradient id="floorGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          {/* Stage floor - polished wood */}
+          <linearGradient id="stageFloor" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#8B7355" />
-            <stop offset="100%" stopColor="#6B5344" />
+            <stop offset="50%" stopColor="#7A6548" />
+            <stop offset="100%" stopColor="#5D4E3A" />
+          </linearGradient>
+          {/* Stage depth gradient */}
+          <linearGradient id="stageDepth" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#2D1B0E" />
+            <stop offset="100%" stopColor="#1A0F08" />
           </linearGradient>
         </defs>
 
-        {/* Back wall - dark theater */}
-        <rect x="50" y="0" width="700" height="200" fill="#1a0505" />
+        {/* Back wall - deep theater darkness */}
+        <rect x="0" y="0" width="800" height="220" fill="#0a0303" />
 
-        {/* Curtain top valance */}
-        <rect x="0" y="0" width="800" height="40" fill="#8B0000" />
-        <rect x="0" y="35" width="800" height="15" fill="#6B0000" />
+        {/* Back wall paneling */}
+        <rect x="80" y="50" width="640" height="150" fill="#120808" rx="5" />
+        <rect x="90" y="60" width="620" height="130" fill="#0d0505" rx="3" />
 
-        {/* Left curtain */}
-        <path d="M0,40 Q30,40 40,50 L40,350 Q30,360 0,360 Z" fill="url(#curtainGradient)" />
-        <path d="M40,50 Q60,45 70,55 L70,340 Q60,350 40,350 Z" fill="#7B0000" />
+        {/* Curtain valance (top) */}
+        <rect x="0" y="0" width="800" height="50" fill="#4A0000" />
+        <path d="M0,45 Q100,55 200,45 Q300,55 400,45 Q500,55 600,45 Q700,55 800,45 L800,50 L0,50 Z" fill="#6B0000" />
 
-        {/* Right curtain */}
-        <path d="M800,40 Q770,40 760,50 L760,350 Q770,360 800,360 Z" fill="url(#curtainGradient)" />
-        <path d="M760,50 Q740,45 730,55 L730,340 Q740,350 760,350 Z" fill="#7B0000" />
+        {/* Left curtain with folds */}
+        <path d="M0,45 C20,50 30,50 50,55 L50,420 C30,425 20,425 0,420 Z" fill="url(#curtainFabric)" />
+        <path d="M50,55 C60,52 65,52 75,58 L75,415 C65,418 60,418 50,420 Z" fill="#7B0000" />
+        <path d="M75,58 C82,55 85,55 90,60 L90,410 C85,415 82,415 75,415 Z" fill="#5C0A0A" />
 
-        {/* Stage platform */}
-        <rect x="70" y="280" width="660" height="180" fill="url(#floorGradient)" />
-        {/* Stage front edge */}
-        <rect x="70" y="455" width="660" height="15" fill="#5B4334" />
+        {/* Right curtain with folds */}
+        <path d="M800,45 C780,50 770,50 750,55 L750,420 C770,425 780,425 800,420 Z" fill="url(#curtainFabric)" />
+        <path d="M750,55 C740,52 735,52 725,58 L725,415 C735,418 740,418 750,420 Z" fill="#7B0000" />
+        <path d="M725,58 C718,55 715,55 710,60 L710,410 C715,415 718,415 725,415 Z" fill="#5C0A0A" />
 
-        {/* Wood floor lines */}
-        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-          <line key={i} x1={70 + i * 82} y1="280" x2={70 + i * 82} y2="455" stroke="#7B6355" strokeWidth="1" opacity="0.5" />
+        {/* Stage platform with depth */}
+        {/* Back riser (elevated for back row) */}
+        <rect x="100" y="200" width="600" height="30" fill="#3D2817" />
+        <rect x="100" y="225" width="600" height="8" fill="#2D1B0E" />
+
+        {/* Middle riser */}
+        <rect x="100" y="233" width="600" height="50" fill="url(#stageFloor)" />
+
+        {/* Main stage floor */}
+        <rect x="90" y="283" width="620" height="180" fill="url(#stageFloor)" />
+
+        {/* Stage front edge/apron */}
+        <rect x="90" y="458" width="620" height="12" fill="#4A3728" />
+        <rect x="90" y="468" width="620" height="5" fill="#2D1B0E" />
+
+        {/* Floor wood grain lines */}
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
+          <line
+            key={`grain-${i}`}
+            x1={90 + i * 62}
+            y1="233"
+            x2={90 + i * 62}
+            y2="468"
+            stroke="#6B5847"
+            strokeWidth="1"
+            opacity="0.3"
+          />
         ))}
 
-        {/* Stage lighting effect */}
-        <ellipse cx="400" cy="300" rx="350" ry="150" fill="url(#stageLight)" />
+        {/* Orchestra ambient lighting */}
+        <ellipse cx="400" cy="320" rx="300" ry="120" fill="url(#orchestraLight)" />
 
-        {/* Spotlight effects */}
-        <ellipse cx="250" cy="350" rx="80" ry="40" fill="#FFF8E7" opacity="0.08" />
-        <ellipse cx="400" cy="340" rx="100" ry="50" fill="#FFF8E7" opacity="0.1" />
-        <ellipse cx="550" cy="350" rx="80" ry="40" fill="#FFF8E7" opacity="0.08" />
+        {/* Conductor spotlight - prominent */}
+        <ellipse cx="400" cy="440" rx="80" ry="35" fill="url(#conductorSpotlight)" />
 
-        {/* Music Stands - positioned in front of musician rows */}
-        {/* Front row stands */}
-        <MusicStandSimple x={150} y={340} />
-        <MusicStandSimple x={220} y={335} />
-        <MusicStandSimple x={285} y={330} />
-        <MusicStandSimple x={480} y={330} />
-        <MusicStandSimple x={545} y={335} />
-        <MusicStandSimple x={615} y={340} />
-        {/* Back row stands */}
-        <MusicStandSimple x={120} y={300} />
-        <MusicStandSimple x={190} y={295} />
-        <MusicStandSimple x={260} y={290} />
-        <MusicStandSimple x={330} y={290} />
-        <MusicStandSimple x={440} y={290} />
-        <MusicStandSimple x={510} y={290} />
-        <MusicStandSimple x={580} y={295} />
-        <MusicStandSimple x={650} y={300} />
+        {/* Section spotlights */}
+        <ellipse cx="200" cy="380" rx="100" ry="50" fill="#FFF8E7" opacity="0.04" />
+        <ellipse cx="600" cy="380" rx="100" ry="50" fill="#FFF8E7" opacity="0.04" />
 
-        {/* Conductor's podium */}
-        <rect x="375" y="420" width="50" height="8" fill="#5B4334" />
-        <rect x="380" y="415" width="40" height="5" fill="#4B3324" />
+        {/* Conductor's podium - prominent */}
+        <rect x="380" y="430" width="40" height="6" fill="#5D4037" />
+        <rect x="375" y="424" width="50" height="8" fill="#4E342E" />
+        <rect x="370" y="418" width="60" height="8" fill="#3E2723" />
+
+        {/* Music stands - organized by section */}
+        {/* First Violins stands */}
+        <MusicStandSimple x={130} y={365} />
+        <MusicStandSimple x={175} y={355} />
+        <MusicStandSimple x={220} y={345} />
+        <MusicStandSimple x={265} y={335} />
+
+        {/* Second Violins stands */}
+        <MusicStandSimple x={500} y={335} />
+        <MusicStandSimple x={545} y={345} />
+        <MusicStandSimple x={590} y={355} />
+        <MusicStandSimple x={635} y={365} />
+
+        {/* Violas stands */}
+        <MusicStandSimple x={190} y={290} />
+        <MusicStandSimple x={250} y={280} />
+        <MusicStandSimple x={310} y={275} />
+
+        {/* Cellos stands */}
+        <MusicStandSimple x={460} y={275} />
+        <MusicStandSimple x={520} y={280} />
+        <MusicStandSimple x={580} y={290} />
+
+        {/* Basses stands */}
+        <MusicStandSimple x={115} y={245} />
+        <MusicStandSimple x={655} y={245} />
+
+        {/* Section labels (subtle) */}
+        <text x="180" y="395" fill="#8B7355" fontSize="8" fontFamily="serif" opacity="0.5">1st Violins</text>
+        <text x="560" y="395" fill="#8B7355" fontSize="8" fontFamily="serif" opacity="0.5">2nd Violins</text>
+        <text x="230" y="310" fill="#8B7355" fontSize="8" fontFamily="serif" opacity="0.5">Violas</text>
+        <text x="500" y="310" fill="#8B7355" fontSize="8" fontFamily="serif" opacity="0.5">Cellos</text>
       </svg>
 
-      {/* Musicians Layer - positioned over SVG */}
+      {/* Musicians Layer */}
       <div className="absolute inset-0 z-20 pointer-events-none">
-        {/* Conductor/Maestro - front center, facing orchestra */}
+
+        {/* CONDUCTOR - Prominent, center front with spotlight effect */}
         <div
-          className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform"
-          style={{ left: '50%', top: '68%', transform: 'translateX(-50%)' }}
+          className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform z-30"
+          style={{ left: '50%', top: '82%', transform: 'translateX(-50%)' }}
         >
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-30" style={{ fontFamily: 'monospace' }}>
-            Maestro Tempo
+          {/* Spotlight glow behind conductor */}
+          <div
+            className="absolute -inset-4 rounded-full opacity-30"
+            style={{
+              background: 'radial-gradient(circle, rgba(255,248,220,0.4) 0%, transparent 70%)',
+              filter: 'blur(8px)'
+            }}
+          />
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-700 to-amber-600 text-white text-[11px] px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg font-semibold" style={{ fontFamily: 'Georgia, serif' }}>
+            🎼 Maestro Tempo
           </div>
-          <PixelConductor className="w-10 h-14" />
+          <PixelConductor className="w-12 h-16 drop-shadow-lg" />
         </div>
 
-        {/* Orchestra Musicians - arranged in semicircle */}
-        {orchestraMusicians.map((musician) => (
+        {/* Orchestra Musicians - organized by section */}
+        {allMusicians.map((musician) => (
           <div
             key={musician.id}
-            className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform"
+            className="absolute pointer-events-auto cursor-pointer group hover:scale-105 transition-transform"
             style={{
               left: `${musician.x}%`,
               top: `${musician.y}%`,
-              transform: 'translate(-50%, -50%)'
+              transform: 'translate(-50%, -50%)',
+              zIndex: Math.round(musician.y) // Back rows behind front rows
             }}
           >
             <div
-              className="absolute -top-6 left-1/2 -translate-x-1/2 text-white text-[9px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-30"
+              className="absolute -top-5 left-1/2 -translate-x-1/2 text-white text-[8px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md"
               style={{
-                fontFamily: 'monospace',
-                backgroundColor: musician.hairColor
+                fontFamily: 'Georgia, serif',
+                backgroundColor: musician.hairColor,
               }}
             >
               {musician.name}
@@ -616,71 +705,71 @@ const OrchestraScenario: React.FC = () => {
               instrument={musician.instrument}
               hairColor={musician.hairColor}
               accentColor={musician.hairColor}
-              className="w-10 h-10"
+              className="w-8 h-8"
             />
           </div>
         ))}
       </div>
 
-      {/* Chat Bubbles - Concert announcements style */}
-      <div className="absolute top-16 left-4 right-4 flex flex-wrap gap-2 z-30">
+      {/* Chat Bubbles - Minimal, elegant */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2 z-30">
         {chatMessages.map((msg, index) => (
           <div
             key={index}
             className={cn(
-              'px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-500 transform',
+              'px-3 py-1.5 rounded-full text-xs transition-all duration-500',
               currentMessage === index
-                ? 'opacity-100 scale-100 shadow-lg'
-                : 'opacity-20 scale-95'
+                ? 'opacity-100 scale-100'
+                : 'opacity-0 scale-90 hidden'
             )}
             style={{
-              backgroundColor: currentMessage === index ? msg.color : '#333',
+              backgroundColor: msg.color,
               fontFamily: 'Georgia, serif',
             }}
           >
-            <span className="text-white font-bold">{msg.user}:</span>
+            <span className="text-white font-semibold">{msg.user}:</span>
             <span className="text-white/90 ml-1">{msg.message}</span>
           </div>
         ))}
       </div>
 
-      {/* Now Playing Widget - Elegant concert style */}
-      <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm rounded-lg p-3 flex items-center gap-3 border border-amber-900/50 z-30">
-        <div className="w-12 h-12 bg-gradient-to-br from-amber-700 to-amber-900 rounded-lg flex items-center justify-center shadow-inner">
-          <Music className="w-6 h-6 text-amber-200" />
+      {/* Now Playing Widget - Bottom right, elegant */}
+      <div className="absolute bottom-4 right-4 bg-black/85 backdrop-blur-md rounded-xl p-4 flex items-center gap-4 border border-amber-800/30 z-30 shadow-2xl">
+        <div className="w-14 h-14 bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 rounded-xl flex items-center justify-center shadow-inner">
+          <Music className="w-7 h-7 text-amber-100" />
         </div>
-        <div className="flex-1">
-          <p className="text-amber-400 text-[10px] font-semibold uppercase tracking-wider">Now Performing</p>
-          <p className="text-white text-sm font-serif">Symphony of Content</p>
-          <p className="text-white/50 text-[10px]">Violin Chamber Orchestra</p>
+        <div className="flex-1 min-w-[140px]">
+          <p className="text-amber-400/80 text-[9px] font-semibold uppercase tracking-widest">Now Performing</p>
+          <p className="text-white text-sm font-serif mt-0.5">Symphony of Content</p>
+          <p className="text-amber-200/40 text-[10px] font-serif">Violin Chamber Orchestra</p>
         </div>
         <button
           onClick={() => setIsPlaying(!isPlaying)}
-          className="w-8 h-8 bg-amber-900/50 hover:bg-amber-800/50 rounded-full flex items-center justify-center transition-colors"
+          className="w-10 h-10 bg-amber-800/40 hover:bg-amber-700/50 rounded-full flex items-center justify-center transition-all hover:scale-105"
         >
           {isPlaying ? (
-            <Volume2 className="w-4 h-4 text-amber-300" />
+            <Volume2 className="w-5 h-5 text-amber-200" />
           ) : (
-            <Play className="w-4 h-4 text-amber-300" />
+            <Play className="w-5 h-5 text-amber-200" />
           )}
         </button>
       </div>
 
-      {/* Orchestra Info - Elegant style */}
-      <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-sm rounded-lg p-3 border border-amber-900/50 z-30">
-        <p className="text-amber-400 text-xs font-semibold tracking-wide">Violin Orchestra Hall</p>
-        <p className="text-white/60 text-[10px]">Chamber Music Performance</p>
-        <div className="flex items-center gap-2 mt-2">
-          <div className="flex -space-x-1">
-            {orchestraMusicians.slice(0, 6).map((m, i) => (
+      {/* Orchestra Info - Bottom left */}
+      <div className="absolute bottom-4 left-4 bg-black/85 backdrop-blur-md rounded-xl p-4 border border-amber-800/30 z-30 shadow-2xl">
+        <p className="text-amber-400 text-sm font-semibold font-serif">Violin Orchestra Hall</p>
+        <p className="text-amber-200/40 text-[10px] mt-1">Chamber Music Performance</p>
+        <div className="flex items-center gap-3 mt-3">
+          <div className="flex -space-x-2">
+            {allMusicians.slice(0, 5).map((m, i) => (
               <div
                 key={i}
-                className="w-4 h-4 rounded-full border-2 border-black"
+                className="w-5 h-5 rounded-full border-2 border-black shadow-sm"
                 style={{ backgroundColor: m.hairColor }}
               />
             ))}
           </div>
-          <span className="text-white/40 text-[10px]">{orchestraMusicians.length + 1} musicians</span>
+          <span className="text-amber-200/50 text-[10px]">{allMusicians.length + 1} musicians</span>
         </div>
       </div>
     </div>
