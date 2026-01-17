@@ -107,7 +107,10 @@
       "Bash(find:*)",
       "Bash(cd:*)",
       "mcp__chrome-devtools__list_pages",
-      "mcp__chrome-devtools__take_screenshot"
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__blueprint__browser_list",
+      "mcp__blueprint__enable",
+      "mcp__blueprint__status"
     ]
   },
   "enabledMcpjsonServers": [
