@@ -218,8 +218,8 @@ export const PlatformIntegrations: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDisconnect(account.id)}
-                        disabled={disconnectingId === account.id}
+                        onClick={() => account.id && handleDisconnect(account.id)}
+                        disabled={!account.id || disconnectingId === account.id}
                       >
                         {disconnectingId === account.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
