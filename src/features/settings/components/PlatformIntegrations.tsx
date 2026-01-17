@@ -80,9 +80,9 @@ const PLATFORM_CONFIG: Record<string, PlatformConfig> = {
   snapchat: {
     name: 'Snapchat',
     logoUrl:
-      'https://cdn-icons-png.flaticon.com/512/3670/3670042.png',
+      'https://1000logos.net/wp-content/uploads/2017/08/Snapchat-logo.png',
     description: 'Publique stories e Spotlight no Snapchat',
-    enabled: true,
+    enabled: false,
   },
   'google-business': {
     name: 'Google Business',
