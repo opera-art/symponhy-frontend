@@ -140,7 +140,9 @@ export function CompanySetupModal({ isOpen, onComplete }: CompanySetupModalProps
       router.push('/onboarding');
     } catch (err: any) {
       console.error('Error creating organization:', err);
-      setError(err?.response?.data?.error || 'Erro ao criar empresa. Tente novamente.');
+      console.error('Response data:', err?.response?.data);
+      const errorMessage = err?.response?.data?.error || err?.message || 'Erro ao criar empresa. Tente novamente.';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
