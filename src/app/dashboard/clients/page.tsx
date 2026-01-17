@@ -6,6 +6,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useOrganization } from '@clerk/nextjs';
 import api from '@/lib/api';
 import { ProtectedRoute } from '@/components/auth';
+import { usePermissions } from '@/shared/hooks/usePermissions';
 import {
   Users,
   Eye,
@@ -37,7 +38,8 @@ interface Client {
 
 const ClientsPage: React.FC = () => {
   const { t } = useLanguage();
-  const { organization, membership } = useOrganization();
+  const { organization } = useOrganization();
+  const { isAgency } = usePermissions();
 
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,8 +48,8 @@ const ClientsPage: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  // Verificar se é admin (agência)
-  const isAdmin = membership?.role === 'admin';
+  // Agências podem criar/gerenciar clientes
+  const canManageClients = isAgency;
 
   // Fetch clients from API
   const fetchClients = useCallback(async () => {
@@ -149,7 +151,7 @@ const ClientsPage: React.FC = () => {
                 </p>
               </div>
 
-              {isAdmin && (
+              {canManageClients && (
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowCreateModal(true)}
@@ -255,7 +257,7 @@ const ClientsPage: React.FC = () => {
                         <div className="flex flex-col items-center gap-2">
                           <Users className="w-12 h-12 text-slate-300" />
                           <p className="text-slate-500">Nenhum cliente encontrado</p>
-                          {isAdmin && (
+                          {canManageClients && (
                             <button
                               onClick={() => setShowCreateModal(true)}
                               className="mt-2 text-gold hover:underline text-sm"
@@ -301,7 +303,7 @@ const ClientsPage: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <div className="flex items-center justify-end gap-2">
-                            {isAdmin && client.clerk_user_id && (
+                            {canManageClients && client.clerk_user_id && (
                               <button
                                 onClick={() => handleAccessClient(client)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-gold/10 hover:bg-gold/20 text-gold rounded-lg transition-all duration-200 text-sm font-medium"
@@ -310,7 +312,7 @@ const ClientsPage: React.FC = () => {
                                 Acessar
                               </button>
                             )}
-                            {isAdmin && (
+                            {canManageClients && (
                               <div className="relative">
                                 <button
                                   onClick={() => setActiveDropdown(activeDropdown === client.id ? null : client.id)}
