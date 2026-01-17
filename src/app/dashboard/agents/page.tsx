@@ -328,7 +328,262 @@ const chatMessages = [
   { user: 'Cadenza', message: 'New trend detected in your niche', color: '#60A5FA' },
 ];
 
-// Isometric Room Scenario Component - Habbo Style
+// Habbo-style Isometric Tile Component (2:1 ratio - 64x32)
+const IsoTile = ({ x, y, color, stroke = "#1a1a1a" }: { x: number; y: number; color: string; stroke?: string }) => {
+  // Convert grid position to isometric screen position
+  const screenX = (x - y) * 32 + 400; // 32 = half tile width
+  const screenY = (x + y) * 16 + 100; // 16 = half tile height
+
+  return (
+    <polygon
+      points={`${screenX},${screenY - 16} ${screenX + 32},${screenY} ${screenX},${screenY + 16} ${screenX - 32},${screenY}`}
+      fill={color}
+      stroke={stroke}
+      strokeWidth="1"
+    />
+  );
+};
+
+// Habbo-style Wall (left side)
+const IsoWallLeft = ({ x, y, height, color }: { x: number; y: number; height: number; color: string }) => {
+  const screenX = (x - y) * 32 + 400;
+  const screenY = (x + y) * 16 + 100;
+
+  return (
+    <g>
+      {/* Wall face */}
+      <polygon
+        points={`${screenX - 32},${screenY} ${screenX - 32},${screenY - height} ${screenX},${screenY - 16 - height} ${screenX},${screenY - 16}`}
+        fill={color}
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+      {/* Wall top */}
+      <polygon
+        points={`${screenX - 32},${screenY - height} ${screenX},${screenY - 16 - height} ${screenX + 32},${screenY - height} ${screenX},${screenY + 16 - height}`}
+        fill={adjustBrightness(color, 20)}
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+    </g>
+  );
+};
+
+// Habbo-style Wall (right side)
+const IsoWallRight = ({ x, y, height, color }: { x: number; y: number; height: number; color: string }) => {
+  const screenX = (x - y) * 32 + 400;
+  const screenY = (x + y) * 16 + 100;
+
+  return (
+    <g>
+      {/* Wall face */}
+      <polygon
+        points={`${screenX},${screenY - 16} ${screenX},${screenY - 16 - height} ${screenX + 32},${screenY - height} ${screenX + 32},${screenY}`}
+        fill={adjustBrightness(color, -15)}
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+    </g>
+  );
+};
+
+// Helper to adjust color brightness
+const adjustBrightness = (hex: string, percent: number): string => {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.min(255, Math.max(0, (num >> 16) + amt));
+  const G = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amt));
+  const B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt));
+  return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+};
+
+// Habbo-style Furniture: Stage Platform
+const IsoStagePlatform = ({ x, y }: { x: number; y: number }) => {
+  const screenX = (x - y) * 32 + 400;
+  const screenY = (x + y) * 16 + 100;
+  const platformHeight = 12;
+
+  return (
+    <g>
+      {/* Platform top */}
+      <polygon
+        points={`${screenX},${screenY - 16 - platformHeight} ${screenX + 64},${screenY - platformHeight} ${screenX},${screenY + 16 - platformHeight} ${screenX - 64},${screenY - platformHeight}`}
+        fill="#8B4513"
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+      {/* Platform front left */}
+      <polygon
+        points={`${screenX - 64},${screenY - platformHeight} ${screenX},${screenY + 16 - platformHeight} ${screenX},${screenY + 16} ${screenX - 64},${screenY}`}
+        fill="#6B3410"
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+      {/* Platform front right */}
+      <polygon
+        points={`${screenX},${screenY + 16 - platformHeight} ${screenX + 64},${screenY - platformHeight} ${screenX + 64},${screenY} ${screenX},${screenY + 16}`}
+        fill="#5B2D0F"
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+    </g>
+  );
+};
+
+// Habbo-style Furniture: Chair
+const IsoChair = ({ x, y, color = "#dc2626" }: { x: number; y: number; color?: string }) => {
+  const screenX = (x - y) * 32 + 400;
+  const screenY = (x + y) * 16 + 100;
+
+  return (
+    <g>
+      {/* Seat */}
+      <polygon
+        points={`${screenX},${screenY - 24} ${screenX + 12},${screenY - 18} ${screenX},${screenY - 12} ${screenX - 12},${screenY - 18}`}
+        fill={color}
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+      {/* Back */}
+      <polygon
+        points={`${screenX - 12},${screenY - 18} ${screenX - 12},${screenY - 38} ${screenX},${screenY - 44} ${screenX},${screenY - 24}`}
+        fill={adjustBrightness(color, -20)}
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+      {/* Legs */}
+      <line x1={screenX - 10} y1={screenY - 16} x2={screenX - 10} y2={screenY - 4} stroke="#1a1a1a" strokeWidth="2" />
+      <line x1={screenX + 10} y1={screenY - 16} x2={screenX + 10} y2={screenY - 4} stroke="#1a1a1a" strokeWidth="2" />
+    </g>
+  );
+};
+
+// Habbo-style Furniture: Music Stand
+const IsoMusicStand = ({ x, y }: { x: number; y: number }) => {
+  const screenX = (x - y) * 32 + 400;
+  const screenY = (x + y) * 16 + 100;
+
+  return (
+    <g>
+      {/* Stand pole */}
+      <line x1={screenX} y1={screenY - 5} x2={screenX} y2={screenY - 35} stroke="#1a1a1a" strokeWidth="2" />
+      {/* Sheet holder */}
+      <polygon
+        points={`${screenX - 10},${screenY - 35} ${screenX + 10},${screenY - 35} ${screenX + 10},${screenY - 50} ${screenX - 10},${screenY - 50}`}
+        fill="#f5f5f4"
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+      {/* Music notes on sheet */}
+      <circle cx={screenX - 4} cy={screenY - 42} r="2" fill="#1a1a1a" />
+      <circle cx={screenX + 4} cy={screenY - 45} r="2" fill="#1a1a1a" />
+    </g>
+  );
+};
+
+// Habbo-style Furniture: Grand Piano
+const IsoPiano = ({ x, y }: { x: number; y: number }) => {
+  const screenX = (x - y) * 32 + 400;
+  const screenY = (x + y) * 16 + 100;
+
+  return (
+    <g>
+      {/* Piano body - top */}
+      <polygon
+        points={`${screenX - 40},${screenY - 30} ${screenX + 20},${screenY - 60} ${screenX + 50},${screenY - 45} ${screenX - 10},${screenY - 15}`}
+        fill="#1a1a1a"
+        stroke="#0a0a0a"
+        strokeWidth="1"
+      />
+      {/* Piano body - front */}
+      <polygon
+        points={`${screenX - 10},${screenY - 15} ${screenX + 50},${screenY - 45} ${screenX + 50},${screenY - 20} ${screenX - 10},${screenY + 10}`}
+        fill="#2d2d2d"
+        stroke="#0a0a0a"
+        strokeWidth="1"
+      />
+      {/* Piano body - side */}
+      <polygon
+        points={`${screenX - 40},${screenY - 30} ${screenX - 10},${screenY - 15} ${screenX - 10},${screenY + 10} ${screenX - 40},${screenY - 5}`}
+        fill="#404040"
+        stroke="#0a0a0a"
+        strokeWidth="1"
+      />
+      {/* Keys */}
+      <polygon
+        points={`${screenX - 5},${screenY - 12} ${screenX + 25},${screenY - 27} ${screenX + 25},${screenY - 22} ${screenX - 5},${screenY - 7}`}
+        fill="#f5f5f4"
+        stroke="#0a0a0a"
+        strokeWidth="1"
+      />
+      {/* Black keys */}
+      {[0, 1, 3, 4, 5].map(i => (
+        <rect key={i} x={screenX - 3 + i * 5} y={screenY - 11 - i * 2.5} width="3" height="4" fill="#1a1a1a" />
+      ))}
+    </g>
+  );
+};
+
+// Habbo-style Plant
+const IsoPlant = ({ x, y }: { x: number; y: number }) => {
+  const screenX = (x - y) * 32 + 400;
+  const screenY = (x + y) * 16 + 100;
+
+  return (
+    <g>
+      {/* Pot */}
+      <polygon
+        points={`${screenX - 10},${screenY - 8} ${screenX + 10},${screenY - 8} ${screenX + 8},${screenY + 4} ${screenX - 8},${screenY + 4}`}
+        fill="#c2410c"
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+      {/* Soil */}
+      <ellipse cx={screenX} cy={screenY - 8} rx="10" ry="4" fill="#78350f" stroke="#1a1a1a" strokeWidth="1" />
+      {/* Leaves */}
+      <ellipse cx={screenX - 8} cy={screenY - 25} rx="8" ry="12" fill="#22c55e" stroke="#1a1a1a" strokeWidth="1" />
+      <ellipse cx={screenX + 8} cy={screenY - 28} rx="8" ry="12" fill="#16a34a" stroke="#1a1a1a" strokeWidth="1" />
+      <ellipse cx={screenX} cy={screenY - 32} rx="7" ry="10" fill="#4ade80" stroke="#1a1a1a" strokeWidth="1" />
+    </g>
+  );
+};
+
+// Habbo-style Chandelier
+const IsoChandelier = ({ x, y }: { x: number; y: number }) => {
+  const screenX = x;
+  const screenY = y;
+
+  return (
+    <g>
+      {/* Chain */}
+      <line x1={screenX} y1={screenY - 60} x2={screenX} y2={screenY - 40} stroke="#fbbf24" strokeWidth="2" />
+      {/* Main body */}
+      <polygon
+        points={`${screenX},${screenY - 40} ${screenX + 30},${screenY - 25} ${screenX},${screenY - 15} ${screenX - 30},${screenY - 25}`}
+        fill="#fbbf24"
+        stroke="#1a1a1a"
+        strokeWidth="1"
+      />
+      {/* Candles */}
+      {[-20, 0, 20].map((offset, i) => (
+        <g key={i}>
+          <rect x={screenX + offset - 3} y={screenY - 35 - Math.abs(offset) * 0.3} width="6" height="10" fill="#f5f5f4" stroke="#1a1a1a" strokeWidth="1" />
+          <ellipse
+            cx={screenX + offset}
+            cy={screenY - 40 - Math.abs(offset) * 0.3}
+            rx="4"
+            ry="6"
+            fill="#fde047"
+            className="animate-pulse"
+            style={{ animationDelay: `${i * 0.3}s` }}
+          />
+        </g>
+      ))}
+    </g>
+  );
+};
+
+// Isometric Room Scenario Component - Authentic Habbo Style
 const OrchestraScenario: React.FC = () => {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -342,191 +597,159 @@ const OrchestraScenario: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
+  // Floor tile colors - warm wood tones
+  const floorColor1 = "#d4a574";
+  const floorColor2 = "#c4956a";
+  const wallColor = "#7c9885";
+  const wallColorDark = "#5a7562";
+
   return (
-    <div className="relative w-full h-[calc(100vh-180px)] min-h-[600px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden">
-      {/* Starry Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 40}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              opacity: Math.random() * 0.7 + 0.3,
-            }}
-          />
+    <div className="relative w-full h-[calc(100vh-180px)] min-h-[600px] bg-[#1e3a5f] rounded-2xl overflow-hidden">
+      {/* SVG Room */}
+      <svg
+        viewBox="0 0 800 500"
+        className="w-full h-full"
+        style={{ imageRendering: 'pixelated' }}
+      >
+        {/* Background - Dark blue gradient like Habbo night scene */}
+        <defs>
+          <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#0f172a" />
+            <stop offset="100%" stopColor="#1e3a5f" />
+          </linearGradient>
+        </defs>
+        <rect width="800" height="500" fill="url(#bgGradient)" />
+
+        {/* Back Wall */}
+        {[...Array(12)].map((_, i) => (
+          <IsoWallLeft key={`wall-l-${i}`} x={i - 6} y={-6} height={120} color={wallColor} />
         ))}
-      </div>
+        {[...Array(12)].map((_, i) => (
+          <IsoWallRight key={`wall-r-${i}`} x={5} y={i - 6} height={120} color={wallColorDark} />
+        ))}
 
-      {/* City Skyline Background */}
-      <div className="absolute bottom-[40%] left-0 right-0 h-32">
-        <svg viewBox="0 0 1200 150" className="w-full h-full" preserveAspectRatio="xMidYMax slice">
-          {/* Buildings silhouette */}
-          <rect x="0" y="80" width="60" height="70" fill="#1e293b" />
-          <rect x="70" y="50" width="80" height="100" fill="#1e293b" />
-          <rect x="160" y="70" width="50" height="80" fill="#1e293b" />
-          <rect x="220" y="30" width="100" height="120" fill="#1e293b" />
-          <rect x="330" y="60" width="70" height="90" fill="#1e293b" />
-          <rect x="410" y="40" width="90" height="110" fill="#1e293b" />
-          <rect x="510" y="80" width="60" height="70" fill="#1e293b" />
-          <rect x="580" y="20" width="120" height="130" fill="#1e293b" />
-          <rect x="710" y="50" width="80" height="100" fill="#1e293b" />
-          <rect x="800" y="70" width="60" height="80" fill="#1e293b" />
-          <rect x="870" y="35" width="100" height="115" fill="#1e293b" />
-          <rect x="980" y="55" width="70" height="95" fill="#1e293b" />
-          <rect x="1060" y="45" width="90" height="105" fill="#1e293b" />
-          {/* Windows */}
-          {[...Array(40)].map((_, i) => (
-            <rect
-              key={i}
-              x={70 + (i % 10) * 100 + Math.random() * 50}
-              y={40 + Math.floor(i / 10) * 25 + Math.random() * 20}
-              width="4"
-              height="6"
-              fill="#fef08a"
-              opacity={Math.random() > 0.3 ? 0.8 : 0.2}
+        {/* Window on left wall */}
+        <rect x="180" y="50" width="40" height="50" fill="#1e3a5f" stroke="#1a1a1a" strokeWidth="2" />
+        <line x1="200" y1="50" x2="200" y2="100" stroke="#5a7562" strokeWidth="2" />
+        <line x1="180" y1="75" x2="220" y2="75" stroke="#5a7562" strokeWidth="2" />
+
+        {/* Window on right wall */}
+        <rect x="580" y="50" width="40" height="50" fill="#1e3a5f" stroke="#1a1a1a" strokeWidth="2" />
+        <line x1="600" y1="50" x2="600" y2="100" stroke="#5a7562" strokeWidth="2" />
+        <line x1="580" y1="75" x2="620" y2="75" stroke="#5a7562" strokeWidth="2" />
+
+        {/* Floor Tiles - Checkered pattern */}
+        {[...Array(10)].map((_, row) =>
+          [...Array(10)].map((_, col) => (
+            <IsoTile
+              key={`tile-${row}-${col}`}
+              x={col - 3}
+              y={row - 3}
+              color={(row + col) % 2 === 0 ? floorColor1 : floorColor2}
             />
-          ))}
-        </svg>
-      </div>
+          ))
+        )}
 
-      {/* Isometric Floor */}
-      <div className="absolute bottom-0 left-0 right-0 h-[45%]">
-        <svg viewBox="0 0 800 300" className="w-full h-full" preserveAspectRatio="xMidYMax slice">
-          {/* Floor tiles - isometric grid */}
-          <defs>
-            <pattern id="isoGrid" width="40" height="20" patternUnits="userSpaceOnUse">
-              <path d="M0 10 L20 0 L40 10 L20 20 Z" fill="none" stroke="#475569" strokeWidth="0.5" />
-            </pattern>
-            <linearGradient id="floorGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#334155" />
-              <stop offset="100%" stopColor="#1e293b" />
-            </linearGradient>
-          </defs>
+        {/* Stage Platform */}
+        <IsoStagePlatform x={1} y={1} />
 
-          {/* Main floor */}
-          <polygon points="400,20 800,150 400,280 0,150" fill="url(#floorGradient)" />
-          <polygon points="400,20 800,150 400,280 0,150" fill="url(#isoGrid)" />
-
-          {/* Stage platform */}
-          <polygon points="400,80 600,150 400,220 200,150" fill="#475569" />
-          <polygon points="400,75 600,145 400,215 200,145" fill="#64748b" />
-
-          {/* Red carpet */}
-          <polygon points="400,150 500,195 400,240 300,195" fill="#991b1b" />
-          <polygon points="400,145 500,190 400,235 300,190" fill="#dc2626" />
-        </svg>
-      </div>
-
-      {/* Stage Elements */}
-      <div className="absolute bottom-[25%] left-1/2 -translate-x-1/2 w-full max-w-4xl">
         {/* Chandelier */}
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2">
-          <svg viewBox="0 0 120 80" className="w-32 h-24">
-            <rect x="55" y="0" width="10" height="15" fill="#fef08a" />
-            <polygon points="60,15 90,40 60,50 30,40" fill="#fef08a" />
-            <polygon points="60,15 90,40 60,50 30,40" fill="#fde047" opacity="0.5" />
-            <circle cx="35" cy="50" r="4" fill="#fef9c3" className="animate-pulse" />
-            <circle cx="60" cy="55" r="4" fill="#fef9c3" className="animate-pulse" style={{ animationDelay: "0.2s" }} />
-            <circle cx="85" cy="50" r="4" fill="#fef9c3" className="animate-pulse" style={{ animationDelay: "0.4s" }} />
-          </svg>
+        <IsoChandelier x={400} y={120} />
+
+        {/* Red Carpet - center aisle */}
+        {[0, 1, 2, 3].map(i => (
+          <IsoTile key={`carpet-${i}`} x={i - 1} y={4 + i} color="#991b1b" stroke="#7f1d1d" />
+        ))}
+
+        {/* Plants */}
+        <IsoPlant x={-4} y={-2} />
+        <IsoPlant x={5} y={-2} />
+        <IsoPlant x={-4} y={5} />
+        <IsoPlant x={5} y={5} />
+
+        {/* Grand Piano */}
+        <IsoPiano x={-2} y={-1} />
+
+        {/* Music Stands */}
+        <IsoMusicStand x={0} y={0} />
+        <IsoMusicStand x={2} y={0} />
+        <IsoMusicStand x={1} y={2} />
+
+        {/* Chairs for musicians */}
+        <IsoChair x={-1} y={1} color="#dc2626" />
+        <IsoChair x={1} y={1} color="#dc2626" />
+        <IsoChair x={3} y={1} color="#dc2626" />
+        <IsoChair x={0} y={3} color="#dc2626" />
+        <IsoChair x={2} y={3} color="#dc2626" />
+      </svg>
+
+      {/* Musicians Layer - positioned over SVG */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Pianist at piano */}
+        <div className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform" style={{ left: '28%', top: '42%' }}>
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10" style={{ fontFamily: 'monospace' }}>
+            Sonata
+          </div>
+          <PixelPianist className="w-10 h-10" />
         </div>
 
-        {/* Musicians positioned on stage */}
-        <div className="relative h-48 flex items-end justify-center gap-4">
-          {/* Pianist - back left */}
-          <div className="absolute left-[15%] bottom-[60%] transform hover:scale-110 transition-transform cursor-pointer group">
-            <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Sonata
-              </div>
-              <PixelPianist className="w-16 h-16 drop-shadow-lg" />
-            </div>
+        {/* Violinist */}
+        <div className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform" style={{ left: '40%', top: '48%' }}>
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10" style={{ fontFamily: 'monospace' }}>
+            Harmonia
           </div>
+          <PixelViolinist className="w-10 h-10" />
+        </div>
 
-          {/* Cellist - back right */}
-          <div className="absolute right-[15%] bottom-[60%] transform hover:scale-110 transition-transform cursor-pointer group">
-            <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Cadenza
-              </div>
-              <PixelCellist className="w-16 h-16 drop-shadow-lg" />
-            </div>
+        {/* Cellist */}
+        <div className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform" style={{ left: '52%', top: '48%' }}>
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10" style={{ fontFamily: 'monospace' }}>
+            Cadenza
           </div>
+          <PixelCellist className="w-10 h-10" />
+        </div>
 
-          {/* Violinist - middle left */}
-          <div className="absolute left-[25%] bottom-[35%] transform hover:scale-110 transition-transform cursor-pointer group animate-bounce" style={{ animationDuration: "3s" }}>
-            <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-[10px] px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Harmonia
-              </div>
-              <PixelViolinist className="w-16 h-16 drop-shadow-lg" />
-            </div>
+        {/* Flutist */}
+        <div className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform" style={{ left: '64%', top: '48%' }}>
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10" style={{ fontFamily: 'monospace' }}>
+            Melody
           </div>
+          <PixelFlutist className="w-10 h-10" />
+        </div>
 
-          {/* Flutist - middle right */}
-          <div className="absolute right-[25%] bottom-[35%] transform hover:scale-110 transition-transform cursor-pointer group">
-            <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Melody
-              </div>
-              <PixelFlutist className="w-16 h-16 drop-shadow-lg" />
-            </div>
+        {/* Trumpeter - front */}
+        <div className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform" style={{ left: '46%', top: '58%' }}>
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10" style={{ fontFamily: 'monospace' }}>
+            Rhythm
           </div>
+          <PixelTrumpeter className="w-10 h-10" />
+        </div>
 
-          {/* Drummer - center back */}
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-[50%] transform hover:scale-110 transition-transform cursor-pointer group">
-            <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-600 text-white text-[10px] px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Tempo
-              </div>
-              <PixelDrummer className="w-16 h-16 drop-shadow-lg" />
-            </div>
+        {/* Drummer */}
+        <div className="absolute pointer-events-auto cursor-pointer group hover:scale-110 transition-transform" style={{ left: '58%', top: '58%' }}>
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-600 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10" style={{ fontFamily: 'monospace' }}>
+            Tempo
           </div>
-
-          {/* Trumpeter - front center */}
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-[15%] transform hover:scale-110 transition-transform cursor-pointer group">
-            <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Rhythm
-              </div>
-              <PixelTrumpeter className="w-16 h-16 drop-shadow-lg" />
-            </div>
-          </div>
+          <PixelDrummer className="w-10 h-10" />
         </div>
       </div>
 
-      {/* Decorative Elements */}
-      {/* Plants */}
-      <div className="absolute bottom-[15%] left-[5%]">
-        <svg viewBox="0 0 40 60" className="w-12 h-16">
-          <rect x="12" y="45" width="16" height="15" fill="#78350f" />
-          <ellipse cx="20" cy="35" rx="15" ry="20" fill="#166534" />
-          <ellipse cx="15" cy="30" rx="10" ry="15" fill="#22c55e" />
-        </svg>
-      </div>
-      <div className="absolute bottom-[15%] right-[5%]">
-        <svg viewBox="0 0 40 60" className="w-12 h-16">
-          <rect x="12" y="45" width="16" height="15" fill="#78350f" />
-          <ellipse cx="20" cy="35" rx="15" ry="20" fill="#166534" />
-          <ellipse cx="25" cy="30" rx="10" ry="15" fill="#22c55e" />
-        </svg>
-      </div>
-
-      {/* Chat Bubbles */}
-      <div className="absolute top-4 left-4 right-4 flex flex-wrap gap-2">
+      {/* Chat Bubbles - Habbo style */}
+      <div className="absolute top-4 left-4 right-4 flex flex-wrap gap-2 z-20">
         {chatMessages.map((msg, index) => (
           <div
             key={index}
             className={cn(
-              'px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-500 transform',
+              'px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-500 transform border-2 border-black/20',
               currentMessage === index
                 ? 'opacity-100 scale-100'
-                : 'opacity-40 scale-95'
+                : 'opacity-30 scale-95'
             )}
-            style={{ backgroundColor: msg.color }}
+            style={{
+              backgroundColor: msg.color,
+              fontFamily: 'monospace',
+              imageRendering: 'pixelated'
+            }}
           >
             <span className="text-white font-bold">{msg.user}:</span>
             <span className="text-white/90 ml-1">{msg.message}</span>
@@ -534,61 +757,44 @@ const OrchestraScenario: React.FC = () => {
         ))}
       </div>
 
-      {/* Now Playing Widget */}
-      <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm rounded-xl p-4 flex items-center gap-3 border border-white/10">
-        <div className="w-12 h-12 bg-gradient-to-br from-gold to-amber-600 rounded-lg flex items-center justify-center">
-          <Music className="w-6 h-6 text-white" />
+      {/* Now Playing Widget - Habbo style */}
+      <div className="absolute bottom-4 right-4 bg-[#1a1a1a]/90 rounded-lg p-3 flex items-center gap-3 border-2 border-[#333] z-20" style={{ fontFamily: 'monospace' }}>
+        <div className="w-10 h-10 bg-gradient-to-br from-gold to-amber-600 rounded flex items-center justify-center border-2 border-black">
+          <Music className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1">
-          <p className="text-white text-sm font-medium">{t('nowPlaying') || 'Now Playing'}</p>
-          <p className="text-white/60 text-xs">Symphony of Content</p>
-          <p className="text-white/40 text-[10px]">by: Violin AI Orchestra</p>
+          <p className="text-gold text-xs font-bold uppercase">Now Playing</p>
+          <p className="text-white text-[10px]">Symphony of Content</p>
+          <p className="text-white/50 text-[8px]">by: Violin Orchestra</p>
         </div>
         <button
           onClick={() => setIsPlaying(!isPlaying)}
-          className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+          className="w-7 h-7 bg-[#333] hover:bg-[#444] rounded flex items-center justify-center transition-colors border border-[#555]"
         >
           {isPlaying ? (
-            <Volume2 className="w-4 h-4 text-white" />
+            <Volume2 className="w-3 h-3 text-gold" />
           ) : (
-            <Play className="w-4 h-4 text-white" />
+            <Play className="w-3 h-3 text-gold" />
           )}
         </button>
       </div>
 
-      {/* Room Info */}
-      <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-        <p className="text-white text-sm font-medium">Studio: Violin AI Rooftop Oasis</p>
-        <p className="text-white/60 text-xs">Owner: Violin Orchestra</p>
-        <div className="flex items-center gap-2 mt-2">
+      {/* Room Info - Habbo style */}
+      <div className="absolute bottom-4 left-4 bg-[#1a1a1a]/90 rounded-lg p-3 border-2 border-[#333] z-20" style={{ fontFamily: 'monospace' }}>
+        <p className="text-gold text-xs font-bold">Studio: Violin Orchestra Hall</p>
+        <p className="text-white/60 text-[10px]">Owner: ViolinAI</p>
+        <div className="flex items-center gap-2 mt-1">
           <div className="flex -space-x-1">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="w-4 h-4 rounded-full bg-gradient-to-br from-gold to-amber-600 border border-white/20"
+                className="w-3 h-3 rounded-full border border-black"
+                style={{ backgroundColor: ['#8b5cf6', '#f59e0b', '#22c55e', '#ef4444', '#6366f1', '#64748b'][i] }}
               />
             ))}
           </div>
-          <span className="text-white/40 text-xs">6 agents online</span>
+          <span className="text-white/40 text-[10px]">6 agents online</span>
         </div>
-      </div>
-
-      {/* Musical Notes Animation */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-white/20 animate-float"
-            style={{
-              left: `${20 + Math.random() * 60}%`,
-              bottom: '30%',
-              animationDelay: `${i * 0.5}s`,
-              animationDuration: `${3 + Math.random() * 2}s`,
-            }}
-          >
-            <Music className="w-4 h-4" />
-          </div>
-        ))}
       </div>
     </div>
   );
