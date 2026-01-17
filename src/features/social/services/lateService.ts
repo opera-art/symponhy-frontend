@@ -22,7 +22,7 @@ export type Platform =
   | 'bluesky'
   | 'telegram'
   | 'snapchat'
-  | 'google-business';
+  | 'googlebusiness';
 
 export interface LateProfile {
   _id: string;

@@ -84,7 +84,7 @@ const PLATFORM_CONFIG: Record<string, PlatformConfig> = {
     description: 'Publique stories e Spotlight no Snapchat',
     enabled: false,
   },
-  'google-business': {
+  googlebusiness: {
     name: 'Google Business',
     logoUrl:
       'https://cdn-icons-png.flaticon.com/512/2991/2991148.png',
@@ -125,7 +125,7 @@ const PLATFORM_ORDER: Platform[] = [
   'threads',
   'pinterest',
   'snapchat',
-  'google-business',
+  'googlebusiness',
   'bluesky',
   'reddit',
   'telegram',
