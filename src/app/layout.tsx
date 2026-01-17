@@ -14,7 +14,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Symponhy - Social Media Dashboard',
+  title: 'Violin - Social Media Dashboard',
   description: 'Gestao profissional de redes sociais com IA',
 };
 
