@@ -127,8 +127,15 @@ export function CompanySetupModal({ isOpen, onComplete }: CompanySetupModalProps
     setError(null);
 
     try {
-      // Create organization in Clerk via backend
-      await api.post('/organizations', { name: companyName });
+      // Create organization in Clerk via backend with setup data
+      await api.post('/organizations', {
+        name: companyName,
+        companySize,
+        segment,
+        source,
+        acceptedTerms,
+        acceptedMarketing,
+      });
 
       // Reload user to get new organization
       await user?.reload();
