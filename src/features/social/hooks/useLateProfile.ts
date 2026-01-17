@@ -1,13 +1,11 @@
 /**
  * Hook for managing Late profiles and connected accounts
+ * SECURITY: Profile is fetched from backend (Supabase), not stored in localStorage
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { lateService, LateProfile, LateAccount, Platform } from '../services/lateService';
-
-const PROFILE_STORAGE_KEY = 'late_profile_id';
-const USER_ID_STORAGE_KEY = 'late_profile_user_id';
 
 export function useLateProfile() {
   const { user } = useUser();
@@ -16,7 +14,7 @@ export function useLateProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Get or create profile for current user
+  // Get profile for current user from backend (secure)
   const initProfile = useCallback(async () => {
     if (!user) return;
 
@@ -24,49 +22,8 @@ export function useLateProfile() {
       setIsLoading(true);
       setError(null);
 
-      // Clear cached profile if user changed (different Clerk user logged in)
-      const savedUserId = localStorage.getItem(USER_ID_STORAGE_KEY);
-      if (savedUserId && savedUserId !== user.id) {
-        console.log('[useLateProfile] User changed, clearing cached profile');
-        localStorage.removeItem(PROFILE_STORAGE_KEY);
-        localStorage.removeItem(USER_ID_STORAGE_KEY);
-      }
-
-      // Check if we have a saved profile ID
-      const savedProfileId = localStorage.getItem(PROFILE_STORAGE_KEY);
-
-      if (savedProfileId) {
-        // Try to fetch the existing profile
-        try {
-          const existingProfile = await lateService.getProfile(savedProfileId);
-          setProfile(existingProfile);
-          return existingProfile;
-        } catch {
-          // Profile might not exist anymore, create new one
-          localStorage.removeItem(PROFILE_STORAGE_KEY);
-        }
-      }
-
-      // Get all profiles - Late uses one account per API key
-      // We use the default profile or first available
-      const profiles = await lateService.getProfiles();
-
-      // Find default profile or use first one
-      let userProfile = profiles.find((p) => p.name === 'Default Profile') || profiles[0];
-
-      if (!userProfile && profiles.length === 0) {
-        // Only create if no profiles exist at all
-        userProfile = await lateService.createProfile('Default Profile');
-      }
-
-      if (!userProfile) {
-        throw new Error('No profile available');
-      }
-
-      // Save profile ID and user ID (Late uses _id)
-      const profileId = userProfile._id || userProfile.id;
-      localStorage.setItem(PROFILE_STORAGE_KEY, profileId!);
-      localStorage.setItem(USER_ID_STORAGE_KEY, user.id);
+      // Fetch profile from backend - it uses Supabase to get the correct profile
+      const userProfile = await lateService.getMyProfile();
       setProfile(userProfile);
       return userProfile;
     } catch (err) {
@@ -80,41 +37,37 @@ export function useLateProfile() {
 
   // Load connected accounts
   const loadAccounts = useCallback(async () => {
-    if (!profile) return;
-
     try {
-      const profileId = profile._id || profile.id;
-      const { accounts: loadedAccounts } = await lateService.getAccounts(profileId!);
+      // Backend fetches accounts using the authenticated user's profile
+      const { accounts: loadedAccounts } = await lateService.getAccounts();
       setAccounts(loadedAccounts);
     } catch (err) {
       console.error('Error loading accounts:', err);
     }
-  }, [profile]);
+  }, []);
 
   // Connect a platform
   const connectPlatform = useCallback(
     async (platform: Platform) => {
-      const profileId = profile?._id || profile?.id;
-
-      if (!profileId) {
-        setError('Profile não inicializado. Tente novamente.');
-        return;
+      try {
+        setError(null);
+        const redirectUrl = `${window.location.origin}/dashboard/settings?connected=${platform}`;
+        // Backend handles profileId lookup automatically
+        const { authUrl } = await lateService.getConnectUrl(platform, redirectUrl);
+        window.location.href = authUrl;
+      } catch (err) {
+        console.error('Error connecting platform:', err);
+        setError('Erro ao conectar plataforma. Tente novamente.');
       }
-
-      const redirectUrl = `${window.location.origin}/dashboard/settings?connected=${platform}`;
-      const { authUrl } = await lateService.getConnectUrl(platform, profileId, redirectUrl);
-
-      // Redirect to OAuth
-      window.location.href = authUrl;
     },
-    [profile]
+    []
   );
 
   // Disconnect an account
   const disconnectAccount = useCallback(
     async (accountId: string) => {
       await lateService.disconnectAccount(accountId);
-      setAccounts((prev) => prev.filter((a) => a.id !== accountId));
+      setAccounts((prev) => prev.filter((a) => a.id !== accountId && a._id !== accountId));
     },
     []
   );
@@ -126,7 +79,7 @@ export function useLateProfile() {
         if (p) loadAccounts();
       });
     }
-  }, [user, initProfile]);
+  }, [user, initProfile, loadAccounts]);
 
   // Load accounts when profile changes
   useEffect(() => {
