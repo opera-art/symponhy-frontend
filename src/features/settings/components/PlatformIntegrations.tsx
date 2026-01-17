@@ -327,7 +327,25 @@ export const PlatformIntegrations: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {PLATFORM_ORDER.map((platform) => renderPlatformCard(platform))}
+          {/* Ordenar: conectados > desconectados > em breve */}
+          {PLATFORM_ORDER
+            .sort((a, b) => {
+              const configA = PLATFORM_CONFIG[a];
+              const configB = PLATFORM_CONFIG[b];
+              const connectedA = getAccountsForPlatform(a).length > 0;
+              const connectedB = getAccountsForPlatform(b).length > 0;
+
+              // Conectados primeiro
+              if (connectedA && !connectedB) return -1;
+              if (!connectedA && connectedB) return 1;
+
+              // Em breve por último
+              if (configA?.enabled && !configB?.enabled) return -1;
+              if (!configA?.enabled && configB?.enabled) return 1;
+
+              return 0;
+            })
+            .map((platform) => renderPlatformCard(platform))}
         </div>
       )}
 
