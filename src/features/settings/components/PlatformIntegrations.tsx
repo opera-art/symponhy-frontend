@@ -77,6 +77,41 @@ const PLATFORM_CONFIG: Record<string, PlatformConfig> = {
     description: 'Publique pins no Pinterest',
     enabled: true,
   },
+  snapchat: {
+    name: 'Snapchat',
+    logoUrl:
+      'https://cdn-icons-png.flaticon.com/512/3670/3670042.png',
+    description: 'Publique stories e Spotlight no Snapchat',
+    enabled: true,
+  },
+  'google-business': {
+    name: 'Google Business',
+    logoUrl:
+      'https://cdn-icons-png.flaticon.com/512/2991/2991148.png',
+    description: 'Publique atualizações no Google Business Profile',
+    enabled: true,
+  },
+  bluesky: {
+    name: 'Bluesky',
+    logoUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Bluesky_Logo.svg/1200px-Bluesky_Logo.svg.png',
+    description: 'Publique na rede descentralizada Bluesky',
+    enabled: true,
+  },
+  reddit: {
+    name: 'Reddit',
+    logoUrl:
+      'https://cdn-icons-png.flaticon.com/512/1384/1384876.png',
+    description: 'Publique posts no Reddit',
+    enabled: false,
+  },
+  telegram: {
+    name: 'Telegram',
+    logoUrl:
+      'https://cdn-icons-png.flaticon.com/512/2111/2111646.png',
+    description: 'Publique em canais do Telegram',
+    enabled: false,
+  },
 };
 
 // Plataformas em ordem de prioridade
@@ -89,6 +124,11 @@ const PLATFORM_ORDER: Platform[] = [
   'facebook',
   'threads',
   'pinterest',
+  'snapchat',
+  'google-business',
+  'bluesky',
+  'reddit',
+  'telegram',
 ];
 
 export const PlatformIntegrations: React.FC = () => {
